@@ -8,6 +8,7 @@ import Login from '../pages/login';
 import Register from '../pages/register';
 import AdminDashboard from '../pages/adminDashboard';
 import NotFound from '../pages/not found404';
+import ProtectedRoute from '../components/protectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -28,7 +29,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'cart',
-        element: <Cart />,
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'login',
@@ -40,7 +45,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: <AdminDashboard />,
+        element: (
+          <ProtectedRoute adminOnly>
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '*',

@@ -3,19 +3,19 @@ import heroImage from '../assets/hero.png';
 
 function HeroSection() {
   return (
-    <section className="hero-section position-relative overflow-hidden py-5">
+    <section className="hero-section position-relative overflow-hidden">
       <div className="hero-backdrop" />
       <div className="container position-relative">
-        <div className="row align-items-center gy-5">
-          <div className="col-lg-6">
-            <div className="hero-copy pe-xl-5">
+        <div className="row align-items-center hero-row">
+          <div className="col-lg-6 hero-copy-column">
+            <div className="hero-copy">
               <span className="hero-badge d-inline-flex align-items-center mb-3">
                 Premium tech, fast delivery
               </span>
-              <h1 className="display-5 fw-bold text-white mb-4">
+              <h1 className="fw-bold text-white mb-4">
                 Elevate your setup with curated technology built for modern life.
               </h1>
-              <p className="hero-subtitle text-muted mb-4">
+              <p className="hero-subtitle mb-4">
                 Tech Core delivers the latest devices, trusted accessories and seamless checkout for professionals,
                 creators and anyone who demands premium performance.
               </p>
@@ -37,7 +37,7 @@ function HeroSection() {
             </div>
           </div>
 
-          <div className="col-lg-6">
+          <div className="col-lg-6 hero-showcase-column">
             <div className="hero-showcase card border-0 rounded-4 shadow-lg overflow-hidden">
               <div className="hero-showcase-top d-flex justify-content-between align-items-center px-4 pt-4">
                 <span className="badge hero-pill bg-gradient-primary text-white">Top pick</span>
@@ -50,10 +50,10 @@ function HeroSection() {
               </div>
 
               <div className="card-body px-4 pb-4 pt-3">
-                <div className="d-flex justify-content-between align-items-start mb-3">
+                <div className="hero-product-summary d-flex justify-content-between align-items-start mb-3">
                   <div>
                     <h3 className="h4 text-white mb-1">EchoX Wireless Headset</h3>
-                    <p className="text-muted mb-0">Immersive audio, adaptive noise cancellation and premium comfort.</p>
+                    <p className="mb-0">Immersive audio, adaptive noise cancellation and premium comfort.</p>
                   </div>
                   <div className="text-end">
                     <div className="text-muted small">From</div>
@@ -68,8 +68,8 @@ function HeroSection() {
                 </div>
 
                 <div className="d-flex gap-3 flex-column flex-sm-row">
-                  <button className="btn btn-outline-light flex-grow-1 py-3">View details</button>
-                  <button className="btn btn-primary flex-grow-1 py-3">Add to cart</button>
+                  <Link to="/products" className="btn btn-outline-light flex-grow-1 py-3">View catalog</Link>
+                  <Link to="/products" className="btn btn-primary flex-grow-1 py-3">Start shopping</Link>
                 </div>
               </div>
             </div>

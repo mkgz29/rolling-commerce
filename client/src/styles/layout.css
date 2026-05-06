@@ -12,6 +12,16 @@
   padding: 2rem 1rem;
 }
 
+.main-content:has(.home-page) {
+  max-width: none;
+  padding: 0;
+}
+
+.main-content:has(.catalog-page) {
+  max-width: none;
+  padding: 0;
+}
+
 .page {
   animation: fadeIn 0.3s ease-in;
 }

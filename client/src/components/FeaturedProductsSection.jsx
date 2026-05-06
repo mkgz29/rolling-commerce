@@ -1,43 +1,172 @@
-﻿import { Link } from 'react-router-dom';
-
-const products = [
-  { id: 1, name: 'Wireless Headphones', price: '$89.99', description: 'Noise cancelling sound for every playlist.' },
-  { id: 2, name: 'Smart Watch', price: '$129.99', description: 'Track your health, notifications, and active life.' },
-  { id: 3, name: 'Gaming Keyboard', price: '$74.99', description: 'Responsive keys with RGB lighting.' },
-  { id: 4, name: 'Portable Speaker', price: '$59.99', description: 'Rich audio on the go with durable design.' },
-];
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { useCart } from '../hooks/useCart';
+import { getProductsRequest } from '../routes/productService';
+import { formatPrice } from '../utils/formatPrice';
 
 function FeaturedProductsSection() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cartMessage, setCartMessage] = useState('');
+  const { isAuthenticated } = useAuth();
+  const { addItem } = useCart();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+
+    setLoading(true);
+    setError(null);
+
+    getProductsRequest()
+      .then((data) => {
+        if (active) {
+          setProducts(data.slice(0, 4));
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setProducts([]);
+          setError(requestError.message || 'Products could not be loaded.');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleAddToCart = async (productId) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: '/' } } });
+      return;
+    }
+
+    try {
+      setCartMessage('');
+      await addItem(productId);
+      setCartMessage('Product added to cart.');
+    } catch (requestError) {
+      setCartMessage(requestError.message || 'Could not add product to cart.');
+    }
+  };
+
+  const renderStatePanel = ({ eyebrow, title, message, actionLabel }) => (
+    <div className="home-state-panel">
+      <div className="state-orb" aria-hidden="true">
+        <span />
+      </div>
+      <div className="state-copy">
+        <p className="state-eyebrow">{eyebrow}</p>
+        <h3>{title}</h3>
+        <p>{message}</p>
+      </div>
+      <Link to="/products" className="btn state-action">
+        {actionLabel}
+      </Link>
+    </div>
+  );
+
   return (
-    <section className="py-5 bg-white">
+    <section className="featured-products-section py-5">
       <div className="container">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end mb-4 gap-3">
+        <div className="section-heading d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end mb-4 gap-3">
           <div>
             <h2>Featured Products</h2>
-            <p className="text-muted">Top picks selected for your next upgrade.</p>
+            <p>Live picks from the Tech Core catalog.</p>
           </div>
-          <Link to="/products" className="btn btn-outline-secondary">
+          <Link to="/products" className="btn btn-outline-light">
             View all products
           </Link>
         </div>
 
-        <div className="row g-4">
-          {products.map((product) => (
-            <div className="col-md-6 col-xl-3" key={product.id}>
-              <article className="card h-100 border-0 shadow-sm">
-                <div className="ratio ratio-4x3 bg-secondary"></div>
-                <div className="card-body d-flex flex-column">
-                  <h3 className="h5">{product.name}</h3>
-                  <p className="text-muted flex-grow-1">{product.description}</p>
-                  <div className="d-flex justify-content-between align-items-center mt-3">
-                    <span className="fw-bold">{product.price}</span>
-                    <button className="btn btn-success btn-sm">Add to cart</button>
+        {loading && (
+          <div className="row g-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div className="col-md-6 col-xl-3" key={item}>
+                <article className="featured-product-card is-loading" aria-label="Loading product">
+                  <div className="product-card-image skeleton-block" />
+                  <div className="product-card-body">
+                    <div className="skeleton-line w-75" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line w-50" />
                   </div>
+                </article>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && error && (
+          renderStatePanel({
+            eyebrow: 'Catalog signal interrupted',
+            title: 'Products are unavailable',
+            message: error,
+            actionLabel: 'Open catalog',
+          })
+        )}
+
+        {!loading && !error && products.length === 0 && (
+          renderStatePanel({
+            eyebrow: 'Catalog awaiting products',
+            title: 'No featured products yet',
+            message: 'Add products in the backend catalog and they will appear here automatically.',
+            actionLabel: 'Browse catalog',
+          })
+        )}
+
+        {!loading && !error && products.length > 0 && (
+          <>
+            {cartMessage && <p className="cart-feedback mb-3">{cartMessage}</p>}
+            <div className="row g-4">
+              {products.map((product) => (
+                <div className="col-md-6 col-xl-3" key={product._id}>
+                  <article className="featured-product-card h-100">
+                    <Link to={`/products/${product._id}`} className="product-card-link" aria-label={`View ${product.name}`}>
+                      <div className="product-card-image">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} />
+                        ) : (
+                          <span>{product.category || 'Tech Core'}</span>
+                        )}
+                      </div>
+                    </Link>
+                    <div className="product-card-body">
+                      <div className="product-card-copy">
+                        <p className="product-card-category">{product.category}</p>
+                        <h3>{product.name}</h3>
+                        <p>{product.description}</p>
+                      </div>
+                      <div className="product-card-actions">
+                        <span>{formatPrice(product.price)}</span>
+                        <div className="d-flex gap-2">
+                          <Link className="btn btn-outline-light btn-sm" to={`/products/${product._id}`}>
+                            Details
+                          </Link>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            type="button"
+                            disabled={product.stock <= 0}
+                            onClick={() => handleAddToCart(product._id)}
+                          >
+                            {product.stock <= 0 ? 'Out' : 'Add'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
                 </div>
-              </article>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </section>
   );
