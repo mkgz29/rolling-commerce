@@ -16,8 +16,7 @@ export const register = async (req, res) => {
 
     res.status(201).json(user);
   } catch (error) {
-    console.error("[register]", error);
-
+    console.error("[register] Error registering user:", error.message);
     if (
       error.message.includes("registrado") ||
       error.message.includes("en uso") ||
@@ -45,7 +44,7 @@ export const login = async (req, res) => {
 
     res.status(200).json(authData);
   } catch (error) {
-    console.error("[login]", error);
+    console.error("[login] Error logging in:", error.message);
 
     if (
       error.message.includes("Credenciales inválidas") ||

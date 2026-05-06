@@ -6,6 +6,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/productsController.js";
+import { protect, admin } from "../middlewares/authMiddlewares.js";
 
 const router = express.Router();
 
@@ -13,10 +14,9 @@ const router = express.Router();
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 
-//Rutas privadas
-//TODO: Agregar auth middleware
-router.post("/", createProduct);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+//Rutas privadas - requieren autenticación y rol admin
+router.post("/", protect, admin, createProduct);
+router.put("/:id", protect, admin, updateProduct);
+router.delete("/:id", protect, admin, deleteProduct);
 
 export default router;

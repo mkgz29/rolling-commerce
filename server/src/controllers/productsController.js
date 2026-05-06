@@ -1,98 +1,77 @@
-import Product from "../models/products.js";
+import {
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} from "../services/productService.js";
 
 // @desc    Create a new product
 // @route   POST /api/products
-// @access  Private
-const createProduct = async (req, res) => {
+// @access  Private/Admin
+const createProductController = async (req, res, next) => {
   try {
-    const { name, price, description, image, category, stock } = req.body;
-    const product = new Product({
-      name,
-      price,
-      description,
-      image,
-      category,
-      stock,
-    });
-    const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    const productData = req.body;
+    const product = await createProduct(productData);
+    res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc    Get all products
 // @route   GET /api/products
 // @access  Public
-const getProducts = async (req, res) => {
+const getProductsController = async (req, res, next) => {
   try {
-    const { category } = req.query;
-    let filter = {};
-    if (category) {
-      filter.category = category;
-    }
-    const products = await Product.find(filter);
+    const { category, search } = req.query;
+    const products = await getProducts({ category, search });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc    Get product by ID
 // @route   GET /api/products/:id
 // @access  Public
-const getProductById = async (req, res) => {
+const getProductByIdController = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
+    const product = await getProductById(req.params.id);
+    res.json(product);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc    Update a product
 // @route   PUT /api/products/:id
-// @access  Private
-const updateProduct = async (req, res) => {
+// @access  Private/Admin
+const updateProductController = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    const product = await updateProduct(req.params.id, req.body);
     res.json(product);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc    Delete a product
 // @route   DELETE /api/products/:id
-// @access  Private
-const deleteProduct = async (req, res) => {
+// @access  Private/Admin
+const deleteProductController = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      await product.deleteOne();
-      res.json({ message: "Product removed" });
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
+    const result = await deleteProduct(req.params.id);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 export {
-  createProduct,
-  getProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
+  createProductController as createProduct,
+  getProductsController as getProducts,
+  getProductByIdController as getProductById,
+  updateProductController as updateProduct,
+  deleteProductController as deleteProduct,
 };

@@ -1,13 +1,22 @@
 ﻿import express from "express";
+import {
+  getCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "../controllers/categoryControllers.js";
+import { protect, admin } from "../middlewares/authMiddlewares.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.status(200).json({ message: "Category endpoint available" });
-});
+// Rutas públicas
+router.get("/", getCategories);
+router.get("/:id", getCategoryById);
 
-router.get("/:id", (req, res) => {
-  res.status(200).json({ message: "Category detail endpoint available" });
-});
+// Rutas privadas - requieren autenticación y rol admin
+router.post("/", protect, admin, createCategory);
+router.put("/:id", protect, admin, updateCategory);
+router.delete("/:id", protect, admin, deleteCategory);
 
 export default router;

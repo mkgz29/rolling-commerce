@@ -10,6 +10,7 @@
 // Para conectar con Orders: getCart devuelve items y total listos para generar una orden.
 import mongoose from "mongoose";
 import Cart from "../models/cart.js";
+import Product from "../models/products.js";
 // Devuelve el carrito del usuario logueado.
 // Si no tiene carrito creado, devuelve un objeto vacío con items: [] y total: 0.
 export const getCart = async (req, res) => {
@@ -56,21 +57,30 @@ export const addItem = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { productId, name, price, quantity } = req.body;
+    const { productId, quantity } = req.body;
 
-    if (!productId || !name || !price) {
-      return res.status(400).json({ message: "productId, name and price are required" });
+    if (!productId) {
+      return res.status(400).json({ message: "productId is required" });
     }
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ message: "Invalid product ID format" });
     }
 
-    if (price <= 0) {
-      return res.status(400).json({ message: "Price must be greater than 0" });
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
     const itemQuantity = quantity && quantity > 0 ? quantity : 1;
+
+    if (!Number.isInteger(itemQuantity) || itemQuantity <= 0) {
+      return res.status(400).json({ message: "Quantity must be a positive integer" });
+    }
+
+    if (itemQuantity > product.stock) {
+      return res.status(400).json({ message: `Requested quantity exceeds stock. Available: ${product.stock}` });
+    }
 
     let cart = await Cart.findOne({ userId: req.user._id });
 
@@ -86,12 +96,16 @@ export const addItem = async (req, res) => {
     );
 
     if (existingItem) {
-      existingItem.quantity += itemQuantity;
+      const newQuantity = existingItem.quantity + itemQuantity;
+      if (newQuantity > product.stock) {
+        return res.status(400).json({ message: `Requested quantity exceeds stock. Available: ${product.stock}` });
+      }
+      existingItem.quantity = newQuantity;
     } else {
       cart.items.push({
         productId,
-        name,
-        price,
+        name: product.name,
+        price: product.price,
         quantity: itemQuantity,
       });
     }
@@ -132,8 +146,8 @@ export const updateItem = async (req, res) => {
       return res.status(400).json({ message: "Invalid product ID format" });
     }
 
-    if (quantity === undefined || quantity < 0) {
-      return res.status(400).json({ message: "Valid quantity is required" });
+    if (quantity === undefined || quantity < 0 || !Number.isInteger(quantity)) {
+      return res.status(400).json({ message: "Valid quantity (non-negative integer) is required" });
     }
 
     const cart = await Cart.findOne({ userId: req.user._id });
