@@ -4,7 +4,7 @@ import { CartContext } from "../context/CartContext";
 function useCart() {
   const context = useContext(CartContext);
 
-  const { cart } = useCart();
+  const { cart } = context;
   const totalItems = cart?.items?.length || 0;
 
   if (!context) {
