@@ -1,29 +1,19 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
-import { useAuth } from '../hooks/useAuth';
-import { useCart } from '../hooks/useCart';
 import './navbar.css';
 
 const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/products', label: 'Products' },
+  { to: '/cart', label: 'Cart' },
+  { to: '/login', label: 'Login' },
+  { to: '/register', label: 'Register' },
+  { to: '/admin', label: 'Admin' },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, isAdmin, logout } = useAuth();
-  const { itemCount } = useCart();
-
-  const visibleLinks = [
-    ...navLinks,
-    { to: '/cart', label: itemCount ? `Cart (${itemCount})` : 'Cart' },
-    ...(isAuthenticated ? [] : [
-      { to: '/login', label: 'Login' },
-      { to: '/register', label: 'Register' },
-    ]),
-    ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
-  ];
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark main-navbar">
@@ -48,7 +38,7 @@ export default function Navbar() {
 
         <div className={`collapse navbar-collapse ${menuOpen ? 'show' : ''}`}>
           <ul className="navbar-nav ms-auto align-items-lg-center navbar-menu">
-            {visibleLinks.map((item) => (
+            {navLinks.map((item) => (
               <li className="nav-item" key={item.to}>
                 <NavLink
                   to={item.to}
@@ -62,20 +52,6 @@ export default function Navbar() {
                 </NavLink>
               </li>
             ))}
-            {isAuthenticated && (
-              <li className="nav-item">
-                <button
-                  className="nav-link custom-link text-light-muted border-0 bg-transparent"
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    setMenuOpen(false);
-                  }}
-                >
-                  Logout
-                </button>
-              </li>
-            )}
           </ul>
         </div>
       </div>

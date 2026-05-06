@@ -4,18 +4,18 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="footer">
+    <footer className="footer bg-dark text-light">
       <div className="container py-5">
         <div className="row gy-4">
           <div className="col-md-4">
-            <h5>Tech Core</h5>
-            <p>
-              Premium technology, curated products and a cleaner path from upgrade to checkout.
+            <h5 className="text-white">Rolling Commerce</h5>
+            <p className="text-muted">
+              Discover smart shopping with fast delivery, secure checkout and inspired deals for every budget.
             </p>
           </div>
 
           <div className="col-md-4">
-            <h6>Quick Links</h6>
+            <h6 className="text-white">Quick Links</h6>
             <ul className="footer-links list-unstyled">
               <li><a href="#privacy">Privacy Policy</a></li>
               <li><a href="#terms">Terms of Service</a></li>
@@ -24,14 +24,14 @@ export default function Footer() {
           </div>
 
           <div className="col-md-4">
-            <h6>Need Help?</h6>
-            <p className="mb-1">support@techcore.com</p>
-            <p>+1 (555) 123-4567</p>
+            <h6 className="text-white">Need Help?</h6>
+            <p className="text-muted mb-1">support@rollingcommerce.com</p>
+            <p className="text-muted">+1 (555) 123-4567</p>
           </div>
         </div>
 
-        <div className="footer-bottom pt-4 mt-4 text-center">
-          <small>&copy; {year} Tech Core. All rights reserved.</small>
+        <div className="border-top border-secondary pt-4 mt-4 text-center">
+          <small>&copy; {year} Rolling Commerce. All rights reserved.</small>
         </div>
       </div>
     </footer>
