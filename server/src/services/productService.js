@@ -2,7 +2,7 @@ import Product from "../models/products.js";
 import mongoose from "mongoose";
 
 const validateProductData = (data) => {
-  const { name, price, description, image, category, stock } = data;
+  const { name, price, description, image, images = [], category, stock } = data;
 
   if (!name || !name.trim()) {
     throw new Error("Product name is required");
@@ -16,7 +16,28 @@ const validateProductData = (data) => {
     throw new Error("Product description is required");
   }
 
-  if (!image || !image.trim()) {
+  if (!image?.trim() && (!Array.isArray(images) || images.length === 0)) {
+    throw new Error("At least one product image is required");
+  }
+
+  if (!Array.isArray(images)) {
+    throw new Error("Product images must be an array");
+  }
+
+  const normalizedImages = images.map((item) => {
+    if (!item?.url?.trim() || !item?.public_id?.trim()) {
+      throw new Error("Each product image must include url and public_id");
+    }
+
+    return {
+      url: item.url.trim(),
+      public_id: item.public_id.trim(),
+    };
+  });
+
+  const primaryImage = image?.trim() || normalizedImages[0]?.url;
+
+  if (!primaryImage) {
     throw new Error("Product image URL is required");
   }
 
@@ -32,7 +53,8 @@ const validateProductData = (data) => {
     name: name.trim(),
     price: parseFloat(price),
     description: description.trim(),
-    image: image.trim(),
+    image: primaryImage,
+    images: normalizedImages,
     category: category.trim(),
     stock: parseInt(stock),
   };
@@ -98,6 +120,7 @@ const updateProduct = async (productId, updateData) => {
     price: updateData.price,
     description: updateData.description,
     image: updateData.image,
+    images: updateData.images,
     category: updateData.category,
     stock: updateData.stock,
   });

@@ -22,6 +22,11 @@
   padding: 0;
 }
 
+.main-content:has(.product-detail-page) {
+  max-width: none;
+  padding: 0;
+}
+
 .page {
   animation: fadeIn 0.3s ease-in;
 }

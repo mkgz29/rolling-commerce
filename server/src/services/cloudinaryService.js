@@ -1,21 +1,4 @@
-import { v2 as cloudinary } from "cloudinary";
-
-// Configurar Cloudinary con variables de entorno
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const validateCloudinaryConfig = () => {
-  const { cloud_name, api_key, api_secret } = cloudinary.config();
-
-  if (!cloud_name || !api_key || !api_secret) {
-    throw new Error(
-      "Cloudinary configuration is missing. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables."
-    );
-  }
-};
+import { cloudinary, validateCloudinaryConfig } from "../config/cloudinary.js";
 
 const validateFileData = (fileData) => {
   if (!fileData) {
