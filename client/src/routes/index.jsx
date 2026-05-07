@@ -7,8 +7,11 @@ import Cart from '../pages/cart';
 import Login from '../pages/login';
 import Register from '../pages/register';
 import AdminDashboard from '../pages/adminDashboard';
-import NotFound from '../pages/not found404';
+import NotFound from '../pages/not-found-404';
 import ProtectedRoute from '../components/protectedRoute';
+import BuildYourPc from '../pages/build-your-pc';
+import Profile from '../pages/profile';
+import Loader from '../components/Loader';
 
 export const router = createBrowserRouter([
   {
@@ -30,9 +33,9 @@ export const router = createBrowserRouter([
       {
         path: 'cart',
         element: (
-          <ProtectedRoute>
+          /*<ProtectedRoute>*/
             <Cart />
-          </ProtectedRoute>
+         /* </ProtectedRoute>*/ //sacar comentarios para porteger rutas//
         ),
       },
       {
@@ -46,14 +49,18 @@ export const router = createBrowserRouter([
       {
         path: 'admin',
         element: (
-          <ProtectedRoute adminOnly>
+        /*  <ProtectedRoute adminOnly>*/
             <AdminDashboard />
-          </ProtectedRoute>
+         /* </ProtectedRoute>*/
         ),
       },
       {
         path: '*',
         element: <NotFound />,
+      },
+      {
+        path: 'build-your-pc',
+        element: <BuildYourPc />,
       },
     ],
   },

@@ -1,0 +1,132 @@
+.admin-layout {
+  min-height: 100vh;
+  background-color: #060b16;
+  color: #f4f7ff;
+}
+
+.admin-sidebar {
+  width: 280px;
+  background-color: #081123;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #42c4ff 0%, #8d5cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-sidebar .nav-link {
+  color: rgba(244, 247, 255, 0.6);
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.admin-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.admin-sidebar .nav-link.active {
+  background: rgba(141, 92, 255, 0.15);
+  color: #8d5cff;
+  font-weight: 600;
+}
+
+.stat-card, .table-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.25rem;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(135deg, #42c4ff 0%, #8d5cff 100%);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-primary-gradient:hover {
+  opacity: 0.9;
+  color: white;
+}
+
+.table-dark {
+  --bs-table-bg: transparent;
+}
+
+.btn-action {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f4f7ff;
+}
+
+.btn-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.progress {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- RESPONSIVE / MOBILE VERSION --- */
+
+@media (max-width: 991px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .admin-sidebar nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .admin-sidebar .nav-link {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+  }
+
+  .admin-sidebar h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-content {
+    padding: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.25rem;
+  }
+}

@@ -6,10 +6,11 @@ import './navbar.css';
 const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/products', label: 'Products' },
+  { to: '/build-your-pc', label: 'Build Your PC' },
   { to: '/cart', label: 'Cart' },
+  { to: '/admin', label: 'Admin' },
   { to: '/login', label: 'Login' },
   { to: '/register', label: 'Register' },
-  { to: '/admin', label: 'Admin' },
 ];
 
 export default function Navbar() {

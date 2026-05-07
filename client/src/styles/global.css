@@ -1,0 +1,93 @@
+.cart-card {
+  background: rgba(18, 24, 38, 0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+
+  border-radius: 24px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.4);
+
+  backdrop-filter: blur(12px);
+}
+
+.cart-image {
+  width: 120px;
+  height: 120px;
+
+  object-fit: contain;
+
+  border-radius: 16px;
+
+  background: #0f172a;
+  padding: 10px;
+}
+
+.summary-card {
+  background: rgba(18, 24, 38, 0.95);
+
+  border-radius: 24px;
+
+  padding: 30px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  position: sticky;
+  top: 100px;
+}
+
+.quantity-box {
+  display: flex;
+  align-items: center;
+
+  background: #0f172a;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+}
+
+.quantity-box button {
+  border: none;
+  background: transparent;
+  color: white;
+
+  width: 40px;
+  height: 40px;
+
+  font-size: 1.1rem;
+}
+
+.quantity-box span {
+  width: 40px;
+  text-align: center;
+}
+
+.quantity-btn {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  background: transparent;
+  color: white;
+}
+
+.btn-outline-custom {
+  background: transparent;
+
+  border: 1px solid var(--primary);
+
+  color: white;
+
+  padding: 12px;
+
+  border-radius: 14px;
+}
+
+.btn-outline-custom:hover {
+  background: var(--primary);
+}

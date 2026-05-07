@@ -1,67 +1,119 @@
-import { Link } from 'react-router-dom';
-import { useCart } from '../hooks/useCart';
-import { formatPrice } from '../utils/formatPrice';
+import {useCart} from "../hooks/useCart";
+import Loader from "../components/Loader";
+import {formatPrice} from "../utils/formatPrice";
 
-export default function Cart() {
-  const { items, total, loading, error, updateItem, removeItem, clearCart } = useCart();
+
+function Cart() {
+  const { cart, removeItem } = useCart();
+
+  if (!cart) return <Loader />;
 
   return (
-    <div className="page cart-page">
-      <h1>Shopping Cart</h1>
-      {loading && <p>Loading cart...</p>}
-      {error && <p className="text-danger">{error}</p>}
-      {!loading && items.length === 0 && (
-        <p>
-          Your cart is empty. <Link to="/products">Browse products</Link>
-        </p>
-      )}
-      {items.length > 0 && (
-        <>
-          <div className="table-responsive">
-            <table className="table align-middle">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Subtotal</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.productId}>
-                    <td>{item.name}</td>
-                    <td>{formatPrice(item.price)}</td>
-                    <td>
-                      <input
-                        className="form-control"
-                        type="number"
-                        min="0"
-                        value={item.quantity}
-                        onChange={(event) => updateItem(item.productId, Number(event.target.value))}
-                        style={{ maxWidth: 90 }}
-                      />
-                    </td>
-                    <td>{formatPrice(item.price * item.quantity)}</td>
-                    <td className="text-end">
-                      <button className="btn btn-outline-danger btn-sm" type="button" onClick={() => removeItem(item.productId)}>
-                        Remove
+    <div className="container py-5 mt-5">
+
+      <h1 className="fw-bold mb-4">Mi carrito</h1>
+
+      <div className="row g-4">
+
+        {/* PRODUCTOS */}
+        <div className="col-lg-8">
+
+          {cart.items.length === 0 ? (
+            <div className="cart-card">
+              <h4>Carrito vacío</h4>
+            </div>
+          ) : (
+            cart.items.map((item) => (
+              <div className="cart-card mb-4" key={item.product._id}>
+
+                <div className="d-flex align-items-center gap-4">
+
+                  {/* IMAGEN */}
+                  <img
+                    src={item.product.image}
+                    alt={item.product.name}
+                    className="cart-image"
+                  />
+
+                  {/* INFO */}
+                  <div className="flex-grow-1">
+
+                    <h5 className="mb-2">
+                      {item.product.name}
+                    </h5>
+
+                    <p className="text-muted mb-3">
+                      {item.product.description}
+                    </p>
+
+                    {/* CONTROLES */}
+                    <div className="d-flex align-items-center gap-3">
+
+                      <button
+                        className="quantity-btn"
+                        onClick={() => removeItem(item.product._id)}
+                      >
+                        🗑️
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="d-flex justify-content-between align-items-center">
-            <button className="btn btn-outline-secondary" type="button" onClick={clearCart}>
-              Clear cart
+
+                      <div className="quantity-box">
+                        <button>-</button>
+                        <span>{item.quantity}</span>
+                        <button>+</button>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* PRECIO */}
+                  <div>
+                    <h4 className="fw-bold">
+                      {formatPrice(item.price)}
+                    </h4>
+                  </div>
+
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* RESUMEN */}
+        <div className="col-lg-4">
+
+          <div className="summary-card">
+
+            <h4 className="mb-4">Resumen</h4>
+
+            <div className="d-flex justify-content-between mb-3">
+              <span>Productos</span>
+              <strong>{cart.items.length}</strong>
+            </div>
+
+            <hr />
+
+            <div className="d-flex justify-content-between mb-4">
+              <h5>Total</h5>
+              <h4 className="fw-bold gradient-text">
+                {formatPrice(cart.total)}
+              </h4>
+            </div>
+
+            <button className="btn-primary w-100 mb-3">
+              Iniciar compra
             </button>
-            <strong>Total: {formatPrice(total)}</strong>
+
+            <button className="btn-outline-custom w-100">
+              Ver más productos
+            </button>
+
           </div>
-        </>
-      )}
+        </div>
+
+      </div>
     </div>
   );
 }
+
+export default Cart;
