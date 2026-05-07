@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import ThumbnailList from './ThumbnailList';
+import { getProductImages } from '../../utils/productImage';
 import './ProductGallery.css';
 
 const fallbackLabel = 'Tech Core';
 
 export default function ProductGallery({ images = [], title }) {
-  const validImages = images.filter(Boolean);
+  const validImages = getProductImages({ images });
   const [selectedImage, setSelectedImage] = useState('');
   const [failedImage, setFailedImage] = useState('');
   const activeImage = validImages.includes(selectedImage) ? selectedImage : validImages[0] || '';

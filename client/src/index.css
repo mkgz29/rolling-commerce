@@ -1,7 +1,15 @@
 ﻿:root {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #212529;
-  background: #f8f9fa;
+  color: #f4f7ff;
+  background: #060b16;
+  --btn-gradient: linear-gradient(135deg, #42c4ff 0%, #8d5cff 54%, #d85cff 100%);
+  --btn-gradient-hover: linear-gradient(135deg, #6bd5ff 0%, #9d72ff 52%, #e277ff 100%);
+  --btn-glow: 0 18px 44px rgba(66, 196, 255, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  --btn-glow-hover: 0 22px 54px rgba(66, 196, 255, 0.24), 0 0 28px rgba(141, 92, 255, 0.16);
+  --btn-border: rgba(131, 216, 255, 0.28);
+  --btn-surface: rgba(255, 255, 255, 0.065);
+  --btn-surface-hover: rgba(255, 255, 255, 0.105);
+  --btn-focus: 0 0 0 0.22rem rgba(66, 196, 255, 0.22);
 }
 
 * {
@@ -13,12 +21,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f8f9fa;
-  color: #212529;
+  background: #060b16;
+  color: #f4f7ff;
 }
 
 #root {
   min-height: 100vh;
+  background: #060b16;
 }
 
 a {
@@ -36,4 +45,246 @@ select {
 img {
   max-width: 100%;
   display: block;
+}
+
+.split-heading {
+  font-family: Manrope, Inter, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.title-accent {
+  display: block;
+  color: #b7e4ff;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.title-main {
+  display: block;
+  color: #ffffff;
+  font-family: Manrope, Inter, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.btn,
+button.btn,
+a.btn,
+.product-action-primary,
+.product-action-secondary,
+.catalog-search-row button,
+.catalog-clear,
+.catalog-card-actions a,
+.catalog-card-actions button,
+.newsletter-form button,
+.category-action,
+.state-action,
+.promo-primary {
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0;
+  min-height: 42px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    filter 0.18s ease !important;
+}
+
+.btn {
+  border-color: var(--btn-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.btn-primary,
+.btn-dark,
+.product-action-primary,
+.catalog-search-row button,
+.catalog-card-actions button,
+.newsletter-form button,
+.promo-primary {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: var(--btn-gradient) !important;
+  box-shadow: var(--btn-glow) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary,
+.btn-outline-light,
+.btn-outline-primary,
+.btn-outline-secondary,
+.product-action-secondary,
+.catalog-clear,
+.catalog-card-actions a,
+.category-action,
+.state-action {
+  border: 1px solid var(--btn-border) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
+    var(--btn-surface) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #f7fbff !important;
+}
+
+.btn-light {
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(211, 238, 255, 0.88)) !important;
+  box-shadow: 0 18px 42px rgba(183, 228, 255, 0.14) !important;
+  color: #071025 !important;
+}
+
+.btn-outline-danger,
+.btn-danger {
+  border: 1px solid rgba(255, 118, 151, 0.36) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 86, 128, 0.16), rgba(141, 92, 255, 0.08)),
+    rgba(255, 255, 255, 0.045) !important;
+  color: #ffc7d4 !important;
+}
+
+.btn-sm,
+.catalog-card-actions a,
+.catalog-card-actions button,
+.product-card-actions .btn {
+  min-height: 36px;
+  padding: 0.5rem 0.78rem !important;
+  font-size: 0.84rem !important;
+}
+
+.btn-lg,
+.hero-action-group .btn,
+.hero-showcase .btn,
+.newsletter-form button {
+  min-height: 52px;
+  padding-inline: 1.25rem !important;
+}
+
+.btn:hover:not(:disabled),
+.btn:focus-visible,
+.product-action-primary:hover:not(:disabled),
+.product-action-secondary:hover:not(:disabled),
+.product-action-primary:focus-visible,
+.product-action-secondary:focus-visible,
+.catalog-search-row button:hover:not(:disabled),
+.catalog-search-row button:focus-visible,
+.catalog-clear:hover:not(:disabled),
+.catalog-clear:focus-visible,
+.catalog-card-actions a:hover,
+.catalog-card-actions a:focus-visible,
+.catalog-card-actions button:hover:not(:disabled),
+.catalog-card-actions button:focus-visible,
+.newsletter-form button:hover:not(:disabled),
+.newsletter-form button:focus-visible,
+.category-action:hover,
+.category-action:focus-visible,
+.state-action:hover,
+.state-action:focus-visible,
+.promo-primary:hover,
+.promo-primary:focus-visible {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible,
+.btn-dark:hover,
+.btn-dark:focus-visible,
+.product-action-primary:hover:not(:disabled),
+.product-action-primary:focus-visible,
+.catalog-search-row button:hover:not(:disabled),
+.catalog-search-row button:focus-visible,
+.catalog-card-actions button:hover:not(:disabled),
+.catalog-card-actions button:focus-visible,
+.newsletter-form button:hover:not(:disabled),
+.newsletter-form button:focus-visible,
+.promo-primary:hover,
+.promo-primary:focus-visible {
+  background: var(--btn-gradient-hover) !important;
+  box-shadow: var(--btn-glow-hover) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible,
+.btn-outline-light:hover,
+.btn-outline-light:focus-visible,
+.btn-outline-primary:hover,
+.btn-outline-primary:focus-visible,
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus-visible,
+.product-action-secondary:hover:not(:disabled),
+.product-action-secondary:focus-visible,
+.catalog-clear:hover:not(:disabled),
+.catalog-clear:focus-visible,
+.catalog-card-actions a:hover,
+.catalog-card-actions a:focus-visible,
+.category-action:hover,
+.category-action:focus-visible,
+.state-action:hover,
+.state-action:focus-visible {
+  border-color: rgba(183, 228, 255, 0.48) !important;
+  background:
+    linear-gradient(135deg, rgba(66, 196, 255, 0.16), rgba(141, 92, 255, 0.14)),
+    var(--btn-surface-hover) !important;
+  box-shadow: 0 16px 36px rgba(0, 8, 26, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.11) !important;
+  color: #ffffff !important;
+}
+
+.btn-light:hover,
+.btn-light:focus-visible {
+  background: linear-gradient(135deg, #ffffff, #dff6ff) !important;
+  box-shadow: 0 20px 48px rgba(183, 228, 255, 0.2) !important;
+  color: #071025 !important;
+}
+
+.btn:active,
+.btn.active,
+.product-action-primary:active,
+.product-action-secondary:active,
+.catalog-search-row button:active,
+.catalog-clear:active,
+.catalog-card-actions a:active,
+.catalog-card-actions button:active,
+.newsletter-form button:active,
+.category-action:active,
+.state-action:active,
+.promo-primary:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.btn:focus-visible,
+.product-action-primary:focus-visible,
+.product-action-secondary:focus-visible,
+.catalog-search-row button:focus-visible,
+.catalog-clear:focus-visible,
+.catalog-card-actions a:focus-visible,
+.catalog-card-actions button:focus-visible,
+.newsletter-form button:focus-visible,
+.category-action:focus-visible,
+.state-action:focus-visible,
+.promo-primary:focus-visible {
+  outline: 0 !important;
+  box-shadow: var(--btn-focus), var(--btn-glow) !important;
+}
+
+.btn:disabled,
+.btn.disabled,
+button:disabled,
+.product-action-primary:disabled,
+.product-action-secondary:disabled,
+.catalog-card-actions button:disabled {
+  cursor: not-allowed !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.075) !important;
+  box-shadow: none !important;
+  color: rgba(219, 233, 255, 0.44) !important;
+  opacity: 1 !important;
+  transform: none !important;
 }

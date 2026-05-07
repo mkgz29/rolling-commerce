@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 const validateProductData = (data) => {
   const { name, price, description, image, images = [], category, stock } = data;
+  const parsedStock = Number(stock);
 
   if (!name || !name.trim()) {
     throw new Error("Product name is required");
@@ -45,7 +46,13 @@ const validateProductData = (data) => {
     throw new Error("Product category is required");
   }
 
-  if (stock === undefined || stock === null || !Number.isInteger(stock) || stock < 0) {
+  if (
+    stock === undefined ||
+    stock === null ||
+    stock === "" ||
+    !Number.isInteger(parsedStock) ||
+    parsedStock < 0
+  ) {
     throw new Error("Product stock must be a non-negative integer");
   }
 
@@ -56,7 +63,7 @@ const validateProductData = (data) => {
     image: primaryImage,
     images: normalizedImages,
     category: category.trim(),
-    stock: parseInt(stock),
+    stock: parsedStock,
   };
 };
 

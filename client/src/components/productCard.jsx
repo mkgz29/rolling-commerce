@@ -1,34 +1,33 @@
-const products = [
-  { id: 1, name: "Wireless Headphones", price: "$89.99" },
-  { id: 2, name: "Smart Watch", price: "$129.99" },
-  { id: 3, name: "Gaming Keyboard", price: "$74.99" },
-  { id: 4, name: "Portable Speaker", price: "$59.99" },
-];
+import { Link } from 'react-router-dom';
+import { formatPrice } from '../utils/formatPrice';
+import { getProductImage } from '../utils/productImage';
 
-function FeaturedProductsSection() {
+function ProductCard({ product }) {
+  const productId = product?._id || product?.id;
+  const productImage = getProductImage(product);
+
   return (
-    <section className="home-section">
-      <div className="section-header">
-        <div>
-          <h2>Featured Products</h2>
-          <p>Selected products for this week.</p>
+    <article className="featured-product-card">
+      <Link to={`/products/${productId}`} className="product-card-link" aria-label={`View ${product.name}`}>
+        <div className="product-card-image">
+          <img src={productImage} alt={product.name} />
+        </div>
+      </Link>
+      <div className="product-card-body">
+        <div className="product-card-copy">
+          <p className="product-card-category">{product.category || 'Tech Core'}</p>
+          <h3>{product.name}</h3>
+          <p>{product.description}</p>
+        </div>
+        <div className="product-card-actions">
+          <span>{formatPrice(product.price)}</span>
+          <Link className="btn btn-primary btn-sm" to={`/products/${productId}`}>
+            Details
+          </Link>
         </div>
       </div>
-
-      <div className="products-grid">
-        {products.map((product) => (
-          <article className="product-card" key={product.id}>
-            <div className="product-image"></div>
-            <div className="product-info">
-              <h3>{product.name}</h3>
-              <p>{product.price}</p>
-              <button>Add to cart</button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
+    </article>
   );
 }
 
-export default FeaturedProductsSection;
+export default ProductCard;

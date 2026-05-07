@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getProductByIdRequest } from '../routes/productService';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
-import { mockProducts } from '../data/mockProducts';
+import { getProductImages } from '../utils/productImage';
 import ProductGallery from '../components/product-detail/ProductGallery';
 import ProductInfo from '../components/product-detail/ProductInfo';
 import './ProductDetailPage.css';
@@ -15,7 +15,7 @@ const normalizeProduct = (product) => {
     return null;
   }
 
-  const images = product.images?.length ? product.images : [product.image].filter(Boolean);
+  const images = getProductImages(product);
   const generatedSpecs = [
     product.category ? `Category: ${product.category}` : null,
     Number.isFinite(Number(product.rating)) && Number(product.rating) > 0 ? `Rating: ${product.rating}/5` : null,
@@ -38,8 +38,6 @@ const normalizeProduct = (product) => {
     specs: product.specs?.length ? product.specs : generatedSpecs,
   };
 };
-
-const findMockProduct = (id) => mockProducts.find((product) => String(product.id) === String(id));
 
 function ProductDetailLoading() {
   return (
@@ -79,15 +77,9 @@ export default function ProductDetail() {
           setProduct(normalizeProduct(data));
         }
       } catch (requestError) {
-        const mockProduct = findMockProduct(id);
         if (active) {
-          if (mockProduct) {
-            setProduct(normalizeProduct(mockProduct));
-            setError(null);
-          } else {
-            setProduct(null);
-            setError(requestError.message || 'Product not found');
-          }
+          setProduct(null);
+          setError(requestError.message || 'Product not found');
         }
       } finally {
         if (active) {

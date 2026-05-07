@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { getProductsRequest } from '../routes/productService';
 import { formatPrice } from '../utils/formatPrice';
+import { getProductImage } from '../utils/productImage';
 import '../styles/home.css';
 
 const categories = ['Smartphones', 'Laptops', 'Accessories', 'Gaming'];
@@ -212,11 +213,7 @@ export default function Products() {
               {products.map((product) => (
                 <article className="catalog-card" key={product._id}>
                   <Link to={`/products/${product._id}`} className="catalog-card-image" aria-label={`View ${product.name}`}>
-                    {product.image ? (
-                      <img src={product.image} alt={product.name} />
-                    ) : (
-                      <span>{product.category || 'Tech Core'}</span>
-                    )}
+                    <img src={getProductImage(product)} alt={product.name} />
                   </Link>
                   <div className="catalog-card-body">
                     <div className="catalog-card-meta">

@@ -18,8 +18,17 @@ mongoose.connection.on("disconnected", () => {
 });
 
 const connectDB = async () => {
+  const mongoUri = process.env.MONGO_URI?.trim();
+
+  if (!mongoUri) {
+    console.error(
+      "Missing required environment variable MONGO_URI. Add it to server/.env before starting the backend."
+    );
+    process.exit(1);
+  }
+
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000,
     });
   } catch (error) {

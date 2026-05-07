@@ -1,43 +1,59 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import ProductCard from './productCard';
 
-const products = [
-  { id: 1, name: 'Wireless Headphones', price: '$89.99', description: 'Noise cancelling sound for every playlist.' },
-  { id: 2, name: 'Smart Watch', price: '$129.99', description: 'Track your health, notifications, and active life.' },
-  { id: 3, name: 'Gaming Keyboard', price: '$74.99', description: 'Responsive keys with RGB lighting.' },
-  { id: 4, name: 'Portable Speaker', price: '$59.99', description: 'Rich audio on the go with durable design.' },
-];
-
-function FeaturedProductsSection() {
+function FeaturedProductsSection({ products = [], loading = false, error = null }) {
   return (
-    <section className="py-5 bg-white">
+    <section className="featured-products-section py-5">
       <div className="container">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end mb-4 gap-3">
-          <div>
-            <h2>Featured Products</h2>
-            <p className="text-muted">Top picks selected for your next upgrade.</p>
+          <div className="section-heading">
+            <h2 className="split-heading">
+              <span className="title-accent">Featured</span>
+              <span className="title-main">Products</span>
+            </h2>
+            <p>Top picks selected from the live catalog.</p>
           </div>
-          <Link to="/products" className="btn btn-outline-secondary">
+          <Link to="/products" className="btn btn-outline-light">
             View all products
           </Link>
         </div>
 
-        <div className="row g-4">
-          {products.map((product) => (
-            <div className="col-md-6 col-xl-3" key={product.id}>
-              <article className="card h-100 border-0 shadow-sm">
-                <div className="ratio ratio-4x3 bg-secondary"></div>
-                <div className="card-body d-flex flex-column">
-                  <h3 className="h5">{product.name}</h3>
-                  <p className="text-muted flex-grow-1">{product.description}</p>
-                  <div className="d-flex justify-content-between align-items-center mt-3">
-                    <span className="fw-bold">{product.price}</span>
-                    <button className="btn btn-success btn-sm">Add to cart</button>
+        {loading ? (
+          <div className="row g-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div className="col-md-6 col-xl-3" key={item}>
+                <article className="featured-product-card is-loading">
+                  <div className="product-card-image skeleton-block" />
+                  <div className="product-card-body">
+                    <div className="skeleton-line w-50" />
+                    <div className="skeleton-line w-75" />
+                    <div className="skeleton-line" />
                   </div>
-                </div>
-              </article>
+                </article>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {!loading && error ? (
+          <div className="home-state-panel">
+            <div className="state-copy">
+              <p className="state-eyebrow">Catalog unavailable</p>
+              <h3>Featured products could not be loaded</h3>
+              <p>{error}</p>
             </div>
-          ))}
-        </div>
+          </div>
+        ) : null}
+
+        {!loading && !error && products.length > 0 ? (
+          <div className="row g-4">
+            {products.map((product) => (
+              <div className="col-md-6 col-xl-3" key={product._id || product.id}>
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );

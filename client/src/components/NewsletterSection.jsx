@@ -4,8 +4,11 @@
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-xl-7">
-            <div className="text-center mb-4">
-              <h2>Stay updated</h2>
+            <div className="text-center mb-4 newsletter-copy">
+              <h2 className="split-heading">
+                <span className="title-accent">Stay</span>
+                <span className="title-main">updated</span>
+              </h2>
               <p className="text-muted mb-0">Receive new products, offers and ecommerce news.</p>
             </div>
 

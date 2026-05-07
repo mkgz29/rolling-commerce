@@ -4,7 +4,6 @@ const allowedImageMimeTypes = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/gif",
 ]);
 
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -20,7 +19,7 @@ const imageFileFilter = (req, file, callback) => {
   if (!allowedImageMimeTypes.has(file.mimetype)) {
     callback(
       createUploadError(
-        "Invalid file type. Only JPG, PNG, WEBP and GIF images are allowed."
+        "Invalid file type. Only JPG, JPEG, PNG and WEBP images are allowed."
       )
     );
     return;

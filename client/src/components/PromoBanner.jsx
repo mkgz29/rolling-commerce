@@ -5,8 +5,11 @@ function PromoBanner() {
     <section className="promo-banner py-5">
       <div className="container">
         <div className="row align-items-center gx-4 gy-3">
-          <div className="col-lg-8">
-            <h2 className="text-white">Upgrade your setup today</h2>
+          <div className="col-lg-8 promo-content">
+            <h2 className="text-white split-heading">
+              <span className="title-accent">Upgrade</span>
+              <span className="title-main">your setup today</span>
+            </h2>
             <p className="text-white-50 mb-0">
               Exclusive deals on selected tech products. Save more on premium gear before the offer ends.
             </p>

@@ -39,17 +39,6 @@ app.get("/", (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// --- RUTA TEMPORAL DE PRUEBA NODEMAILER ---
-app.get("/test-email", async (req, res) => {
-  try {
-    await sendEmail(process.env.EMAIL_ADDRESS, "Prueba desde Node", "¡Funciona perfecto!");
-    res.send("¡Correo de prueba enviado! Revisá tu bandeja en Mailtrap.");
-  } catch (error) {
-    res.status(500).send("Hubo un error al enviar el correo.");
-  }
-});
-// ------------------------------------------
-
 const PORT = process.env.PORT || 3000;
 connectDB().then(() => {
   app.listen(PORT, () => {

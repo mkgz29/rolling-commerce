@@ -5,13 +5,37 @@ import {
   updateProduct,
   deleteProduct,
 } from "../services/productService.js";
+import { uploadImageFile } from "../services/image.service.js";
+
+const buildProductData = async (body, file) => {
+  const productData = { ...body };
+
+  if (!file) {
+    return productData;
+  }
+
+  const uploadedImage = await uploadImageFile(file, {
+    folder: "rolling-commerce/products",
+    transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+  });
+
+  productData.image = uploadedImage.url;
+  productData.images = [
+    {
+      url: uploadedImage.url,
+      public_id: uploadedImage.public_id,
+    },
+  ];
+
+  return productData;
+};
 
 // @desc    Create a new product
 // @route   POST /api/products
 // @access  Private/Admin
 const createProductController = async (req, res, next) => {
   try {
-    const productData = req.body;
+    const productData = await buildProductData(req.body, req.file);
     const product = await createProduct(productData);
     res.status(201).json(product);
   } catch (error) {
@@ -49,7 +73,8 @@ const getProductByIdController = async (req, res, next) => {
 // @access  Private/Admin
 const updateProductController = async (req, res, next) => {
   try {
-    const product = await updateProduct(req.params.id, req.body);
+    const productData = await buildProductData(req.body, req.file);
+    const product = await updateProduct(req.params.id, productData);
     res.json(product);
   } catch (error) {
     next(error);
