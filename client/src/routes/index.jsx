@@ -12,6 +12,7 @@ import ProtectedRoute from '../components/protectedRoute';
 import BuildYourPc from '../pages/build-your-pc';
 import Profile from '../pages/profile';
 import Loader from '../components/Loader';
+import Checkout from '../pages/checkout';
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +62,14 @@ export const router = createBrowserRouter([
       {
         path: 'build-your-pc',
         element: <BuildYourPc />,
+      },
+      {
+        path: 'checkout',
+        element: (
+         /* <ProtectedRoute> */
+            <Checkout />
+         /* </ProtectedRoute> */
+        ),
       },
     ],
   },

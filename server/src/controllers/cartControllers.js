@@ -1,16 +1,63 @@
 // MÓDULO: Cart
-// Controllers disponibles y sus rutas:
-// getCart    → GET    /api/cart                      (usuario logueado)
-// addItem    → POST   /api/cart/add                  (usuario logueado)
-// updateItem → PUT    /api/cart/item/:productId       (usuario logueado)
-// clearCart  → DELETE /api/cart/clear                (usuario logueado)
-// removeItem → DELETE /api/cart/item/:productId      (usuario logueado)
+// Rutas del carrito que requieren token JWT:
+// GET    /api/cart                    → obtener el carrito del usuario logueado
+// POST   /api/cart/add                → agregar un producto o sumar cantidad si ya existe
+// PUT    /api/cart/item/:productId    → actualizar la cantidad de un producto en el carrito
+// DELETE /api/cart/item/:productId    → eliminar un producto del carrito
+// DELETE /api/cart/clear              → vaciar el carrito completo
 //
-// El carrito siempre se busca por req.user._id — un usuario no puede tocar el carrito de otro.
-// Para conectar con Orders: getCart devuelve items y total listos para generar una orden.
+// El carrito se asocia automáticamente al usuario de `req.user._id`.
+// El backend devuelve el carrito con `items` y `total` calculados.
+// Cada item incluye ahora:
+// - productId
+// - name
+// - price
+// - quantity
+// - product: { _id, name, description, image, images, category, stock }
 import mongoose from "mongoose";
 import Cart from "../models/cart.js";
 import Product from "../models/products.js";
+
+// buildCartResponse convierte el carrito de Mongo en la forma que usa el frontend.
+// Cada item contiene:
+// - productId
+// - name
+// - price
+// - quantity
+// - product: { _id, name, description, image, images, category, stock }
+const buildCartResponse = (cart) => {
+  const items = cart.items.map((item) => {
+    const populatedProduct = item.productId && item.productId.name ? item.productId : null;
+
+    return {
+      productId: populatedProduct?._id ?? item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      product: populatedProduct
+        ? {
+            _id: populatedProduct._id,
+            name: populatedProduct.name,
+            description: populatedProduct.description,
+            image: populatedProduct.image,
+            images: populatedProduct.images,
+            category: populatedProduct.category,
+            stock: populatedProduct.stock,
+          }
+        : null,
+    };
+  });
+
+  const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  return {
+    _id: cart._id,
+    userId: cart.userId,
+    items,
+    total: parseFloat(total.toFixed(2)),
+    updatedAt: cart.updatedAt,
+  };
+};
 // Devuelve el carrito del usuario logueado.
 // Si no tiene carrito creado, devuelve un objeto vacío con items: [] y total: 0.
 export const getCart = async (req, res) => {
@@ -19,7 +66,7 @@ export const getCart = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    let cart = await Cart.findOne({ userId: req.user._id });
+    let cart = await Cart.findOne({ userId: req.user._id }).populate("items.productId");
 
     if (!cart) {
       return res.status(200).json({
@@ -29,24 +76,13 @@ export const getCart = async (req, res) => {
       });
     }
 
-    const total = cart.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    res.status(200).json({
-      _id: cart._id,
-      userId: cart.userId,
-      items: cart.items,
-      total: parseFloat(total.toFixed(2)),
-      updatedAt: cart.updatedAt,
-    });
-
+    res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[getCart]", error);
     res.status(500).json({ message: "Error getting cart" });
   }
 };
+
 // Agrega un producto al carrito.
 // Si el producto ya existe en el carrito, suma la quantity en lugar de duplicar el item.
 // Si el usuario no tiene carrito, lo crea automáticamente.
@@ -111,25 +147,15 @@ export const addItem = async (req, res) => {
     }
 
     await cart.save();
+    await cart.populate("items.productId");
 
-    const total = cart.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    res.status(200).json({
-      _id: cart._id,
-      userId: cart.userId,
-      items: cart.items,
-      total: parseFloat(total.toFixed(2)),
-      updatedAt: cart.updatedAt,
-    });
-
+    res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[addItem]", error);
     res.status(500).json({ message: "Error adding item to cart" });
   }
 };
+
 // Actualiza la cantidad de un producto en el carrito.
 // Si quantity llega a 0, el item se elimina automáticamente.
 // Params: productId. Body requerido: { quantity }
@@ -171,20 +197,9 @@ export const updateItem = async (req, res) => {
     }
 
     await cart.save();
+    await cart.populate("items.productId");
 
-    const total = cart.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    res.status(200).json({
-      _id: cart._id,
-      userId: cart.userId,
-      items: cart.items,
-      total: parseFloat(total.toFixed(2)),
-      updatedAt: cart.updatedAt,
-    });
-
+    res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[updateItem]", error);
     res.status(500).json({ message: "Error updating item" });
@@ -221,20 +236,9 @@ export const removeItem = async (req, res) => {
     cart.items.splice(itemIndex, 1);
 
     await cart.save();
+    await cart.populate("items.productId");
 
-    const total = cart.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    res.status(200).json({
-      _id: cart._id,
-      userId: cart.userId,
-      items: cart.items,
-      total: parseFloat(total.toFixed(2)),
-      updatedAt: cart.updatedAt,
-    });
-
+    res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[removeItem]", error);
     res.status(500).json({ message: "Error removing item from cart" });
@@ -259,12 +263,8 @@ export const clearCart = async (req, res) => {
 
     res.status(200).json({
       message: "Cart cleared successfully",
-      _id: cart._id,
-      userId: cart.userId,
-      items: [],
-      total: 0,
+      ...buildCartResponse(cart),
     });
-
   } catch (error) {
     console.error("[clearCart]", error);
     res.status(500).json({ message: "Error clearing cart" });
