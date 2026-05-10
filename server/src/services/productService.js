@@ -192,8 +192,8 @@ const createProduct = async (productData) => {
   return createdProduct.toJSON();
 };
 
-const getProducts = async ({ category = null, search = null } = {}) => {
-  const filter = { isActive: { $ne: false } };
+const getProducts = async ({ category = null, search = null, includeInactive = false } = {}) => {
+  const filter = includeInactive ? {} : { isActive: { $ne: false } };
 
   if (category && category.trim()) {
     filter.category = normalizeCategory(category);
@@ -277,9 +277,10 @@ const deleteProduct = async (productId) => {
     throw new Error("Product not found");
   }
 
-  await product.deleteOne();
+  product.isActive = false;
+  await product.save();
 
-  return { message: "Product deleted successfully" };
+  return { message: "Product deactivated successfully" };
 };
 
 const decreaseStock = async (productId, quantity) => {

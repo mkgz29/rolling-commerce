@@ -1,11 +1,22 @@
 import Category from "../models/category.js";
+import Product from "../models/products.js";
 
 // @desc    Get all categories
 // @route   GET /api/categories
 // @access  Public
 const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true }).sort({ name: 1 });
+    let categories = await Category.find({ isActive: true }).sort({ name: 1 });
+    
+    if (categories.length === 0) {
+      const productCategories = await Product.distinct("category");
+      categories = productCategories.map(cat => ({
+        _id: cat,
+        name: cat,
+        isActive: true
+      }));
+    }
+
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });

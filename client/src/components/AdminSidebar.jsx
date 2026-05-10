@@ -9,24 +9,6 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
         >
           <i className="bi bi-speedometer2 me-2"></i> Dashboard
         </button>
-        <button 
-          className={`nav-link border-0 text-start ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          <i className="bi bi-box-seam me-2"></i> Productos
-        </button>
-        <button 
-          className={`nav-link border-0 text-start ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          <i className="bi bi-cart-check me-2"></i> Órdenes
-        </button>
-        <button 
-          className={`nav-link border-0 text-start ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          <i className="bi bi-people me-2"></i> Usuarios
-        </button>
       </nav>
       <button className="btn btn-outline-danger mt-auto">
         <i className="bi bi-box-arrow-right me-2"></i> Cerrar Sesión

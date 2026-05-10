@@ -51,8 +51,12 @@ const createProductController = async (req, res, next) => {
 // @access  Public
 const getProductsController = async (req, res, next) => {
   try {
-    const { category, search } = req.query;
-    const products = await getProducts({ category, search });
+    const { category, search, includeInactive } = req.query;
+    const products = await getProducts({ 
+      category, 
+      search, 
+      includeInactive: includeInactive === "true" 
+    });
     res.json(products);
   } catch (error) {
     next(error);

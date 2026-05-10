@@ -40,17 +40,23 @@ export const apiRequest = async (endpoint, options = {}) => {
   const { body, params, token = getStoredToken(), headers = {}, ...requestOptions } = options;
   const url = buildUrl(endpoint, params);
 
+  const isFormData = body instanceof FormData;
+  const finalHeaders = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...headers,
+  };
+
+  if (!isFormData) {
+    finalHeaders['Content-Type'] = 'application/json';
+  }
+
   let response;
 
   try {
     response = await fetch(url, {
       ...requestOptions,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...headers,
-      },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      headers: finalHeaders,
+      body: body === undefined ? undefined : (isFormData ? body : JSON.stringify(body)),
     });
   } catch (error) {
     throw new ApiError(`Could not reach API at ${API_BASE_URL}. Check that the backend is running.`, 0, {
