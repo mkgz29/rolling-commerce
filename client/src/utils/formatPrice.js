@@ -6,3 +6,5 @@ export const formatPrice = (value, currency = 'USD') => {
     currency,
   }).format(amount);
 };
+
+export default formatPrice;

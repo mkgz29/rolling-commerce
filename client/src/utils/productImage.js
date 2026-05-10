@@ -16,6 +16,9 @@ const getImageUrl = (image) => {
 export const getProductImages = (product) => {
   const imageCandidates = [
     getImageUrl(product?.image),
+    getImageUrl(product?.imageUrl),
+    getImageUrl(product?.img),
+    getImageUrl(product?.thumbnail),
     ...(Array.isArray(product?.images) ? product.images.map(getImageUrl) : []),
   ].filter(Boolean);
 

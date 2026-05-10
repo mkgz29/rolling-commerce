@@ -20,10 +20,13 @@ const buildProductData = async (body, file) => {
   });
 
   productData.image = uploadedImage.url;
+  productData.imageUrl = uploadedImage.url;
+  productData.publicId = uploadedImage.public_id;
   productData.images = [
     {
       url: uploadedImage.url,
       public_id: uploadedImage.public_id,
+      publicId: uploadedImage.public_id,
     },
   ];
 

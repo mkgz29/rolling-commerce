@@ -1,5 +1,6 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { CartContext } from './cartContextValue';
 import {
   addCartItemRequest,
   clearCartRequest,
@@ -12,8 +13,6 @@ const emptyCart = {
   items: [],
   total: 0,
 };
-
-export const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -43,7 +42,9 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     if (!authLoading) {
-      syncCart().catch(() => {});
+      queueMicrotask(() => {
+        syncCart().catch(() => {});
+      });
     }
   }, [authLoading, syncCart]);
 

@@ -1,5 +1,5 @@
-import {useAuth} from "../hooks/useAuth";
-import Loader from "../components/Loader";
+import { useAuth } from "../hooks/useAuth";
+import Loader from "../components/loader";
 
 function Profile() {
   const { user } = useAuth();

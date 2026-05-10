@@ -11,7 +11,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState({});
 
   const from = location.state?.from?.pathname || "/";
@@ -27,8 +26,7 @@ export default function Login() {
     if (!email) newErrors.email = "Email is required.";
     else if (!email.includes("@")) newErrors.email = "Email must contain @.";
     if (!password) newErrors.password = "Password is required.";
-    else if (password.length < 8) newErrors.password = "Minimum 8 characters.";
-    if (!acceptTerms) newErrors.terms = "You must agree to the terms.";
+    else if (password.length < 6) newErrors.password = "Minimum 6 characters.";
     return newErrors;
   };
 
@@ -143,27 +141,6 @@ export default function Login() {
               </button>
             </div>
             {errors.password && <p style={styles.error}>{errors.password}</p>}
-          </div>
-
-          <div style={{ marginBottom: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <input
-                type="checkbox"
-                checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  accentColor: "#7c3aed",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ color: "#d1d5db", fontSize: "14px" }}>
-                I agree to the <Link to="/terms" style={{ color: "#a78bfa", textDecoration: "underline" }}>Terms and Conditions</Link>
-              </span>
-            </div>
-            {errors.terms && <p style={styles.error}>{errors.terms}</p>}
           </div>
 
           {(errors.submit || error) && (

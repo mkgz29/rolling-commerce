@@ -38,16 +38,26 @@ const buildUrl = (endpoint, params) => {
 
 export const apiRequest = async (endpoint, options = {}) => {
   const { body, params, token = getStoredToken(), headers = {}, ...requestOptions } = options;
+  const url = buildUrl(endpoint, params);
 
-  const response = await fetch(buildUrl(endpoint, params), {
-    ...requestOptions,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response;
+
+  try {
+    response = await fetch(url, {
+      ...requestOptions,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (error) {
+    throw new ApiError(`Could not reach API at ${API_BASE_URL}. Check that the backend is running.`, 0, {
+      cause: error.message,
+      url,
+    });
+  }
 
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : null;

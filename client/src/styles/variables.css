@@ -1,0 +1,18 @@
+:root {
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+
+  --accent: #d946ef;
+  --secondary: #22d3ee;
+
+  --bg: #0b0f1a;
+  --bg-light: #0f172a;
+  --card: #121826;
+
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+
+  --border: rgba(255,255,255,0.08);
+
+  --gradient-main: linear-gradient(135deg, #7c3aed, #d946ef, #22d3ee);
+}

@@ -1,22 +1,34 @@
 import { useMemo, useState } from 'react';
-import { clearStoredToken, setStoredToken } from '../routes/api';
+import { clearStoredToken, getStoredToken, setStoredToken } from '../routes/api';
 import { loginRequest, registerRequest } from '../routes/authService';
 import { AuthContext } from './authContextValue';
 
 const USER_STORAGE_KEY = 'rolling-commerce-user';
 
-const readStoredUser = () => {
+const readStoredSession = () => {
   try {
+    const storedToken = getStoredToken();
     const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-    return storedUser ? JSON.parse(storedUser) : null;
+
+    if (!storedToken || !storedUser) {
+      clearStoredToken();
+      localStorage.removeItem(USER_STORAGE_KEY);
+      return { user: null, token: null };
+    }
+
+    return {
+      user: JSON.parse(storedUser),
+      token: storedToken,
+    };
   } catch {
+    clearStoredToken();
     localStorage.removeItem(USER_STORAGE_KEY);
-    return null;
+    return { user: null, token: null };
   }
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readStoredUser);
+  const [session, setSession] = useState(readStoredSession);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,7 +39,7 @@ export function AuthProvider({ children }) {
       const data = await loginRequest(credentials);
       setStoredToken(data.token);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-      setUser(data.user);
+      setSession({ user: data.user, token: data.token });
       return data.user;
     } catch (requestError) {
       setError(requestError.message || 'Could not log in.');
@@ -53,21 +65,22 @@ export function AuthProvider({ children }) {
   const logout = () => {
     clearStoredToken();
     localStorage.removeItem(USER_STORAGE_KEY);
-    setUser(null);
+    setSession({ user: null, token: null });
   };
 
   const value = useMemo(
     () => ({
-      user,
+      user: session.user,
+      token: session.token,
       loading,
       error,
-      isAuthenticated: Boolean(user),
-      isAdmin: user?.role === 'admin',
+      isAuthenticated: Boolean(session.user && session.token),
+      isAdmin: session.user?.role === 'admin',
       login,
       register,
       logout,
     }),
-    [user, loading, error],
+    [session, loading, error],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

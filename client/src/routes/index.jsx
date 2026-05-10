@@ -11,10 +11,9 @@ import NotFound from '../pages/not-found-404';
 import ProtectedRoute from '../components/protectedRoute';
 import BuildYourPc from '../pages/build-your-pc';
 import Profile from '../pages/profile';
-import Loader from '../components/Loader';
 import Checkout from '../pages/checkout';
 
-export const router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
@@ -34,9 +33,9 @@ export const router = createBrowserRouter([
       {
         path: 'cart',
         element: (
-          /*<ProtectedRoute>*/
+          <ProtectedRoute>
             <Cart />
-         /* </ProtectedRoute>*/ //sacar comentarios para porteger rutas//
+          </ProtectedRoute>
         ),
       },
       {
@@ -50,26 +49,34 @@ export const router = createBrowserRouter([
       {
         path: 'admin',
         element: (
-        /*  <ProtectedRoute adminOnly>*/
+          <ProtectedRoute adminOnly>
             <AdminDashboard />
-         /* </ProtectedRoute>*/
+          </ProtectedRoute>
         ),
-      },
-      {
-        path: '*',
-        element: <NotFound />,
       },
       {
         path: 'build-your-pc',
         element: <BuildYourPc />,
       },
       {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'checkout',
         element: (
-         /* <ProtectedRoute> */
+          <ProtectedRoute>
             <Checkout />
-         /* </ProtectedRoute> */
+          </ProtectedRoute>
         ),
+      },
+      {
+        path: '*',
+        element: <NotFound />,
       },
     ],
   },

@@ -8,15 +8,44 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
+import paymentRoutes from "./src/routes/paymentRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
 
 dotenv.config();
 
+const requiredEnvVars = ["MONGO_URI", "JWT_SECRET"];
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]?.trim());
+
+if (missingEnvVars.length > 0) {
+  console.error(
+    `Missing required environment variable${missingEnvVars.length > 1 ? "s" : ""}: ${missingEnvVars.join(", ")}. ` +
+      "Add them to server/.env before starting the backend."
+  );
+  process.exit(1);
+}
+
 const app = express();
 
 // middlewares
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  ...(process.env.FRONTEND_URL || "").split(","),
+]
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin(origin, callback) {
+    const isLocalDevOrigin = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin || "");
+
+    if (!origin || isLocalDevOrigin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -29,6 +58,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/products", productRoutes);
 
 // ruta base
 app.get("/", (req, res) => {

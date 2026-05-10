@@ -1,20 +1,38 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useAuth } from '../hooks/useAuth';
+import { useCart } from '../hooks/useCart';
 import './navbar.css';
 
-const navLinks = [
+const publicNavLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/products', label: 'Products' },
   { to: '/build-your-pc', label: 'Build Your PC' },
-  { to: '/cart', label: 'Cart' },
-  { to: '/admin', label: 'Admin' },
-  { to: '/login', label: 'Login' },
-  { to: '/register', label: 'Register' },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { itemCount } = useCart();
+
+  const navLinks = [
+    ...publicNavLinks,
+    ...(isAuthenticated ? [{ to: '/cart', label: `Cart${itemCount ? ` (${itemCount})` : ''}` }] : []),
+    ...(isAuthenticated ? [{ to: '/profile', label: 'Profile' }] : []),
+    ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
+    ...(!isAuthenticated
+      ? [
+          { to: '/login', label: 'Login' },
+          { to: '/register', label: 'Register' },
+        ]
+      : []),
+  ];
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark main-navbar">
@@ -53,6 +71,13 @@ export default function Navbar() {
                 </NavLink>
               </li>
             ))}
+            {isAuthenticated && (
+              <li className="nav-item">
+                <button type="button" className="nav-link custom-link logout-link" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>

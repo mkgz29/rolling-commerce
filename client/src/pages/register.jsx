@@ -18,7 +18,6 @@ export default function Register() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeat, setShowRepeat] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,7 +31,7 @@ export default function Register() {
     if (!formData.email) newErrors.email = "Email is required.";
     else if (!formData.email.includes("@")) newErrors.email = "Email must contain @.";
     if (!formData.password) newErrors.password = "Password is required.";
-    else if (formData.password.length < 8) newErrors.password = "Minimum 8 characters.";
+    else if (formData.password.length < 6) newErrors.password = "Minimum 6 characters.";
     if (formData.password !== formData.repeatPassword)
       newErrors.repeatPassword = "Passwords do not match.";
     if (!formData.terms) newErrors.terms = "You must agree to the terms.";

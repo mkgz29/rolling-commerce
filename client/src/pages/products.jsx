@@ -8,6 +8,7 @@ import { getProductImage } from '../utils/productImage';
 import '../styles/home.css';
 
 const categories = ['Smartphones', 'Laptops', 'Accessories', 'Gaming'];
+const getProductId = (product) => product?._id || product?.id;
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -30,7 +31,9 @@ export default function Products() {
   const [draftFilters, setDraftFilters] = useState(filters);
 
   useEffect(() => {
-    setDraftFilters(filters);
+    queueMicrotask(() => {
+      setDraftFilters(filters);
+    });
   }, [filters]);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export default function Products() {
         setError(null);
         const data = await getProductsRequest(filters);
         if (active) {
-          setProducts(data);
+          setProducts(Array.isArray(data) ? data : []);
         }
       } catch (requestError) {
         if (active) {
@@ -211,9 +214,9 @@ export default function Products() {
           {!loading && !error && products.length > 0 && (
             <div className="catalog-grid">
               {products.map((product) => (
-                <article className="catalog-card" key={product._id}>
-                  <Link to={`/products/${product._id}`} className="catalog-card-image" aria-label={`View ${product.name}`}>
-                    <img src={getProductImage(product)} alt={product.name} />
+                <article className="catalog-card" key={getProductId(product)}>
+                  <Link to={`/products/${getProductId(product)}`} className="catalog-card-image" aria-label={`View ${product.name || 'product'}`}>
+                    <img src={getProductImage(product)} alt={product.name || 'Product'} />
                   </Link>
                   <div className="catalog-card-body">
                     <div className="catalog-card-meta">
@@ -223,14 +226,14 @@ export default function Products() {
                       </span>
                     </div>
                     <div className="catalog-card-copy">
-                      <h3>{product.name}</h3>
-                      <p>{product.description}</p>
+                      <h3>{product.name || 'Untitled product'}</h3>
+                      <p>{product.description || 'No description available yet.'}</p>
                     </div>
                     <div className="catalog-card-actions">
                       <strong>{formatPrice(product.price)}</strong>
                       <div>
-                        <Link to={`/products/${product._id}`}>Details</Link>
-                        <button type="button" disabled={product.stock <= 0} onClick={() => handleAddToCart(product._id)}>
+                        <Link to={`/products/${getProductId(product)}`}>Details</Link>
+                        <button type="button" disabled={product.stock <= 0} onClick={() => handleAddToCart(getProductId(product))}>
                           {product.stock <= 0 ? 'Out' : 'Add'}
                         </button>
                       </div>

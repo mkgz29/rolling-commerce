@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { PackageCheck, ShieldCheck, ShoppingCart, Sparkles, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
-import Loader from "../components/Loader";
+import Loader from "../components/loader";
 import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_FALLBACK, getProductImage } from "../utils/productImage";
 import "../styles/cart.css";
@@ -74,15 +75,24 @@ function Cart() {
     navigate("/products");
   };
 
+  const handleBuildPc = () => {
+    navigate("/build-your-pc");
+  };
+
   if (!isReady) return <Loader />;
 
   return (
     <div className="container py-5 mt-5 cart-page">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="cart-hero d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
         <div>
-          <h1 className="fw-bold cart-title">Mi carrito</h1>
-          <p className="text-muted mb-0">
-            Resumen de tus componentes gaming y accesorios seleccionados.
+          <span className="cart-eyebrow">
+            <ShoppingCart size={16} aria-hidden="true" />
+            Carrito de compra
+          </span>
+          <h1 className="fw-bold cart-title">Tu setup está casi listo</h1>
+          <p className="cart-subtitle mb-0">
+            Revisa tus componentes antes de continuar con la compra. Puedes ajustar cantidades,
+            quitar productos o seguir explorando el catálogo.
           </p>
         </div>
         <button
@@ -104,18 +114,24 @@ function Cart() {
       <div className="row g-4">
         <div className="col-lg-8">
           {cartItems.length === 0 ? (
-            <div className="cart-card empty-cart-card text-center py-5">
-              <h4 className="mb-3">Tu carrito está vacío</h4>
-              <p className="text-muted mb-4">
-                Agrega componentes o consolas para empezar tu compra.
+            <div className="cart-card empty-cart-card text-center">
+              <div className="empty-cart-icon" aria-hidden="true">
+                <Sparkles size={34} />
+              </div>
+              <span className="cart-eyebrow justify-content-center">Sin productos seleccionados</span>
+              <h2>Tu próxima actualización empieza acá</h2>
+              <p>
+                Explora componentes, accesorios y hardware gaming para preparar tu compra con una
+                experiencia rápida y segura.
               </p>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleBrowseProducts}
-              >
-                Ver productos
-              </button>
+              <div className="empty-cart-actions">
+                <button type="button" className="btn btn-primary" onClick={handleBrowseProducts}>
+                  Explorar productos
+                </button>
+                <button type="button" className="btn btn-outline-light" onClick={handleBuildPc}>
+                  Armar mi PC
+                </button>
+              </div>
             </div>
           ) : (
             cartItems.map((item) => {
@@ -126,9 +142,7 @@ function Cart() {
                 description: item.description || "",
               };
 
-              const itemImage = product.image
-                ? product.image
-                : getProductImage(product);
+              const itemImage = product.image ? product.image : getProductImage(product);
               const lineTotal = item.price * item.quantity;
               const itemId = product._id || item.productId;
 
@@ -136,15 +150,18 @@ function Cart() {
                 <div className="cart-card mb-4" key={itemId}>
                   <div className="row g-3 align-items-center">
                     <div className="col-12 col-md-3 text-center">
-                      <img
-                        src={itemImage || PRODUCT_IMAGE_FALLBACK}
-                        alt={product.name}
-                        className="cart-image img-fluid"
-                      />
+                      <div className="cart-image-frame">
+                        <img
+                          src={itemImage || PRODUCT_IMAGE_FALLBACK}
+                          alt={product.name}
+                          className="cart-image img-fluid"
+                        />
+                      </div>
                     </div>
 
                     <div className="col-12 col-md-6">
-                      <h5 className="mb-2">{product.name}</h5>
+                      <span className="cart-item-kicker">Producto seleccionado</span>
+                      <h5 className="mb-2 cart-item-title">{product.name}</h5>
                       <p className="text-muted cart-item-description">
                         {product.description || "Hardware y accesorios gaming."}
                       </p>
@@ -154,20 +171,16 @@ function Cart() {
                           <button
                             type="button"
                             className="quantity-control-btn"
-                            onClick={() =>
-                              handleQuantityChange(itemId, item.quantity - 1)
-                            }
+                            onClick={() => handleQuantityChange(itemId, item.quantity - 1)}
                             disabled={isPending(`qty-${itemId}`)}
                           >
-                            −
+                            -
                           </button>
                           <span>{item.quantity}</span>
                           <button
                             type="button"
                             className="quantity-control-btn"
-                            onClick={() =>
-                              handleQuantityChange(itemId, item.quantity + 1)
-                            }
+                            onClick={() => handleQuantityChange(itemId, item.quantity + 1)}
                             disabled={isPending(`qty-${itemId}`)}
                           >
                             +
@@ -187,12 +200,9 @@ function Cart() {
 
                     <div className="col-12 col-md-3 text-md-end">
                       <div className="cart-price-info">
-                        <span className="text-muted d-block mb-1">
-                          Unidad {formatPrice(item.price)}
-                        </span>
-                        <h4 className="fw-bold mb-0">
-                          {formatPrice(lineTotal)}
-                        </h4>
+                        <span className="text-muted d-block mb-1">Unidad {formatPrice(item.price)}</span>
+                        <small>Subtotal</small>
+                        <h4 className="fw-bold mb-0">{formatPrice(lineTotal)}</h4>
                       </div>
                     </div>
                   </div>
@@ -204,25 +214,40 @@ function Cart() {
 
         <div className="col-lg-4">
           <div className="summary-card cart-summary-card">
-            <h4 className="mb-4">Resumen de compra</h4>
+            <div className="cart-summary-heading">
+              <span>
+                <PackageCheck size={18} aria-hidden="true" />
+                Resumen
+              </span>
+              <h4>Orden lista para revisar</h4>
+              <p>Confirma cantidades y continúa al checkout cuando todo esté correcto.</p>
+            </div>
 
-            <div className="d-flex justify-content-between mb-2">
+            <div className="summary-row">
               <span>Productos</span>
               <strong>{cartItems.length}</strong>
             </div>
 
-            <div className="d-flex justify-content-between mb-4">
+            <div className="summary-row">
               <span>Cantidad total</span>
               <strong>{totalQuantity}</strong>
             </div>
 
-            <hr />
+            <div className="summary-benefits">
+              <span>
+                <ShieldCheck size={15} aria-hidden="true" />
+                Secure checkout
+              </span>
+              <span>
+                <Truck size={15} aria-hidden="true" />
+                Fast delivery
+              </span>
+            </div>
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <p className="text-muted mb-1">Total estimado</p>
-                <h3 className="cart-total">{formatPrice(cart.total)}</h3>
-              </div>
+            <div className="summary-total-block">
+              <p className="mb-1">Total estimado</p>
+              <h3 className="cart-total">{formatPrice(cart.total)}</h3>
+              <small>Impuestos y envío calculados en checkout.</small>
             </div>
 
             <button
@@ -234,12 +259,8 @@ function Cart() {
               Iniciar compra
             </button>
 
-            <button
-              type="button"
-              className="btn btn-outline-light w-100"
-              onClick={handleBrowseProducts}
-            >
-              Ver más productos
+            <button type="button" className="btn btn-outline-light w-100" onClick={handleBrowseProducts}>
+              Seguir explorando
             </button>
           </div>
         </div>

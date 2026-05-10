@@ -1,8 +1,109 @@
 import Product from "../models/products.js";
 import mongoose from "mongoose";
 
+const BUILD_PC_CATEGORIES = new Set([
+  "processors",
+  "graphics-cards",
+  "ram",
+  "storage",
+  "power-supplies",
+  "cases",
+]);
+
+const normalizeText = (value = "") =>
+  String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const CATEGORY_ALIASES = new Map([
+  ["procesador", "processors"],
+  ["procesadores", "processors"],
+  ["cpu", "processors"],
+  ["processor", "processors"],
+  ["processors", "processors"],
+  ["placa de video", "graphics-cards"],
+  ["placas de video", "graphics-cards"],
+  ["gpu", "graphics-cards"],
+  ["tarjeta grafica", "graphics-cards"],
+  ["tarjetas graficas", "graphics-cards"],
+  ["graphics card", "graphics-cards"],
+  ["graphics-cards", "graphics-cards"],
+  ["ram", "ram"],
+  ["memoria ram", "ram"],
+  ["memory", "ram"],
+  ["disco", "storage"],
+  ["ssd", "storage"],
+  ["hdd", "storage"],
+  ["almacenamiento", "storage"],
+  ["storage", "storage"],
+  ["nvme", "storage"],
+  ["fuente", "power-supplies"],
+  ["fuentes", "power-supplies"],
+  ["psu", "power-supplies"],
+  ["power supply", "power-supplies"],
+  ["power-supplies", "power-supplies"],
+  ["gabinete", "cases"],
+  ["gabinetes", "cases"],
+  ["case", "cases"],
+  ["cases", "cases"],
+  ["chasis", "cases"],
+  ["chassis", "cases"],
+]);
+
+const normalizeCategory = (category) => {
+  const normalized = normalizeText(category);
+
+  if (BUILD_PC_CATEGORIES.has(normalized)) {
+    return normalized;
+  }
+
+  return CATEGORY_ALIASES.get(normalized) || category.trim();
+};
+
+const parseBoolean = (value, defaultValue = true) => {
+  if (value === undefined || value === null || value === "") return defaultValue;
+  if (typeof value === "boolean") return value;
+  return ["true", "1", "yes", "on"].includes(String(value).toLowerCase());
+};
+
+const parseSpecs = (specs) => {
+  if (!specs) return [];
+  if (Array.isArray(specs)) return specs.map((item) => String(item).trim()).filter(Boolean);
+
+  if (typeof specs === "string") {
+    try {
+      const parsedSpecs = JSON.parse(specs);
+      if (Array.isArray(parsedSpecs)) {
+        return parsedSpecs.map((item) => String(item).trim()).filter(Boolean);
+      }
+    } catch {
+      return specs
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+};
+
 const validateProductData = (data) => {
-  const { name, price, description, image, images = [], category, stock } = data;
+  const {
+    name,
+    price,
+    description,
+    image,
+    imageUrl,
+    publicId,
+    images = [],
+    category,
+    brand,
+    specs,
+    stock,
+    isActive,
+  } = data;
   const parsedStock = Number(stock);
 
   if (!name || !name.trim()) {
@@ -17,7 +118,7 @@ const validateProductData = (data) => {
     throw new Error("Product description is required");
   }
 
-  if (!image?.trim() && (!Array.isArray(images) || images.length === 0)) {
+  if (!image?.trim() && !imageUrl?.trim() && (!Array.isArray(images) || images.length === 0)) {
     throw new Error("At least one product image is required");
   }
 
@@ -26,17 +127,27 @@ const validateProductData = (data) => {
   }
 
   const normalizedImages = images.map((item) => {
-    if (!item?.url?.trim() || !item?.public_id?.trim()) {
+    const itemPublicId = item?.public_id || item?.publicId;
+
+    if (!item?.url?.trim() || !itemPublicId?.trim()) {
       throw new Error("Each product image must include url and public_id");
     }
 
     return {
       url: item.url.trim(),
-      public_id: item.public_id.trim(),
+      public_id: itemPublicId.trim(),
+      publicId: itemPublicId.trim(),
     };
   });
 
-  const primaryImage = image?.trim() || normalizedImages[0]?.url;
+  const primaryImage = imageUrl?.trim() || image?.trim() || normalizedImages[0]?.url;
+  const primaryPublicId = publicId?.trim() || normalizedImages[0]?.public_id || "";
+  const finalImages =
+    normalizedImages.length > 0
+      ? normalizedImages
+      : primaryPublicId
+        ? [{ url: primaryImage, public_id: primaryPublicId, publicId: primaryPublicId }]
+        : [];
 
   if (!primaryImage) {
     throw new Error("Product image URL is required");
@@ -61,9 +172,14 @@ const validateProductData = (data) => {
     price: parseFloat(price),
     description: description.trim(),
     image: primaryImage,
-    images: normalizedImages,
-    category: category.trim(),
+    imageUrl: primaryImage,
+    publicId: primaryPublicId,
+    images: finalImages,
+    category: normalizeCategory(category),
+    brand: brand?.trim() || "",
+    specs: parseSpecs(specs),
     stock: parsedStock,
+    isActive: parseBoolean(isActive, true),
   };
 };
 
@@ -77,10 +193,10 @@ const createProduct = async (productData) => {
 };
 
 const getProducts = async ({ category = null, search = null } = {}) => {
-  const filter = {};
+  const filter = { isActive: { $ne: false } };
 
   if (category && category.trim()) {
-    filter.category = category.trim();
+    filter.category = normalizeCategory(category);
   }
 
   if (search && search.trim()) {
@@ -102,7 +218,7 @@ const getProductById = async (productId) => {
 
   const product = await Product.findById(productId);
 
-  if (!product) {
+  if (!product || product.isActive === false) {
     throw new Error("Product not found");
   }
 
@@ -110,7 +226,7 @@ const getProductById = async (productId) => {
 };
 
 const getFeaturedProducts = async (limit = 6) => {
-  const products = await Product.find()
+  const products = await Product.find({ isActive: { $ne: false } })
     .sort({ rating: -1, numReviews: -1 })
     .limit(limit);
 
@@ -127,9 +243,14 @@ const updateProduct = async (productId, updateData) => {
     price: updateData.price,
     description: updateData.description,
     image: updateData.image,
+    imageUrl: updateData.imageUrl,
+    publicId: updateData.publicId,
     images: updateData.images,
     category: updateData.category,
+    brand: updateData.brand,
+    specs: updateData.specs,
     stock: updateData.stock,
+    isActive: updateData.isActive,
   });
 
   const product = await Product.findByIdAndUpdate(
