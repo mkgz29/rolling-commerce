@@ -1,5 +1,11 @@
+import { MercadoPagoComfig, Preference } from "mercadopago";
 import mongoose from "mongoose";
 import Product from "../models/products.js";
+
+
+const client = new MercadoPagoComfig({
+  access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN,
+});
 
 const sanitizeText = (value = "", maxLength = 120) =>
   String(value)
@@ -103,27 +109,35 @@ const createMercadoPagoPreference = async ({ items = [], checkoutData = {} }) =>
 
   const total = Number(preferenceItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
 
-  return {
-    checkoutUrl: null,
-    message: "Mercado Pago integration pending",
-    preference: {
-      items: preferenceItems,
-      payer: {
-        name: sanitizedCheckoutData.fullName,
-        email: sanitizedCheckoutData.email,
-        phone: sanitizedCheckoutData.phone,
-      },
-      shipping: {
-        country: sanitizedCheckoutData.country,
-        state: sanitizedCheckoutData.state,
-        city: sanitizedCheckoutData.city,
-        zip: sanitizedCheckoutData.zip,
-        address: sanitizedCheckoutData.address,
-        delivery: sanitizedCheckoutData.delivery,
-      },
-      total,
+  const preference = new Preference(client);
+
+const response = await preference.create({
+  body: {
+    items: preferenceItems.map((item) => ({
+      title: item.title,
+      quantity: item.quantity,
+      unit_price: Number(item.unitPrice),
+      currency_id: "ARS",
+    })),
+
+    payer: {
+      name: sanitizedCheckoutData.fullName,
+      email: sanitizedCheckoutData.email,
     },
-  };
+
+    back_urls: {
+      success: "http://localhost:5173/payment-success",
+      failure: "http://localhost:5173/payment-failure",
+      pending: "http://localhost:5173/payment-pending",
+    },
+
+    auto_return: "Aprobado",
+  },
+});
+
+return {
+  checkoutUrl: response.init_point,
+};
 };
 
 export { createMercadoPagoPreference };
