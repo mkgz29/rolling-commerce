@@ -6,19 +6,19 @@
           <div className="col-xl-7">
             <div className="text-center mb-4 newsletter-copy">
               <h2 className="split-heading">
-                <span className="title-accent">Stay</span>
-                <span className="title-main">updated</span>
+                <span className="title-accent">Mantenete</span>
+                <span className="title-main">al día</span>
               </h2>
-              <p className="text-muted mb-0">Receive new products, offers and ecommerce news.</p>
+              <p className="text-muted mb-0">Recibí novedades, ofertas y nuevos productos para tu PC.</p>
             </div>
 
             <form className="row g-2 g-sm-3 justify-content-center">
               <div className="col-12 col-md-8">
-                <input type="email" className="form-control form-control-lg" placeholder="Enter your email" />
+                <input type="email" className="form-control form-control-lg" placeholder="Ingresá tu email" />
               </div>
               <div className="col-12 col-md-auto">
                 <button type="submit" className="btn btn-primary btn-lg w-100">
-                  Subscribe
+                  Suscribirme
                 </button>
               </div>
             </form>

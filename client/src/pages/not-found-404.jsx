@@ -6,7 +6,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
  useEffect(() => {
-    document.title = "Page Not Found 404";
+    document.title = "Página no encontrada 404";
   }, []);
 
 
@@ -37,7 +37,7 @@ export default function NotFound() {
           transition={{ delay: 0.4 }}
           style={styles.title}
         >
-          Page Not Found
+          Página no encontrada
         </motion.h1>
 
         <motion.p
@@ -46,7 +46,7 @@ export default function NotFound() {
           transition={{ delay: 0.5 }}
           style={styles.subtitle}
         >
-          The page you're looking for doesn't exist or has been moved.
+          La página que estás buscando no existe o fue movida.
         </motion.p>
 
         <motion.div
@@ -61,7 +61,7 @@ export default function NotFound() {
             onClick={() => navigate("/")}
             style={styles.primaryBtn}
           >
-            Go Home
+            Ir al inicio
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -69,7 +69,7 @@ export default function NotFound() {
             onClick={() => navigate(-1)}
             style={styles.secondaryBtn}
           >
-            Go Back
+            Volver
           </motion.button>
         </motion.div>
       </motion.div>
@@ -138,25 +138,25 @@ const styles = {
   },
   primaryBtn: {
     padding: "14px 32px",
-    background: "linear-gradient(135deg, #7c3aed 0%, #d946ef 100%)",
-    border: "none",
+    background: "#0d6efd",
+    border: "1px solid #0d6efd",
     borderRadius: "12px",
     color: "#fff",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
-    letterSpacing: "0.5px",
+    boxShadow: "0 4px 20px rgba(13,110,253,0.28)",
+    letterSpacing: "0",
   },
   secondaryBtn: {
     padding: "14px 32px",
     background: "transparent",
-    border: "1px solid rgba(124,58,237,0.4)",
+    border: "1px solid rgba(131,216,255,0.3)",
     borderRadius: "12px",
-    color: "#a78bfa",
+    color: "#dff6ff",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
-    letterSpacing: "0.5px",
+    letterSpacing: "0",
   },
 };

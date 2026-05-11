@@ -115,7 +115,7 @@
   width: 1.55rem;
   height: 1.55rem;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 10px;
   background: rgba(0, 0, 0, 0.22);
   color: rgba(244, 247, 255, 0.72);
   font-size: 0.74rem;
@@ -246,14 +246,15 @@
 }
 
 .btn-primary-gradient {
-  background: linear-gradient(135deg, #42c4ff 0%, #8d5cff 100%);
-  border: none;
+  background: #0d6efd;
+  border: 1px solid #0d6efd;
   color: white;
-  transition: opacity 0.2s;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .btn-primary-gradient:hover {
-  opacity: 0.9;
+  background: #0b5ed7;
+  border-color: #0a58ca;
   color: white;
 }
 
@@ -280,7 +281,7 @@
 .build-summary-watts {
   flex: 0 0 auto;
   border: 1px solid rgba(255, 193, 7, 0.28);
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 0.25rem 0.55rem;
   background: rgba(255, 193, 7, 0.08);
   color: rgba(255, 224, 132, 0.9);
@@ -350,7 +351,7 @@
   height: 1.75rem;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border-radius: 10px;
   background: rgba(0, 0, 0, 0.18);
   color: rgba(244, 247, 255, 0.62);
   transition: all 0.2s ease;
@@ -474,7 +475,7 @@
 .build-summary-image span {
   width: 36px;
   height: 36px;
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.08);
 }
 

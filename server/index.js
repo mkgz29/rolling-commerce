@@ -1,6 +1,6 @@
-﻿import express from "express";
+import "dotenv/config";
+import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
@@ -10,11 +10,13 @@ import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
-
-dotenv.config();
+import { configureCloudinary, getMissingCloudinaryEnvVars } from "./src/config/cloudinary.js";
 
 const requiredEnvVars = ["MONGO_URI", "JWT_SECRET"];
-const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]?.trim());
+const missingEnvVars = [
+  ...requiredEnvVars.filter((envVar) => !process.env[envVar]?.trim()),
+  ...getMissingCloudinaryEnvVars(),
+];
 
 if (missingEnvVars.length > 0) {
   console.error(
@@ -24,9 +26,10 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
+configureCloudinary();
+
 const app = express();
 
-// middlewares
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -48,10 +51,10 @@ const corsOptions = {
   },
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
@@ -61,12 +64,10 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/products", productRoutes);
 
-// ruta base
 app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-// Error handling middlewares
 app.use(notFound);
 app.use(errorHandler);
 

@@ -37,10 +37,18 @@ export const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 401 };
   }
 
+  if (err.code === "CLOUDINARY_CONFIG_MISSING") {
+    error = {
+      message: err.message,
+      statusCode: err.statusCode || 500,
+      exposeStack: false,
+    };
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     message: error.message || "Server Error",
-    error: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    error: process.env.NODE_ENV === "development" && error.exposeStack !== false ? err.stack : undefined,
   });
 };
 

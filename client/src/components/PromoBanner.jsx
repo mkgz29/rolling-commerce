@@ -7,16 +7,16 @@ function PromoBanner() {
         <div className="row align-items-center gx-4 gy-3">
           <div className="col-lg-8 promo-content">
             <h2 className="text-white split-heading">
-              <span className="title-accent">Upgrade</span>
-              <span className="title-main">your setup today</span>
+              <span className="title-accent">Mejorá</span>
+              <span className="title-main">tu PC hoy</span>
             </h2>
             <p className="text-white-50 mb-0">
-              Exclusive deals on selected tech products. Save more on premium gear before the offer ends.
+              Ofertas especiales en hardware seleccionado. Aprovechá componentes premium antes de que termine la promo.
             </p>
           </div>
           <div className="col-lg-4 text-lg-end">
             <Link to="/products" className="btn btn-light btn-lg">
-              Explore Deals
+              Ver ofertas
             </Link>
           </div>
         </div>

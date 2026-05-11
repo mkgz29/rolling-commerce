@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import Loader from "../components/loader";
 import { formatPrice } from "../utils/formatPrice";
-import { PRODUCT_IMAGE_FALLBACK, getProductImage } from "../utils/productImage";
+import { getProductImage, getProductImageFallback } from "../utils/productImage";
 import "../styles/cart.css";
 
 function Cart() {
@@ -37,7 +37,7 @@ function Cart() {
         await updateItem(productId, quantity);
       }
     } catch (err) {
-      console.error("Cart update failed:", err);
+      console.error("No se pudo actualizar el carrito:", err);
     } finally {
       setPending(`qty-${productId}`, false);
     }
@@ -49,7 +49,7 @@ function Cart() {
     try {
       await removeItem(productId);
     } catch (err) {
-      console.error("Remove item failed:", err);
+      console.error("No se pudo quitar el producto:", err);
     } finally {
       setPending(`remove-${productId}`, false);
     }
@@ -61,7 +61,7 @@ function Cart() {
     try {
       await clearCart();
     } catch (err) {
-      console.error("Clear cart failed:", err);
+      console.error("No se pudo vaciar el carrito:", err);
     } finally {
       setPending("clear", false);
     }
@@ -89,9 +89,9 @@ function Cart() {
             <ShoppingCart size={16} aria-hidden="true" />
             Carrito de compra
           </span>
-          <h1 className="fw-bold cart-title">Tu setup está casi listo</h1>
+          <h1 className="fw-bold cart-title">Tu equipo está casi listo</h1>
           <p className="cart-subtitle mb-0">
-            Revisa tus componentes antes de continuar con la compra. Puedes ajustar cantidades,
+            Revisá tus componentes antes de continuar con la compra. Podés ajustar cantidades,
             quitar productos o seguir explorando el catálogo.
           </p>
         </div>
@@ -121,7 +121,7 @@ function Cart() {
               <span className="cart-eyebrow justify-content-center">Sin productos seleccionados</span>
               <h2>Tu próxima actualización empieza acá</h2>
               <p>
-                Explora componentes, accesorios y hardware gaming para preparar tu compra con una
+                Explorá componentes, accesorios y piezas gaming para preparar tu compra con una
                 experiencia rápida y segura.
               </p>
               <div className="empty-cart-actions">
@@ -142,7 +142,7 @@ function Cart() {
                 description: item.description || "",
               };
 
-              const itemImage = product.image ? product.image : getProductImage(product);
+              const itemImage = getProductImage(product);
               const lineTotal = item.price * item.quantity;
               const itemId = product._id || item.productId;
 
@@ -152,9 +152,15 @@ function Cart() {
                     <div className="col-12 col-md-3 text-center">
                       <div className="cart-image-frame">
                         <img
-                          src={itemImage || PRODUCT_IMAGE_FALLBACK}
+                          src={itemImage}
                           alt={product.name}
                           className="cart-image img-fluid"
+                          onError={(event) => {
+                            const fallbackImage = getProductImageFallback(product);
+                            if (event.currentTarget.src !== fallbackImage) {
+                              event.currentTarget.src = fallbackImage;
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -163,7 +169,7 @@ function Cart() {
                       <span className="cart-item-kicker">Producto seleccionado</span>
                       <h5 className="mb-2 cart-item-title">{product.name}</h5>
                       <p className="text-muted cart-item-description">
-                        {product.description || "Hardware y accesorios gaming."}
+                        {product.description || "Componentes y accesorios gaming."}
                       </p>
 
                       <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
@@ -220,7 +226,7 @@ function Cart() {
                 Resumen
               </span>
               <h4>Orden lista para revisar</h4>
-              <p>Confirma cantidades y continúa al checkout cuando todo esté correcto.</p>
+              <p>Confirmá cantidades y continuá al pago cuando todo esté correcto.</p>
             </div>
 
             <div className="summary-row">
@@ -236,18 +242,18 @@ function Cart() {
             <div className="summary-benefits">
               <span>
                 <ShieldCheck size={15} aria-hidden="true" />
-                Secure checkout
+                Compra segura
               </span>
               <span>
                 <Truck size={15} aria-hidden="true" />
-                Fast delivery
+                Entrega rápida
               </span>
             </div>
 
             <div className="summary-total-block">
               <p className="mb-1">Total estimado</p>
               <h3 className="cart-total">{formatPrice(cart.total)}</h3>
-              <small>Impuestos y envío calculados en checkout.</small>
+              <small>Impuestos y envío calculados al finalizar la compra.</small>
             </div>
 
             <button

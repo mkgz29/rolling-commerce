@@ -7,7 +7,7 @@ export default function ProductSpecs({ specs = [] }) {
 
   return (
     <section className="product-specs">
-      <h2>Key features</h2>
+      <h2>Características clave</h2>
       <ul>
         {specs.map((spec) => (
           <li key={spec}>{spec}</li>

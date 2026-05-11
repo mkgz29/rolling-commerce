@@ -9,7 +9,13 @@
 
 import mongoose from "mongoose";
 import Cart from "../models/cart.js";
-import { createOrder, getOrderById, getOrdersByUserId, updateOrderStatus } from "../services/orderService.js";
+import {
+  createOrder,
+  getAllOrders,
+  getOrderById,
+  getOrdersByUserId,
+  updateOrderStatus,
+} from "../services/orderService.js";
 
 // Crea una orden a partir del carrito del usuario logueado.
 // Copia los items y precios del carrito, calcula el total y vacía el carrito.
@@ -39,7 +45,10 @@ export const getOrdersController = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const orders = await getOrdersByUserId(req.user._id);
+    const orders = req.user.role === "admin"
+      ? await getAllOrders({ sortBy: "-createdAt" })
+      : await getOrdersByUserId(req.user._id);
+
     res.status(200).json(orders);
   } catch (error) {
     next(error);

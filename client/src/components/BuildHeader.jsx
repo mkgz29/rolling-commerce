@@ -49,7 +49,7 @@ const BuildHeader = ({
         </div>
       </div>
       <p className="text-secondary mb-0">
-        {subtitle || `${resultCount} resultados encontrados para tu configuracion actual.`}
+        {subtitle || `${resultCount} resultados encontrados para tu configuración actual.`}
       </p>
     </header>
   );

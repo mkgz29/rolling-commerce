@@ -49,7 +49,7 @@ const STEP_COPY = {
   },
   cases: {
     title: 'Elegí tu gabinete',
-    subtitle: 'Cerrá el setup con el formato y flujo de aire adecuados.',
+    subtitle: 'Cerrá el equipo con el formato y flujo de aire adecuados.',
   },
 };
 
@@ -169,7 +169,7 @@ const BuildYourPc = () => {
 
       navigate(nextPath);
     } catch (requestError) {
-      setBuildFeedback(requestError.message || 'No se pudo agregar el ensamble al carrito.');
+      setBuildFeedback(requestError.message || 'No se pudo agregar el armado al carrito.');
     } finally {
       setCartPending(false);
     }
@@ -184,7 +184,7 @@ const BuildYourPc = () => {
 
       window.localStorage.setItem(BUILD_STORAGE_KEY, JSON.stringify(selectedComponents));
     } catch {
-      // Persistencia no critica: si localStorage falla, el armado sigue funcionando en memoria.
+      // Persistencia no crítica: si localStorage falla, el armado sigue funcionando en memoria.
     }
   }, [selectedComponents]);
 
@@ -202,7 +202,7 @@ const BuildYourPc = () => {
       } catch (requestError) {
         if (active) {
           setCatalogProducts([]);
-          setError(requestError.message || 'No se pudo cargar el catalogo.');
+          setError(requestError.message || 'No se pudo cargar el catálogo.');
         }
       } finally {
         if (active) {
@@ -261,9 +261,9 @@ const BuildYourPc = () => {
   const selectedProductForActiveCategory = selectedComponents[activeCategory];
   const selectedProductIdForActiveCategory = getProductId(selectedProductForActiveCategory);
   const hasProductsForCategory = categoryProducts.length > 0;
-  const emptyMessage = `No hay productos para ${activeCategoryLabel?.toLowerCase() || 'esta categoria'}.`;
+  const emptyMessage = `No hay productos para ${activeCategoryLabel?.toLowerCase() || 'esta categoría'}.`;
   const catalogHint = uncategorizedCount > 0
-    ? `${uncategorizedCount} productos del catalogo no coinciden con categorias de armado.`
+    ? `${uncategorizedCount} productos del catálogo no coinciden con categorías de armado.`
     : '';
 
   return (
@@ -303,7 +303,7 @@ const BuildYourPc = () => {
               onSortChange={setSortOrder}
               title={activeStepCopy.title}
               subtitle={activeStepCopy.subtitle}
-              stepLabel={`Paso ${activeStepNumber} de ${BUILD_PC_CATEGORIES.length} · ${selectedCount} / ${BUILD_PC_CATEGORIES.length} componentes`}
+              stepLabel={`Paso ${activeStepNumber} de ${BUILD_PC_CATEGORIES.length} - ${selectedCount} / ${BUILD_PC_CATEGORIES.length} componentes`}
             />
 
             <div className="build-progress mb-4" aria-label="Progreso del armado">
@@ -331,7 +331,7 @@ const BuildYourPc = () => {
             {!loading && !error && !hasProductsForCategory && (
               <div className="home-state-panel mb-4">
                 <div className="state-copy">
-                  <p className="state-eyebrow">Categoria sin productos</p>
+                  <p className="state-eyebrow">Categoría sin productos</p>
                   <h3>{emptyMessage}</h3>
                   {catalogHint && <p>{catalogHint}</p>}
                 </div>
@@ -362,7 +362,7 @@ const BuildYourPc = () => {
 
             <div className="text-center mt-5 mb-5">
               <button className="btn btn-outline-secondary px-5 py-2" disabled>
-                CARGAR MAS PRODUCTOS
+                CARGAR MÁS PRODUCTOS
               </button>
             </div>
           </>

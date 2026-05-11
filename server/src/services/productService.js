@@ -238,14 +238,36 @@ const updateProduct = async (productId, updateData) => {
     throw new Error("Invalid product ID format");
   }
 
+  const existingProduct = await Product.findById(productId);
+
+  if (!existingProduct) {
+    throw new Error("Product not found");
+  }
+
+  const hasReplacementImage =
+    Boolean(updateData.image?.trim()) ||
+    Boolean(updateData.imageUrl?.trim()) ||
+    (Array.isArray(updateData.images) && updateData.images.length > 0);
+
+  const imageData = hasReplacementImage
+    ? {
+        image: updateData.image,
+        imageUrl: updateData.imageUrl,
+        publicId: updateData.publicId,
+        images: updateData.images,
+      }
+    : {
+        image: existingProduct.image,
+        imageUrl: existingProduct.imageUrl,
+        publicId: existingProduct.publicId,
+        images: existingProduct.images,
+      };
+
   const validatedData = validateProductData({
     name: updateData.name,
     price: updateData.price,
     description: updateData.description,
-    image: updateData.image,
-    imageUrl: updateData.imageUrl,
-    publicId: updateData.publicId,
-    images: updateData.images,
+    ...imageData,
     category: updateData.category,
     brand: updateData.brand,
     specs: updateData.specs,
@@ -253,17 +275,10 @@ const updateProduct = async (productId, updateData) => {
     isActive: updateData.isActive,
   });
 
-  const product = await Product.findByIdAndUpdate(
-    productId,
-    validatedData,
-    { new: true, runValidators: true }
-  );
+  Object.assign(existingProduct, validatedData);
+  await existingProduct.save();
 
-  if (!product) {
-    throw new Error("Product not found");
-  }
-
-  return product;
+  return existingProduct;
 };
 
 const deleteProduct = async (productId) => {

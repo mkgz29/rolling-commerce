@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { formatPrice } from '../utils/formatPrice';
-import { PRODUCT_IMAGE_FALLBACK, getProductImage } from '../utils/productImage';
+import { getProductImage, getProductImageFallback } from '../utils/productImage';
 
 const ProductBuildCard = ({ product, isSelected = false, onAddToBuild }) => {
   const productId = product?._id || product?.id;
@@ -12,8 +12,9 @@ const ProductBuildCard = ({ product, isSelected = false, onAddToBuild }) => {
   const description = product?.desc || product?.description || category || 'Sin descripcion disponible';
   const stock = Number(product?.stock || 0);
   const productImage = getProductImage(product);
+  const fallbackImage = getProductImageFallback(product);
   const [failedImage, setFailedImage] = useState('');
-  const imageSrc = failedImage === productImage ? PRODUCT_IMAGE_FALLBACK : productImage;
+  const imageSrc = failedImage === productImage ? fallbackImage : productImage;
 
   return (
     <div className="col-12 col-md-6 col-xl-4">
@@ -25,7 +26,7 @@ const ProductBuildCard = ({ product, isSelected = false, onAddToBuild }) => {
             className="product-build-image"
             loading="lazy"
             onError={() => {
-              if (imageSrc !== PRODUCT_IMAGE_FALLBACK) {
+              if (imageSrc !== fallbackImage) {
                 setFailedImage(productImage);
               }
             }}

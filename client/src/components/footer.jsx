@@ -1,23 +1,24 @@
 import { ArrowUp, BriefcaseBusiness, Camera, GitBranch, Mail, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import './footer.css';
 
 const productLinks = [
-  { label: 'Home', to: '/' },
-  { label: 'Products', to: '/products' },
-  { label: 'Build Your PC', to: '/build-your-pc' },
-  { label: 'Cart', to: '/cart' },
+  { label: 'Inicio', to: '/' },
+  { label: 'Productos', to: '/products' },
+  { label: 'Armá tu PC', to: '/build-your-pc' },
+  { label: 'Carrito', to: '/cart' },
 ];
 
 const companyLinks = [
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
-  { label: 'Support', href: '#support' },
+  { label: 'Nosotros', href: '#about' },
+  { label: 'Contacto', href: '#contact' },
+  { label: 'Soporte', href: '#support' },
 ];
 
 const legalLinks = [
-  { label: 'Privacy Policy', href: '#privacy' },
-  { label: 'Terms of Service', href: '#terms' },
+  { label: 'Privacidad', href: '#privacy' },
+  { label: 'Términos y condiciones', href: '#terms' },
 ];
 
 const socialLinks = [
@@ -40,15 +41,15 @@ export default function Footer() {
       <div className="container footer-container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="footer-logo" aria-label="Tech Core home">
-              <span className="footer-logo-mark">TC</span>
+            <Link to="/" className="footer-logo" aria-label="Ir al inicio de Tech Core">
+              <img src={logo} alt="Tech Core" className="footer-logo-image" />
               <span>
                 <span className="footer-brand-name">Tech Core</span>
-                <span className="footer-brand-tagline">Tech commerce redefined</span>
+                <span className="footer-brand-tagline">Hardware premium para tu PC</span>
               </span>
             </Link>
             <p>
-              Hardware, gaming gear and custom PC essentials with a checkout experience built for speed.
+              Hardware, periféricos gaming y componentes para armar una PC potente con una compra rápida y segura.
             </p>
             <a className="footer-email" href="mailto:support@techcore.com">
               <Mail size={17} aria-hidden="true" />
@@ -91,7 +92,7 @@ export default function Footer() {
 
           <div className="footer-column footer-social-column">
             <h3>Redes</h3>
-            <div className="footer-socials" aria-label="Social links">
+            <div className="footer-socials" aria-label="Redes sociales">
               {socialLinks.map((link) => {
                 const Icon = link.icon;
 
@@ -106,8 +107,8 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <small>&copy; {year} Tech Core. All rights reserved.</small>
-          <button className="footer-back-top" type="button" onClick={scrollToTop} aria-label="Back to top">
+          <small>&copy; {year} Tech Core. Todos los derechos reservados.</small>
+          <button className="footer-back-top" type="button" onClick={scrollToTop} aria-label="Volver arriba">
             <ArrowUp size={18} strokeWidth={2.2} aria-hidden="true" />
           </button>
         </div>

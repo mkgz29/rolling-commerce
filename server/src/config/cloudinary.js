@@ -7,7 +7,7 @@ const requiredCloudinaryEnvVars = [
 ];
 
 const getMissingCloudinaryEnvVars = () => {
-  return requiredCloudinaryEnvVars.filter((key) => !process.env[key]);
+  return requiredCloudinaryEnvVars.filter((key) => !process.env[key]?.trim());
 };
 
 const configureCloudinary = () => {
@@ -25,14 +25,24 @@ const validateCloudinaryConfig = () => {
   const missingEnvVars = getMissingCloudinaryEnvVars();
 
   if (missingEnvVars.length > 0) {
+    const missingList = missingEnvVars.join(", ");
     const error = new Error(
-      `Missing Cloudinary environment variables: ${missingEnvVars.join(", ")}`
+      `Cloudinary is not configured. Missing ${missingList}.`
     );
     error.statusCode = 500;
+    error.code = "CLOUDINARY_CONFIG_MISSING";
+    error.exposeStack = false;
+    error.missingEnvVars = missingEnvVars;
     throw error;
   }
 };
 
 configureCloudinary();
 
-export { cloudinary, configureCloudinary, validateCloudinaryConfig };
+export {
+  cloudinary,
+  configureCloudinary,
+  getMissingCloudinaryEnvVars,
+  requiredCloudinaryEnvVars,
+  validateCloudinaryConfig,
+};

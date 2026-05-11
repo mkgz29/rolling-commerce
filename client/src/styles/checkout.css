@@ -48,7 +48,7 @@
   flex: 1;
   min-width: 140px;
   border: 1px solid rgba(131, 216, 255, 0.12);
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 14px 16px;
   text-align: center;
   color: rgba(219, 233, 255, 0.72);
@@ -247,8 +247,8 @@
 }
 
 .shipping-option.btn-primary {
-  border-color: transparent;
-  background: linear-gradient(135deg, #42c4ff 0%, #8d5cff 100%);
+  border-color: #0d6efd;
+  background: #0d6efd;
 }
 
 @media (max-width: 991.98px) {

@@ -1,12 +1,22 @@
 import { CheckCircle, X } from 'lucide-react';
 import { formatPrice } from '../utils/formatPrice';
-import { getProductImage } from '../utils/productImage';
+import { getProductImage, getProductImageFallback } from '../utils/productImage';
 
 const getProductName = (product) => product?.name || product?.title || 'Producto sin nombre';
 
 const SelectedBuildItem = ({ category, product, onRemoveComponent }) => (
   <div className="selected-build-item">
-    <img src={getProductImage(product)} alt={getProductName(product)} className="selected-build-item-image" />
+    <img
+      src={getProductImage(product)}
+      alt={getProductName(product)}
+      className="selected-build-item-image"
+      onError={(event) => {
+        const fallbackImage = getProductImageFallback(product);
+        if (event.currentTarget.src !== fallbackImage) {
+          event.currentTarget.src = fallbackImage;
+        }
+      }}
+    />
     <div className="selected-build-item-copy">
       <span className="selected-build-item-category">{category.label}</span>
       <strong>{getProductName(product)}</strong>
@@ -41,7 +51,7 @@ const BuildSidebar = ({
     <aside className="ensambly-sidebar d-flex flex-column">
       <div className="p-4">
         <h5 className="fw-bold mb-1">COMPONENTES</h5>
-        <p className="text-secondary small">SELECCION DE HARDWARE</p>
+        <p className="text-secondary small">SELECCIÓN DE HARDWARE</p>
       </div>
 
       <nav className="nav flex-column flex-grow-1">
@@ -90,7 +100,7 @@ const BuildSidebar = ({
               />
             ))
           ) : (
-            <p className="build-summary-empty">Selecciona productos para empezar tu configuracion.</p>
+            <p className="build-summary-empty">Seleccioná productos para empezar tu configuración.</p>
           )}
         </div>
 

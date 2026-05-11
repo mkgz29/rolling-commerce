@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import loginRegisterBg from "../assets/loginregister.jpg";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -19,27 +20,28 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeat, setShowRepeat] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
     setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = "First name is required.";
-    if (!formData.lastName) newErrors.lastName = "Last name is required.";
-    if (!formData.email) newErrors.email = "Email is required.";
-    else if (!formData.email.includes("@")) newErrors.email = "Email must contain @.";
-    if (!formData.password) newErrors.password = "Password is required.";
-    else if (formData.password.length < 6) newErrors.password = "Minimum 6 characters.";
-    if (formData.password !== formData.repeatPassword)
-      newErrors.repeatPassword = "Passwords do not match.";
-    if (!formData.terms) newErrors.terms = "You must agree to the terms.";
+    if (!formData.firstName) newErrors.firstName = "Ingresá tu nombre.";
+    if (!formData.lastName) newErrors.lastName = "Ingresá tu apellido.";
+    if (!formData.email) newErrors.email = "Ingresá tu email.";
+    else if (!formData.email.includes("@")) newErrors.email = "El email debe contener @.";
+    if (!formData.password) newErrors.password = "Ingresá una contraseña.";
+    else if (formData.password.length < 6) newErrors.password = "Mínimo 6 caracteres.";
+    if (formData.password !== formData.repeatPassword) {
+      newErrors.repeatPassword = "Las contraseñas no coinciden.";
+    }
+    if (!formData.terms) newErrors.terms = "Debés aceptar los términos.";
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -57,11 +59,11 @@ export default function Register() {
 
       Swal.fire({
         icon: "success",
-        title: "Account Created!",
-        text: "You can now sign in.",
+        title: "Cuenta creada",
+        text: "Ya podés iniciar sesión.",
         background: "#0f0f1a",
         color: "#fff",
-        confirmButtonColor: "#7c3aed",
+        confirmButtonColor: "#0d6efd",
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
@@ -70,7 +72,7 @@ export default function Register() {
       setErrors({
         submit:
           submitError?.message ||
-          "Registration failed. Please check your data and try again.",
+          "No pudimos crear la cuenta. Revisá tus datos e intentá nuevamente.",
       });
     }
   };
@@ -78,8 +80,8 @@ export default function Register() {
   const inputStyle = (hasError) => ({
     width: "100%",
     padding: "12px 16px",
-    background: "rgba(124,58,237,0.05)",
-    border: `1px solid ${hasError ? "#d946ef" : "rgba(124,58,237,0.3)"}`,
+    background: "rgba(13,110,253,0.06)",
+    border: `1px solid ${hasError ? "#d946ef" : "rgba(13,110,253,0.34)"}`,
     borderRadius: "12px",
     color: "#fff",
     fontSize: "15px",
@@ -87,6 +89,16 @@ export default function Register() {
     transition: "all 0.3s ease",
     boxSizing: "border-box",
   });
+
+  const handleFocus = (event) => {
+    event.target.style.borderColor = "#0d6efd";
+    event.target.style.boxShadow = "0 0 0 4px rgba(13,110,253,0.16)";
+  };
+
+  const handleBlur = (event, hasError) => {
+    event.target.style.borderColor = hasError ? "#d946ef" : "rgba(13,110,253,0.34)";
+    event.target.style.boxShadow = "none";
+  };
 
   return (
     <div style={styles.page}>
@@ -106,69 +118,69 @@ export default function Register() {
           style={{ textAlign: "center", marginBottom: "32px" }}
         >
           <div style={styles.logoCircle}>TC</div>
-          <h1 style={styles.title}>Create Account</h1>
-          <p style={styles.subtitle}>Join the RollingCode community</p>
+          <h1 style={styles.title}>Crear cuenta</h1>
+          <p style={styles.subtitle}>Sumate a Tech Core</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} noValidate>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+          <div style={styles.nameGrid}>
             <div>
-              <label style={styles.label}>First Name</label>
+              <label style={styles.label}>Nombre</label>
               <input
                 type="text"
                 name="firstName"
-                placeholder="John"
+                placeholder="Juan"
                 value={formData.firstName}
                 onChange={handleChange}
                 style={inputStyle(errors.firstName)}
-                onFocus={(e) => { e.target.style.borderColor = "#7c3aed"; e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)"; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.firstName ? "#d946ef" : "rgba(124,58,237,0.3)"; e.target.style.boxShadow = "none"; }}
+                onFocus={handleFocus}
+                onBlur={(event) => handleBlur(event, errors.firstName)}
               />
               {errors.firstName && <p style={styles.error}>{errors.firstName}</p>}
             </div>
             <div>
-              <label style={styles.label}>Last Name</label>
+              <label style={styles.label}>Apellido</label>
               <input
                 type="text"
                 name="lastName"
-                placeholder="Doe"
+                placeholder="Pérez"
                 value={formData.lastName}
                 onChange={handleChange}
                 style={inputStyle(errors.lastName)}
-                onFocus={(e) => { e.target.style.borderColor = "#7c3aed"; e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)"; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.lastName ? "#d946ef" : "rgba(124,58,237,0.3)"; e.target.style.boxShadow = "none"; }}
+                onFocus={handleFocus}
+                onBlur={(event) => handleBlur(event, errors.lastName)}
               />
               {errors.lastName && <p style={styles.error}>{errors.lastName}</p>}
             </div>
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={styles.label}>Email</label>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Correo electrónico</label>
             <input
               type="email"
               name="email"
-              placeholder="your@email.com"
+              placeholder="tu@email.com"
               value={formData.email}
               onChange={handleChange}
               style={inputStyle(errors.email)}
-              onFocus={(e) => { e.target.style.borderColor = "#7c3aed"; e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)"; }}
-              onBlur={(e) => { e.target.style.borderColor = errors.email ? "#d946ef" : "rgba(124,58,237,0.3)"; e.target.style.boxShadow = "none"; }}
+              onFocus={handleFocus}
+              onBlur={(event) => handleBlur(event, errors.email)}
             />
             {errors.email && <p style={styles.error}>{errors.email}</p>}
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={styles.label}>Password</label>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Contraseña</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Min. 8 characters"
+                placeholder="Mínimo 6 caracteres"
                 value={formData.password}
                 onChange={handleChange}
                 style={{ ...inputStyle(errors.password), paddingRight: "48px" }}
-                onFocus={(e) => { e.target.style.borderColor = "#7c3aed"; e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)"; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.password ? "#d946ef" : "rgba(124,58,237,0.3)"; e.target.style.boxShadow = "none"; }}
+                onFocus={handleFocus}
+                onBlur={(event) => handleBlur(event, errors.password)}
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
                 {showPassword ? "ocultar" : "mostrar"}
@@ -177,18 +189,18 @@ export default function Register() {
             {errors.password && <p style={styles.error}>{errors.password}</p>}
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={styles.label}>Confirm Password</label>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Confirmar contraseña</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showRepeat ? "text" : "password"}
                 name="repeatPassword"
-                placeholder="Repeat your password"
+                placeholder="Repetí tu contraseña"
                 value={formData.repeatPassword}
                 onChange={handleChange}
                 style={{ ...inputStyle(errors.repeatPassword), paddingRight: "48px" }}
-                onFocus={(e) => { e.target.style.borderColor = "#7c3aed"; e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)"; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.repeatPassword ? "#d946ef" : "rgba(124,58,237,0.3)"; e.target.style.boxShadow = "none"; }}
+                onFocus={handleFocus}
+                onBlur={(event) => handleBlur(event, errors.repeatPassword)}
               />
               <button type="button" onClick={() => setShowRepeat(!showRepeat)} style={styles.eyeBtn}>
                 {showRepeat ? "ocultar" : "mostrar"}
@@ -197,20 +209,20 @@ export default function Register() {
             {errors.repeatPassword && <p style={styles.error}>{errors.repeatPassword}</p>}
           </div>
 
-          <div style={{ marginBottom: "24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+          <div style={styles.termsBlock}>
+            <label style={styles.termsLabel}>
               <input
                 type="checkbox"
                 name="terms"
                 checked={formData.terms}
                 onChange={handleChange}
-                style={{ width: "18px", height: "18px", accentColor: "#7c3aed", cursor: "pointer" }}
+                style={styles.checkbox}
               />
-              <span style={{ color: "#d1d5db", fontSize: "14px" }}>
-                I agree to the <Link to="/terms" style={{ color: "#a78bfa", textDecoration: "underline" }}>Terms and Conditions</Link>
+              <span>
+                Acepto los <Link to="/terms" style={styles.link}>términos y condiciones</Link>
               </span>
+            </label>
             {errors.terms && <p style={styles.error}>{errors.terms}</p>}
-                </div>
           </div>
 
           {(errors.submit || error) && (
@@ -226,11 +238,11 @@ export default function Register() {
             style={styles.submitBtn}
             disabled={loading}
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
           </motion.button>
 
           <p style={styles.linkText}>
-            Already have an account? <Link to="/login" style={styles.link}>Sign In</Link>
+            ¿Ya tenés cuenta? <Link to="/login" style={styles.link}>Ingresar</Link>
           </p>
         </form>
       </motion.div>
@@ -240,21 +252,24 @@ export default function Register() {
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #0a0a14 0%, #0f0f1a 50%, #0a0a14 100%)",
+    minHeight: "calc(100vh - 92px)",
+    backgroundImage: `linear-gradient(135deg, rgba(4, 8, 18, 0.54), rgba(4, 8, 18, 0.68)), url(${loginRegisterBg})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "40px 20px",
     position: "relative",
-    overflow: "hidden",
+    overflow: "auto",
   },
   bgGlow1: {
     position: "absolute",
     width: "500px",
     height: "500px",
     borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)",
+    background: "radial-gradient(circle, rgba(13,110,253,0.14) 0%, transparent 70%)",
     top: "-150px",
     right: "-150px",
     pointerEvents: "none",
@@ -270,22 +285,22 @@ const styles = {
     pointerEvents: "none",
   },
   card: {
-    background: "linear-gradient(135deg, rgba(20,20,35,0.95) 0%, rgba(10,10,20,0.95) 100%)",
+    background: "rgba(10, 14, 24, 0.86)",
     backdropFilter: "blur(20px)",
-    borderRadius: "24px",
+    borderRadius: "18px",
     padding: "48px 40px",
     width: "100%",
     maxWidth: "500px",
-    border: "1px solid rgba(124,58,237,0.2)",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.1)",
+    border: "1px solid rgba(131,216,255,0.18)",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(13,110,253,0.08)",
     position: "relative",
     zIndex: 1,
   },
   logoCircle: {
     width: "64px",
     height: "64px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #7c3aed 0%, #d946ef 100%)",
+    borderRadius: "14px",
+    background: "#0d6efd",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -293,21 +308,27 @@ const styles = {
     fontSize: "20px",
     fontWeight: "800",
     color: "#fff",
-    boxShadow: "0 0 30px rgba(124,58,237,0.4)",
+    boxShadow: "0 0 30px rgba(13,110,253,0.34)",
   },
   title: {
     color: "#fff",
     fontSize: "28px",
     fontWeight: "700",
     margin: "0 0 8px",
-    background: "linear-gradient(135deg, #fff 0%, #a78bfa 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
   },
   subtitle: {
-    color: "#6b7280",
+    color: "#aeb8c7",
     fontSize: "14px",
     margin: 0,
+  },
+  nameGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "16px",
+    marginBottom: "20px",
+  },
+  fieldGroup: {
+    marginBottom: "20px",
   },
   label: {
     display: "block",
@@ -323,38 +344,55 @@ const styles = {
     transform: "translateY(-50%)",
     background: "transparent",
     border: "none",
-    color: "#6b7280",
+    color: "#aeb8c7",
     cursor: "pointer",
-    fontSize: "18px",
+    fontSize: "14px",
     padding: "4px 8px",
   },
+  termsBlock: {
+    marginBottom: "24px",
+  },
+  termsLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    color: "#d1d5db",
+    cursor: "pointer",
+    fontSize: "14px",
+  },
+  checkbox: {
+    width: "18px",
+    height: "18px",
+    accentColor: "#0d6efd",
+    cursor: "pointer",
+  },
   error: {
-    color: "#d946ef",
+    color: "#ff7a9d",
     fontSize: "13px",
     margin: "6px 0 0",
   },
   submitBtn: {
     width: "100%",
     padding: "14px",
-    background: "linear-gradient(135deg, #7c3aed 0%, #d946ef 100%)",
-    border: "none",
+    background: "#0d6efd",
+    border: "1px solid #0d6efd",
     borderRadius: "12px",
     color: "#fff",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+    boxShadow: "0 4px 20px rgba(13,110,253,0.28)",
     marginBottom: "20px",
-    letterSpacing: "0.5px",
+    letterSpacing: "0",
   },
   linkText: {
     textAlign: "center",
-    color: "#6b7280",
+    color: "#aeb8c7",
     fontSize: "14px",
     margin: 0,
   },
   link: {
-    color: "#a78bfa",
+    color: "#8ec5ff",
     textDecoration: "none",
     fontWeight: "600",
   },

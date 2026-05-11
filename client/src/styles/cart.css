@@ -250,7 +250,7 @@
   justify-content: center;
   gap: 0.4rem;
   border: 1px solid rgba(131, 216, 255, 0.12);
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 0.55rem 0.6rem;
   background: rgba(255, 255, 255, 0.04);
   color: rgba(219, 233, 255, 0.78);

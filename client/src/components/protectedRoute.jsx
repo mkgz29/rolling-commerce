@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
   const location = useLocation();
 
   if (loading) {
-    return <p>Checking access...</p>;
+    return <p>Verificando acceso...</p>;
   }
 
   if (!isAuthenticated) {

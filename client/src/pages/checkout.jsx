@@ -5,7 +5,7 @@ import { useCart } from "../hooks/useCart";
 import { createMercadoPagoPreferenceRequest } from "../routes/paymentService";
 import Loader from "../components/loader";
 import { formatPrice } from "../utils/formatPrice";
-import { PRODUCT_IMAGE_FALLBACK } from "../utils/productImage";
+import { getProductImage, getProductImageFallback } from "../utils/productImage";
 import "../styles/checkout.css";
 
 const initialForm = {
@@ -79,7 +79,7 @@ const validateCheckoutForm = (form) => {
   }
 
   if (!form.agreeTerms) {
-    errors.agreeTerms = "Debes aceptar los términos para continuar.";
+    errors.agreeTerms = "Debés aceptar los términos para continuar.";
   }
 
   return errors;
@@ -194,7 +194,7 @@ function Checkout() {
       <div className="checkout-top mb-4">
         <span className="checkout-eyebrow">
           <ShieldCheck size={16} aria-hidden="true" />
-          Secure checkout
+          Compra segura
         </span>
         <h1 className="fw-bold mb-2">Finalizá tu compra</h1>
         <p>Confirmá tus datos de contacto y prepará el pago de forma segura.</p>
@@ -218,7 +218,7 @@ function Checkout() {
       {cartItems.length === 0 && (
         <div className="checkout-card checkout-empty mb-4">
           <h2>Tu carrito está vacío</h2>
-          <p>Agregá productos o armá una PC antes de iniciar el checkout.</p>
+          <p>Agregá productos o armá una PC antes de finalizar la compra.</p>
           <div className="d-flex flex-wrap gap-2">
             <button type="button" className="btn btn-primary" onClick={handleBackToShop}>
               Explorar productos
@@ -256,14 +256,14 @@ function Checkout() {
                     className={`btn ${form.delivery === "delivery" ? "btn-primary" : "btn-outline-secondary"} shipping-option`}
                     onClick={() => handleDeliveryChange("delivery")}
                   >
-                    Delivery
+                    Envío a domicilio
                   </button>
                   <button
                     type="button"
                     className={`btn ${form.delivery === "pickup" ? "btn-primary" : "btn-outline-secondary"} shipping-option`}
                     onClick={() => handleDeliveryChange("pickup")}
                   >
-                    Pick up
+                    Retiro en tienda
                   </button>
                 </div>
                 {fieldErrors.delivery && <p className="field-error">{fieldErrors.delivery}</p>}
@@ -276,7 +276,7 @@ function Checkout() {
                   {fieldErrors.fullName && <p className="field-error">{fieldErrors.fullName}</p>}
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label">Email *</label>
+                  <label className="form-label">Correo electrónico *</label>
                   <input type="email" name="email" value={form.email} onChange={handleInput} className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`} placeholder="brandon@example.com" />
                   {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
                 </div>
@@ -333,7 +333,7 @@ function Checkout() {
             <div className="checkout-section-heading">
               <div>
                 <h4>Revisá tu carrito</h4>
-                <p>El backend recalcula precios y stock antes de generar la preferencia.</p>
+                <p>El servidor recalcula precios y stock antes de generar la preferencia.</p>
               </div>
               <CreditCard size={24} aria-hidden="true" />
             </div>
@@ -349,7 +349,17 @@ function Checkout() {
 
                 return (
                   <div className="review-item d-flex align-items-center gap-3 mb-3" key={getCartItemProductId(item)}>
-                    <img src={product.image || PRODUCT_IMAGE_FALLBACK} alt={product.name} className="review-item-image" />
+                    <img
+                      src={getProductImage(product)}
+                      alt={product.name}
+                      className="review-item-image"
+                      onError={(event) => {
+                        const fallbackImage = getProductImageFallback(product);
+                        if (event.currentTarget.src !== fallbackImage) {
+                          event.currentTarget.src = fallbackImage;
+                        }
+                      }}
+                    />
                     <div className="flex-grow-1">
                       <h6 className="mb-1">{product.name}</h6>
                       <p className="mb-1">Cantidad: {item.quantity}</p>
@@ -389,7 +399,7 @@ function Checkout() {
 
             <div className="secure-note mt-4">
               <ShieldCheck size={17} aria-hidden="true" />
-              <small>Pago seguro. Tokens de Mercado Pago solo en backend.</small>
+              <small>Pago seguro. Tokens de Mercado Pago solo en servidor.</small>
             </div>
           </div>
         </div>

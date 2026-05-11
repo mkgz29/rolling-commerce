@@ -2,10 +2,12 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #f4f7ff;
   background: #060b16;
-  --btn-gradient: linear-gradient(135deg, #42c4ff 0%, #8d5cff 54%, #d85cff 100%);
-  --btn-gradient-hover: linear-gradient(135deg, #6bd5ff 0%, #9d72ff 52%, #e277ff 100%);
-  --btn-glow: 0 18px 44px rgba(66, 196, 255, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-  --btn-glow-hover: 0 22px 54px rgba(66, 196, 255, 0.24), 0 0 28px rgba(141, 92, 255, 0.16);
+  --btn-primary-bg: #0d6efd;
+  --btn-primary-bg-hover: #0b5ed7;
+  --btn-primary-border: #0d6efd;
+  --btn-primary-border-hover: #0a58ca;
+  --btn-glow: 0 14px 32px rgba(13, 110, 253, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  --btn-glow-hover: 0 18px 40px rgba(13, 110, 253, 0.28);
   --btn-border: rgba(131, 216, 255, 0.28);
   --btn-surface: rgba(255, 255, 255, 0.065);
   --btn-surface-hover: rgba(255, 255, 255, 0.105);
@@ -83,10 +85,11 @@ a.btn,
 .category-action,
 .state-action,
 .promo-primary {
-  border-radius: 999px !important;
+  border-radius: 12px !important;
   font-weight: 800 !important;
   letter-spacing: 0;
   min-height: 42px;
+  padding-inline: 1rem;
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -103,13 +106,16 @@ a.btn,
 
 .btn-primary,
 .btn-dark,
+.btn-primary-gradient,
+.btn-gradient,
+.primary-gradient,
 .product-action-primary,
 .catalog-search-row button,
 .catalog-card-actions button,
 .newsletter-form button,
 .promo-primary {
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background: var(--btn-gradient) !important;
+  border: 1px solid var(--btn-primary-border) !important;
+  background: var(--btn-primary-bg) !important;
   box-shadow: var(--btn-glow) !important;
   color: #ffffff !important;
 }
@@ -195,6 +201,12 @@ a.btn,
 .btn-primary:focus-visible,
 .btn-dark:hover,
 .btn-dark:focus-visible,
+.btn-primary-gradient:hover,
+.btn-primary-gradient:focus-visible,
+.btn-gradient:hover,
+.btn-gradient:focus-visible,
+.primary-gradient:hover,
+.primary-gradient:focus-visible,
 .product-action-primary:hover:not(:disabled),
 .product-action-primary:focus-visible,
 .catalog-search-row button:hover:not(:disabled),
@@ -205,7 +217,8 @@ a.btn,
 .newsletter-form button:focus-visible,
 .promo-primary:hover,
 .promo-primary:focus-visible {
-  background: var(--btn-gradient-hover) !important;
+  border-color: var(--btn-primary-border-hover) !important;
+  background: var(--btn-primary-bg-hover) !important;
   box-shadow: var(--btn-glow-hover) !important;
   color: #ffffff !important;
 }

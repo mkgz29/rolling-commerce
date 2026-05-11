@@ -26,7 +26,7 @@ function Home() {
       } catch (requestError) {
         if (active) {
           setProducts([]);
-          setProductsError(requestError.message || 'Products could not be loaded.');
+          setProductsError(requestError.message || 'No se pudieron cargar los productos.');
         }
       } finally {
         if (active) {

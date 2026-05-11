@@ -59,7 +59,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       body: body === undefined ? undefined : (isFormData ? body : JSON.stringify(body)),
     });
   } catch (error) {
-    throw new ApiError(`Could not reach API at ${API_BASE_URL}. Check that the backend is running.`, 0, {
+    throw new ApiError(`No se pudo conectar con la API en ${API_BASE_URL}. Verificá que el servidor esté corriendo.`, 0, {
       cause: error.message,
       url,
     });

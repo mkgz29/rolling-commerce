@@ -7,6 +7,20 @@ const defaultUploadOptions = {
   fetch_format: "auto",
 };
 
+const normalizeCloudinaryUploadError = (error) => {
+  if (error?.message?.includes("api_key")) {
+    const configError = new Error(
+      "Cloudinary is not configured. Missing CLOUDINARY_API_KEY."
+    );
+    configError.statusCode = 500;
+    configError.code = "CLOUDINARY_CONFIG_MISSING";
+    configError.exposeStack = false;
+    return configError;
+  }
+
+  return error;
+};
+
 const uploadBufferToCloudinary = (buffer, options = {}) => {
   validateCloudinaryConfig();
 
@@ -19,7 +33,7 @@ const uploadBufferToCloudinary = (buffer, options = {}) => {
       },
       (error, result) => {
         if (error) {
-          reject(error);
+          reject(normalizeCloudinaryUploadError(error));
           return;
         }
 

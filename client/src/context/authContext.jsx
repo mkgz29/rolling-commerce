@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
       setSession({ user: data.user, token: data.token });
       return data.user;
     } catch (requestError) {
-      setError(requestError.message || 'Could not log in.');
+      setError(requestError.message || 'No pudimos iniciar sesión.');
       throw requestError;
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export function AuthProvider({ children }) {
       setError(null);
       return await registerRequest(formData);
     } catch (requestError) {
-      setError(requestError.message || 'Could not create account.');
+      setError(requestError.message || 'No pudimos crear la cuenta.');
       throw requestError;
     } finally {
       setLoading(false);

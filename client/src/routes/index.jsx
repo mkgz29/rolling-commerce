@@ -10,7 +10,6 @@ import AdminDashboard from '../pages/adminDashboard';
 import NotFound from '../pages/not-found-404';
 import ProtectedRoute from '../components/protectedRoute';
 import BuildYourPc from '../pages/build-your-pc';
-import Profile from '../pages/profile';
 import Checkout from '../pages/checkout';
 
 const router = createBrowserRouter([
@@ -57,14 +56,6 @@ const router = createBrowserRouter([
       {
         path: 'build-your-pc',
         element: <BuildYourPc />,
-      },
-      {
-        path: 'profile',
-        element: (
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        ),
       },
       {
         path: 'checkout',

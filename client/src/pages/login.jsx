@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import loginRegisterBg from "../assets/loginregister.jpg";
 
 export default function Login() {
   const { login, loading, error, isAuthenticated } = useAuth();
@@ -23,10 +24,10 @@ export default function Login() {
 
   const validate = () => {
     const newErrors = {};
-    if (!email) newErrors.email = "Email is required.";
-    else if (!email.includes("@")) newErrors.email = "Email must contain @.";
-    if (!password) newErrors.password = "Password is required.";
-    else if (password.length < 6) newErrors.password = "Minimum 6 characters.";
+    if (!email) newErrors.email = "Ingresá tu email.";
+    else if (!email.includes("@")) newErrors.email = "El email debe contener @.";
+    if (!password) newErrors.password = "Ingresá tu contraseña.";
+    else if (password.length < 6) newErrors.password = "Mínimo 6 caracteres.";
     return newErrors;
   };
 
@@ -46,11 +47,11 @@ export default function Login() {
 
       Swal.fire({
         icon: "success",
-        title: "Welcome back!",
-        text: `Logged in as ${email}`,
+        title: "Bienvenido de nuevo",
+        text: `Sesión iniciada como ${email}`,
         background: "#0f0f1a",
         color: "#fff",
-        confirmButtonColor: "#7c3aed",
+        confirmButtonColor: "#0d6efd",
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
@@ -59,7 +60,7 @@ export default function Login() {
       setErrors({
         submit:
           submitError?.message ||
-          "Login failed. Please check your credentials and try again.",
+          "No pudimos iniciar sesión. Revisá tus datos e intentá nuevamente.",
       });
     }
   };
@@ -82,54 +83,54 @@ export default function Login() {
           style={{ textAlign: "center", marginBottom: "32px" }}
         >
           <div style={styles.logoCircle}>TC</div>
-          <h1 style={styles.title}>Welcome Back</h1>
-          <p style={styles.subtitle}>Sign in to your account</p>
+          <h1 style={styles.title}>Bienvenido</h1>
+          <p style={styles.subtitle}>Ingresá a tu cuenta</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} noValidate>
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Email Address</label>
+            <label style={styles.label}>Correo electrónico</label>
             <input
               type="email"
-              placeholder="your@email.com"
+              placeholder="tu@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               style={{
                 ...styles.input,
-                borderColor: errors.email ? "#d946ef" : "rgba(124,58,237,0.3)",
+                borderColor: errors.email ? "#d946ef" : "rgba(13,110,253,0.34)",
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "#7c3aed";
-                e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)";
+              onFocus={(event) => {
+                event.target.style.borderColor = "#0d6efd";
+                event.target.style.boxShadow = "0 0 0 4px rgba(13,110,253,0.16)";
               }}
-              onBlur={(e) => {
-                e.target.style.borderColor = errors.email ? "#d946ef" : "rgba(124,58,237,0.3)";
-                e.target.style.boxShadow = "none";
+              onBlur={(event) => {
+                event.target.style.borderColor = errors.email ? "#d946ef" : "rgba(13,110,253,0.34)";
+                event.target.style.boxShadow = "none";
               }}
             />
             {errors.email && <p style={styles.error}>{errors.email}</p>}
           </div>
 
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Password</label>
+            <label style={styles.label}>Contraseña</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Ingresá tu contraseña"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 style={{
                   ...styles.input,
                   paddingRight: "48px",
-                  borderColor: errors.password ? "#d946ef" : "rgba(124,58,237,0.3)",
+                  borderColor: errors.password ? "#d946ef" : "rgba(13,110,253,0.34)",
                 }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "#7c3aed";
-                  e.target.style.boxShadow = "0 0 0 4px rgba(124,58,237,0.15)";
+                onFocus={(event) => {
+                  event.target.style.borderColor = "#0d6efd";
+                  event.target.style.boxShadow = "0 0 0 4px rgba(13,110,253,0.16)";
                 }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = errors.password ? "#d946ef" : "rgba(124,58,237,0.3)";
-                  e.target.style.boxShadow = "none";
+                onBlur={(event) => {
+                  event.target.style.borderColor = errors.password ? "#d946ef" : "rgba(13,110,253,0.34)";
+                  event.target.style.boxShadow = "none";
                 }}
               />
               <button
@@ -156,11 +157,11 @@ export default function Login() {
             style={styles.submitBtn}
             disabled={loading}
           >
-            {loading ? "Logging in..." : "Sign In"}
+            {loading ? "Ingresando..." : "Ingresar"}
           </motion.button>
 
           <p style={styles.linkText}>
-            Don't have an account? <Link to="/register" style={styles.link}>Register now</Link>
+            ¿No tenés cuenta? <Link to="/register" style={styles.link}>Registrate</Link>
           </p>
         </form>
       </motion.div>
@@ -170,21 +171,24 @@ export default function Login() {
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #0a0a14 0%, #0f0f1a 50%, #0a0a14 100%)",
+    minHeight: "calc(100vh - 92px)",
+    backgroundImage: `linear-gradient(135deg, rgba(4, 8, 18, 0.54), rgba(4, 8, 18, 0.68)), url(${loginRegisterBg})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "40px 20px",
     position: "relative",
-    overflow: "hidden",
+    overflow: "auto",
   },
   bgGlow1: {
     position: "absolute",
     width: "400px",
     height: "400px",
     borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)",
+    background: "radial-gradient(circle, rgba(13,110,253,0.16) 0%, transparent 70%)",
     top: "-100px",
     left: "-100px",
     pointerEvents: "none",
@@ -194,28 +198,28 @@ const styles = {
     width: "400px",
     height: "400px",
     borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(217,70,239,0.1) 0%, transparent 70%)",
+    background: "radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)",
     bottom: "-100px",
     right: "-100px",
     pointerEvents: "none",
   },
   card: {
-    background: "linear-gradient(135deg, rgba(20,20,35,0.95) 0%, rgba(10,10,20,0.95) 100%)",
+    background: "rgba(10, 14, 24, 0.86)",
     backdropFilter: "blur(20px)",
-    borderRadius: "24px",
+    borderRadius: "18px",
     padding: "48px 40px",
     width: "100%",
     maxWidth: "440px",
-    border: "1px solid rgba(124,58,237,0.2)",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.1)",
+    border: "1px solid rgba(131,216,255,0.18)",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(13,110,253,0.08)",
     position: "relative",
     zIndex: 1,
   },
   logoCircle: {
     width: "64px",
     height: "64px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #7c3aed 0%, #d946ef 100%)",
+    borderRadius: "14px",
+    background: "#0d6efd",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -223,19 +227,16 @@ const styles = {
     fontSize: "20px",
     fontWeight: "800",
     color: "#fff",
-    boxShadow: "0 0 30px rgba(124,58,237,0.4)",
+    boxShadow: "0 0 30px rgba(13,110,253,0.34)",
   },
   title: {
     color: "#fff",
     fontSize: "28px",
     fontWeight: "700",
     margin: "0 0 8px",
-    background: "linear-gradient(135deg, #fff 0%, #a78bfa 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
   },
   subtitle: {
-    color: "#6b7280",
+    color: "#aeb8c7",
     fontSize: "14px",
     margin: 0,
   },
@@ -252,8 +253,8 @@ const styles = {
   input: {
     width: "100%",
     padding: "12px 16px",
-    background: "rgba(124,58,237,0.05)",
-    border: "1px solid rgba(124,58,237,0.3)",
+    background: "rgba(13,110,253,0.06)",
+    border: "1px solid rgba(13,110,253,0.34)",
     borderRadius: "12px",
     color: "#fff",
     fontSize: "15px",
@@ -268,39 +269,39 @@ const styles = {
     transform: "translateY(-50%)",
     background: "transparent",
     border: "none",
-    color: "#6b7280",
+    color: "#aeb8c7",
     cursor: "pointer",
-    fontSize: "18px",
+    fontSize: "14px",
     padding: "4px 8px",
   },
   error: {
-    color: "#d946ef",
+    color: "#ff7a9d",
     fontSize: "13px",
     margin: "6px 0 0",
   },
   submitBtn: {
     width: "100%",
     padding: "14px",
-    background: "linear-gradient(135deg, #7c3aed 0%, #d946ef 100%)",
-    border: "none",
+    background: "#0d6efd",
+    border: "1px solid #0d6efd",
     borderRadius: "12px",
     color: "#fff",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+    boxShadow: "0 4px 20px rgba(13,110,253,0.28)",
     marginTop: "8px",
     marginBottom: "20px",
-    letterSpacing: "0.5px",
+    letterSpacing: "0",
   },
   linkText: {
     textAlign: "center",
-    color: "#6b7280",
+    color: "#aeb8c7",
     fontSize: "14px",
     margin: 0,
   },
   link: {
-    color: "#a78bfa",
+    color: "#8ec5ff",
     textDecoration: "none",
     fontWeight: "600",
   },

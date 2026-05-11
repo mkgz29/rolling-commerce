@@ -35,6 +35,14 @@ router.put(
   handleMulterError,
   updateProduct
 );
+router.patch(
+  "/:id",
+  protect,
+  admin,
+  productImageUpload.single("image"),
+  handleMulterError,
+  updateProduct
+);
 router.delete("/:id", protect, admin, deleteProduct);
 
 export default router;

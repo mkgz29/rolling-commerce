@@ -6,9 +6,9 @@ import { useCart } from '../hooks/useCart';
 import './navbar.css';
 
 const publicNavLinks = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/products', label: 'Products' },
-  { to: '/build-your-pc', label: 'Build Your PC' },
+  { to: '/', label: 'Inicio', end: true },
+  { to: '/products', label: 'Productos' },
+  { to: '/build-your-pc', label: 'Armá tu PC' },
 ];
 
 export default function Navbar() {
@@ -18,13 +18,12 @@ export default function Navbar() {
 
   const navLinks = [
     ...publicNavLinks,
-    ...(isAuthenticated ? [{ to: '/cart', label: `Cart${itemCount ? ` (${itemCount})` : ''}` }] : []),
-    ...(isAuthenticated ? [{ to: '/profile', label: 'Profile' }] : []),
-    ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
+    ...(isAuthenticated ? [{ to: '/cart', label: `Carrito${itemCount ? ` (${itemCount})` : ''}` }] : []),
+    ...(isAdmin ? [{ to: '/admin', label: 'Administración' }] : []),
     ...(!isAuthenticated
       ? [
-          { to: '/login', label: 'Login' },
-          { to: '/register', label: 'Register' },
+          { to: '/login', label: 'Ingresar' },
+          { to: '/register', label: 'Registrarse' },
         ]
       : []),
   ];
@@ -41,7 +40,7 @@ export default function Navbar() {
           <img src={logo} alt="Tech Core" className="brand-logo" />
           <div className="brand-copy">
             <span className="brand-name">Tech Core</span>
-            <span className="brand-tagline d-none d-lg-inline">Tech commerce redefined</span>
+            <span className="brand-tagline d-none d-xl-inline">Hardware premium para tu PC</span>
           </div>
         </Link>
 
@@ -49,7 +48,7 @@ export default function Navbar() {
           className="navbar-toggler custom-toggler"
           type="button"
           aria-expanded={menuOpen}
-          aria-label="Toggle navigation"
+          aria-label="Abrir navegación"
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span className="navbar-toggler-icon" />
@@ -74,7 +73,7 @@ export default function Navbar() {
             {isAuthenticated && (
               <li className="nav-item">
                 <button type="button" className="nav-link custom-link logout-link" onClick={handleLogout}>
-                  Logout
+                  Salir
                 </button>
               </li>
             )}

@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { formatPrice } from '../utils/formatPrice';
-import { PRODUCT_IMAGE_FALLBACK, getProductImage } from '../utils/productImage';
+import { getProductImage, getProductImageFallback } from '../utils/productImage';
 
 const getProductName = (product) => product?.name || product?.title || 'Producto sin nombre';
 
 const SummaryProductImage = ({ product }) => {
   const productImage = getProductImage(product);
+  const fallbackImage = getProductImageFallback(product);
   const [failedImage, setFailedImage] = useState('');
-  const imageSrc = failedImage === productImage ? PRODUCT_IMAGE_FALLBACK : productImage;
+  const imageSrc = failedImage === productImage ? fallbackImage : productImage;
 
   return (
     <img
       src={imageSrc}
       alt={getProductName(product)}
       onError={() => {
-        if (imageSrc !== PRODUCT_IMAGE_FALLBACK) {
+        if (imageSrc !== fallbackImage) {
           setFailedImage(productImage);
         }
       }}
@@ -40,7 +41,7 @@ const BuildSummary = ({
       <div className="build-final-hero">
         <span className="build-step-label">Resumen final</span>
         <h1>Tu PC está lista</h1>
-        <p>Revisá los componentes seleccionados antes de continuar. Puedes volver a editar cualquier categoría.</p>
+        <p>Revisá los componentes seleccionados antes de continuar. Podés volver a editar cualquier categoría.</p>
       </div>
 
       {!isComplete && (
@@ -89,9 +90,9 @@ const BuildSummary = ({
             onClick={onContinueCheckout}
             disabled={!isComplete || pending}
           >
-            Continuar al checkout
+            Finalizar compra
           </button>
-          <small>{isComplete ? 'Impuestos y envío se calculan en checkout.' : 'Completa todas las categorías para continuar.'}</small>
+          <small>{isComplete ? 'Impuestos y envío se calculan al finalizar la compra.' : 'Completá todas las categorías para continuar.'}</small>
         </aside>
       </div>
     </section>

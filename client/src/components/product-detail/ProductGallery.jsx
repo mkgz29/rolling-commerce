@@ -1,27 +1,35 @@
 import { useState } from 'react';
 import ThumbnailList from './ThumbnailList';
-import { getProductImages } from '../../utils/productImage';
+import { PRODUCT_IMAGE_FALLBACK, getProductImages } from '../../utils/productImage';
 import './ProductGallery.css';
 
 const fallbackLabel = 'Tech Core';
 
-export default function ProductGallery({ images = [], title }) {
+export default function ProductGallery({ images = [], title, fallbackImage = PRODUCT_IMAGE_FALLBACK }) {
   const validImages = getProductImages({ images });
   const [selectedImage, setSelectedImage] = useState('');
   const [failedImage, setFailedImage] = useState('');
   const activeImage = validImages.includes(selectedImage) ? selectedImage : validImages[0] || '';
-  const showFallback = !activeImage || failedImage === activeImage;
+  const imageSrc = failedImage === activeImage ? fallbackImage : activeImage;
 
   return (
-    <section className="product-gallery-card" aria-label={`${title} gallery`}>
+    <section className="product-gallery-card" aria-label={`Galería de ${title}`}>
       <div className="product-main-image">
-        {showFallback ? (
+        {!imageSrc ? (
           <div className="product-image-fallback">
             <span>{fallbackLabel}</span>
             <strong>{title}</strong>
           </div>
         ) : (
-          <img src={activeImage} alt={title} onError={() => setFailedImage(activeImage)} />
+          <img
+            src={imageSrc}
+            alt={title}
+            onError={() => {
+              if (imageSrc !== fallbackImage) {
+                setFailedImage(activeImage);
+              }
+            }}
+          />
         )}
       </div>
       <ThumbnailList
