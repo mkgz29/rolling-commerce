@@ -7,9 +7,12 @@ export const createMercadoPagoPreferenceController = async (req, res) => {
     }
 
     const preferenceData = await createMercadoPagoPreference({
-      items: req.body?.items,
-      checkoutData: req.body?.checkoutData,
-    });
+  items: req.body?.items,
+  checkoutData: {
+    ...req.body?.checkoutData,
+    userId: req.user.id,
+  },
+});
 
     return res.status(200).json(preferenceData);
   } catch (error) {

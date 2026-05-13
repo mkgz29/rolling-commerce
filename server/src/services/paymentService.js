@@ -1,10 +1,15 @@
-import { MercadoPagoComfig, Preference } from "mercadopago";
+import pkg from "mercadopago";
+const { MercadoPagoConfig, Preference } = pkg;
+
+
 import mongoose from "mongoose";
 import Product from "../models/products.js";
+import Order from "../models/order.js";
 
 
-const client = new MercadoPagoComfig({
-  access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN,
+
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
 
 const sanitizeText = (value = "", maxLength = 120) =>
@@ -76,7 +81,11 @@ const normalizeRequestedItems = (items = []) => {
   });
 };
 
-const createMercadoPagoPreference = async ({ items = [], checkoutData = {} }) => {
+const createMercadoPagoPreference = async ({
+  items = [],
+  checkoutData = {},
+  userId,
+}) => {
   const sanitizedCheckoutData = validateCheckoutData(checkoutData);
   const requestedItems = normalizeRequestedItems(items);
   const productIds = requestedItems.map((item) => item.productId);
@@ -109,6 +118,21 @@ const createMercadoPagoPreference = async ({ items = [], checkoutData = {} }) =>
 
   const total = Number(preferenceItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
 
+ const order = await Order.create({
+  userId,
+
+  items: preferenceItems.map((item) => ({
+    productId: item.productId,
+    name: item.title,
+    price: item.unitPrice,
+    quantity: item.quantity,
+  })),
+
+  total,
+
+  status: "pending",
+});
+
   const preference = new Preference(client);
 
 const response = await preference.create({
@@ -131,7 +155,11 @@ const response = await preference.create({
       pending: "http://localhost:5173/payment-pending",
     },
 
-    auto_return: "Aprobado",
+    notification_url: "https://TU_BACKEND.com/api/webhook",
+
+    external_reference: order._id.toString(),
+
+    auto_return: "approved",
   },
 });
 

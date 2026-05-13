@@ -11,6 +11,7 @@ import categoryRoutes from "./src/routes/categoryRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
 import { configureCloudinary, getMissingCloudinaryEnvVars } from "./src/config/cloudinary.js";
+import webhookRoutes from "./src/routes/webhookRoutes.js";
 
 const requiredEnvVars = ["MONGO_URI", "JWT_SECRET"];
 const missingEnvVars = [
@@ -62,6 +63,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/webhooks", webhookRoutes);
 app.use("/products", productRoutes);
 
 app.get("/", (req, res) => {
