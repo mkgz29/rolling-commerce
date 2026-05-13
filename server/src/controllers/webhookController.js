@@ -5,7 +5,13 @@ import { createMercadoPagoClient } from "../config/mercadoPago.js";
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
-    const paymentId = req.query["data.id"];
+    const paymentId = req.query["data.id"] || req.body?.data?.id || req.body?.id;
+
+    console.info("[MercadoPago] Webhook received", {
+      type: req.query.type || req.body?.type || null,
+      action: req.body?.action || null,
+      hasPaymentId: Boolean(paymentId),
+    });
 
     if (!paymentId) {
       return res.status(200).send("ok");

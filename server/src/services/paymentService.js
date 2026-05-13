@@ -2,7 +2,7 @@ import { MercadoPagoConfig, Preference } from "mercadopago";
 import mongoose from "mongoose";
 import Product from "../models/products.js";
 import Order from "../models/order.js";
-import { getMercadoPagoAccessToken } from "../config/mercadoPago.js";
+import { getMercadoPagoAccessToken, getMercadoPagoAccessTokenInfo } from "../config/mercadoPago.js";
 
 const sanitizeText = (value = "", maxLength = 120) =>
   String(value)
@@ -92,6 +92,16 @@ const createMercadoPagoClient = () =>
     accessToken: getMercadoPagoAccessToken(),
   });
 
+const getCheckoutUrl = (response) => {
+  const tokenInfo = getMercadoPagoAccessTokenInfo();
+
+  if (tokenInfo.prefix === "TEST-") {
+    return response.sandbox_init_point || response.init_point;
+  }
+
+  return response.init_point || response.sandbox_init_point;
+};
+
 const getSafePreferencePayloadForLog = (body) => ({
   ...body,
   payer: body.payer
@@ -107,6 +117,7 @@ const buildPreferenceBody = ({ preferenceItems, sanitizedCheckoutData, order }) 
   const backendUrl = getBackendUrl();
   const body = {
     items: preferenceItems.map((item) => ({
+      id: item.productId,
       title: item.title,
       quantity: Number(item.quantity),
       unit_price: Number(item.unitPrice),
@@ -195,9 +206,15 @@ const createMercadoPagoPreference = async ({
   console.info("[MercadoPago] Creating preference", {
     orderId: order._id.toString(),
     userId: String(userId),
+    token: getMercadoPagoAccessTokenInfo(),
     itemCount: preferenceBody.items.length,
     total,
+    clientUrl: getClientUrl(),
+    backendUrl: getBackendUrl() || null,
+    backUrls: preferenceBody.back_urls,
+    autoReturn: preferenceBody.auto_return || null,
     hasNotificationUrl: Boolean(preferenceBody.notification_url),
+    items: preferenceBody.items,
   });
 
   const preference = new Preference(createMercadoPagoClient());
@@ -215,11 +232,15 @@ const createMercadoPagoPreference = async ({
     preferenceId: response.id,
     hasInitPoint: Boolean(response.init_point),
     hasSandboxInitPoint: Boolean(response.sandbox_init_point),
+    checkoutUrlType:
+      getMercadoPagoAccessTokenInfo().prefix === "TEST-" && response.sandbox_init_point
+        ? "sandbox_init_point"
+        : "init_point",
   });
 
   return {
     preferenceId: response.id,
-    checkoutUrl: response.sandbox_init_point || response.init_point,
+    checkoutUrl: getCheckoutUrl(response),
   };
 };
 

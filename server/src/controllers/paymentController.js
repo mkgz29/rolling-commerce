@@ -1,10 +1,35 @@
 import { createMercadoPagoPreference } from "../services/paymentService.js";
+import { getMercadoPagoAccessTokenInfo } from "../config/mercadoPago.js";
+
+const getSafeCheckoutLog = (checkoutData = {}) => ({
+  hasFullName: Boolean(checkoutData.fullName),
+  hasEmail: Boolean(checkoutData.email),
+  hasPhone: Boolean(checkoutData.phone),
+  country: checkoutData.country,
+  state: checkoutData.state,
+  city: checkoutData.city,
+  zip: checkoutData.zip,
+  delivery: checkoutData.delivery,
+});
 
 export const createMercadoPagoPreferenceController = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+
+    console.info("[MercadoPago] Preference request received", {
+      userId: req.user.id,
+      token: getMercadoPagoAccessTokenInfo(),
+      itemCount: Array.isArray(req.body?.items) ? req.body.items.length : 0,
+      items: Array.isArray(req.body?.items)
+        ? req.body.items.map((item) => ({
+            productId: item.productId || item.id || null,
+            quantity: item.quantity,
+          }))
+        : [],
+      checkoutData: getSafeCheckoutLog(req.body?.checkoutData),
+    });
 
     const preferenceData = await createMercadoPagoPreference({
       items: req.body?.items,
