@@ -67,15 +67,15 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'success',
+        path: '/success',
         element: <PaymentStatus />,
       },
       {
-        path: 'failure',
+        path: '/failure',
         element: <PaymentStatus />,
       },
       {
-        path: 'pending',
+        path: '/pending',
         element: <PaymentStatus />,
       },
       {
