@@ -12,6 +12,7 @@ import ProtectedRoute from '../components/protectedRoute';
 import BuildYourPc from '../pages/build-your-pc';
 import Checkout from '../pages/checkout';
 import PaymentStatus from '../pages/paymentStatus';
+import StaticInfo from '../pages/staticInfo';
 
 const router = createBrowserRouter([
   {
@@ -67,16 +68,36 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/success',
+        path: 'success',
         element: <PaymentStatus />,
       },
       {
-        path: '/failure',
+        path: 'failure',
         element: <PaymentStatus />,
       },
       {
-        path: '/pending',
+        path: 'pending',
         element: <PaymentStatus />,
+      },
+      {
+        path: 'about',
+        element: <StaticInfo />,
+      },
+      {
+        path: 'contact',
+        element: <StaticInfo />,
+      },
+      {
+        path: 'support',
+        element: <StaticInfo />,
+      },
+      {
+        path: 'privacy',
+        element: <StaticInfo />,
+      },
+      {
+        path: 'terms',
+        element: <StaticInfo />,
       },
       {
         path: '*',

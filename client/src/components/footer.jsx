@@ -11,14 +11,14 @@ const productLinks = [
 ];
 
 const companyLinks = [
-  { label: 'Nosotros', href: '#about' },
-  { label: 'Contacto', href: '#contact' },
-  { label: 'Soporte', href: '#support' },
+  { label: 'Nosotros', to: '/about' },
+  { label: 'Contacto', to: '/contact' },
+  { label: 'Soporte', to: '/support' },
 ];
 
 const legalLinks = [
-  { label: 'Privacidad', href: '#privacy' },
-  { label: 'Términos y condiciones', href: '#terms' },
+  { label: 'Privacidad', to: '/privacy' },
+  { label: 'Términos y condiciones', to: '/terms' },
 ];
 
 const socialLinks = [
@@ -72,8 +72,8 @@ export default function Footer() {
             <h3>Compañía</h3>
             <ul className="footer-links">
               {companyLinks.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
+                <li key={link.to}>
+                  <Link to={link.to}>{link.label}</Link>
                 </li>
               ))}
             </ul>
@@ -83,8 +83,8 @@ export default function Footer() {
             <h3>Legal</h3>
             <ul className="footer-links">
               {legalLinks.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
+                <li key={link.to}>
+                  <Link to={link.to}>{link.label}</Link>
                 </li>
               ))}
             </ul>

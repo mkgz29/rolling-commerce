@@ -219,7 +219,7 @@ export default function Register() {
                 style={styles.checkbox}
               />
               <span>
-                Acepto los <a href="#terms" style={styles.link}>términos y condiciones</a>
+                Acepto los <Link to="/terms" style={styles.link}>términos y condiciones</Link>
               </span>
             </label>
             {errors.terms && <p style={styles.error}>{errors.terms}</p>}
