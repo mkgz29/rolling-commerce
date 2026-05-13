@@ -1,9 +1,10 @@
-const normalizeApiBaseUrl = (value) => {
-  const baseUrl = (value || 'http://localhost:3000/api').trim().replace(/\/+$/, '');
-  return baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-};
+const rawApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+const API_BASE_URL = rawApiBaseUrl
+  .trim()
+  .replace(/\/+$/, '')
+  .replace(/\/api$/, '') + '/api';
+
 const TOKEN_STORAGE_KEY = 'rolling-commerce-token';
 
 export class ApiError extends Error {
@@ -28,7 +29,8 @@ export const clearStoredToken = () => {
 };
 
 const buildUrl = (endpoint, params) => {
-  const url = new URL(`${API_BASE_URL}${endpoint}`);
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = new URL(`${API_BASE_URL}${cleanEndpoint}`);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -43,32 +45,16 @@ const buildUrl = (endpoint, params) => {
 
 export const apiRequest = async (endpoint, options = {}) => {
   const { body, params, token = getStoredToken(), headers = {}, ...requestOptions } = options;
-  const url = buildUrl(endpoint, params);
 
-  const isFormData = body instanceof FormData;
-  const finalHeaders = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...headers,
-  };
-
-  if (!isFormData) {
-    finalHeaders['Content-Type'] = 'application/json';
-  }
-
-  let response;
-
-  try {
-    response = await fetch(url, {
-      ...requestOptions,
-      headers: finalHeaders,
-      body: body === undefined ? undefined : (isFormData ? body : JSON.stringify(body)),
-    });
-  } catch (error) {
-    throw new ApiError(`No se pudo conectar con la API en ${API_BASE_URL}. Verificá que el servidor esté corriendo.`, 0, {
-      cause: error.message,
-      url,
-    });
-  }
+  const response = await fetch(buildUrl(endpoint, params), {
+    ...requestOptions,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : null;
