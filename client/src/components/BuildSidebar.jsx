@@ -78,7 +78,7 @@ const BuildSidebar = ({
         })}
       </nav>
 
-      <div className="ensambly-summary p-4 mt-auto">
+      <div className="ensambly-summary">
         <div className="build-summary-header">
           <div>
             <span className="text-secondary small d-block">ENSAMBLE ACTUAL</span>
@@ -106,10 +106,10 @@ const BuildSidebar = ({
 
         <div className="build-summary-total">
           <span className="text-secondary small d-block">PRECIO TOTAL</span>
-          <div className="d-flex align-items-center gap-2">
-            <span className="fw-bold fs-3 text-gradient">{formatPrice(totalPrice)}</span>
+          <div className="build-summary-total-row">
+            <span className="build-summary-total-price text-gradient">{formatPrice(totalPrice)}</span>
             <button
-              className="btn btn-outline-secondary btn-sm ms-auto"
+              className="btn btn-outline-secondary btn-sm build-summary-clear"
               type="button"
               onClick={onClearBuild}
               disabled={selectedCount === 0}
