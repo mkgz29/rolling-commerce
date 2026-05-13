@@ -1,7 +1,12 @@
 const rawApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-const API_BASE_URL = rawApiBaseUrl
-  .trim()
+const normalizedRawApiBaseUrl = rawApiBaseUrl.trim();
+
+const apiBaseUrlWithProtocol = normalizedRawApiBaseUrl.startsWith('http://') || normalizedRawApiBaseUrl.startsWith('https://')
+  ? normalizedRawApiBaseUrl
+  : `https://${normalizedRawApiBaseUrl}`;
+
+const API_BASE_URL = apiBaseUrlWithProtocol
   .replace(/\/+$/, '')
   .replace(/\/api$/, '') + '/api';
 
