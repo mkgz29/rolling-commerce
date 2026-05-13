@@ -1,16 +1,8 @@
-import pkg from "mercadopago";
-const { MercadoPagoConfig, Preference } = pkg;
-
-
+import { MercadoPagoConfig, Preference } from "mercadopago";
 import mongoose from "mongoose";
 import Product from "../models/products.js";
 import Order from "../models/order.js";
-
-
-
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
-});
+import { getMercadoPagoAccessToken } from "../config/mercadoPago.js";
 
 const sanitizeText = (value = "", maxLength = 120) =>
   String(value)
@@ -81,6 +73,71 @@ const normalizeRequestedItems = (items = []) => {
   });
 };
 
+const getClientUrl = () =>
+  (process.env.CLIENT_URL || process.env.PUBLIC_SITE_URL || process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
+
+const getBackendUrl = () => (process.env.BACKEND_URL || process.env.PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
+
+const isPublicUrl = (value) => {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+};
+
+const createMercadoPagoClient = () =>
+  new MercadoPagoConfig({
+    accessToken: getMercadoPagoAccessToken(),
+  });
+
+const getSafePreferencePayloadForLog = (body) => ({
+  ...body,
+  payer: body.payer
+    ? {
+        ...body.payer,
+        email: body.payer.email ? "[redacted-email]" : undefined,
+      }
+    : undefined,
+});
+
+const buildPreferenceBody = ({ preferenceItems, sanitizedCheckoutData, order }) => {
+  const clientUrl = getClientUrl();
+  const backendUrl = getBackendUrl();
+  const body = {
+    items: preferenceItems.map((item) => ({
+      title: item.title,
+      quantity: Number(item.quantity),
+      unit_price: Number(item.unitPrice),
+      currency_id: "ARS",
+    })),
+
+    payer: {
+      name: sanitizedCheckoutData.fullName,
+      email: sanitizedCheckoutData.email,
+    },
+
+    back_urls: {
+      success: `${clientUrl}/success`,
+      failure: `${clientUrl}/failure`,
+      pending: `${clientUrl}/pending`,
+    },
+
+    external_reference: order._id.toString(),
+
+    ...(isPublicUrl(clientUrl) && {
+      auto_return: "approved",
+    }),
+  };
+
+  if (backendUrl && isPublicUrl(backendUrl)) {
+    body.notification_url = `${backendUrl}/api/webhooks/webhook`;
+  }
+
+  return body;
+};
+
 const createMercadoPagoPreference = async ({
   items = [],
   checkoutData = {},
@@ -118,54 +175,52 @@ const createMercadoPagoPreference = async ({
 
   const total = Number(preferenceItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
 
- const order = await Order.create({
-  userId,
+  const order = await Order.create({
+    userId,
 
-  items: preferenceItems.map((item) => ({
-    productId: item.productId,
-    name: item.title,
-    price: item.unitPrice,
-    quantity: item.quantity,
-  })),
-
-  total,
-
-  status: "pending",
-});
-
-  const preference = new Preference(client);
-
-const response = await preference.create({
-  body: {
     items: preferenceItems.map((item) => ({
-      title: item.title,
+      productId: item.productId,
+      name: item.title,
+      price: item.unitPrice,
       quantity: item.quantity,
-      unit_price: Number(item.unitPrice),
-      currency_id: "ARS",
     })),
 
-    payer: {
-      name: sanitizedCheckoutData.fullName,
-      email: sanitizedCheckoutData.email,
-    },
+    total,
 
-    back_urls: {
-      success: "http://localhost:5173/payment-success",
-      failure: "http://localhost:5173/payment-failure",
-      pending: "http://localhost:5173/payment-pending",
-    },
+    status: "pending",
+  });
 
-    notification_url: "https://TU_BACKEND.com/api/webhook",
+  const preferenceBody = buildPreferenceBody({ preferenceItems, sanitizedCheckoutData, order });
 
-    external_reference: order._id.toString(),
+  console.info("[MercadoPago] Creating preference", {
+    orderId: order._id.toString(),
+    userId: String(userId),
+    itemCount: preferenceBody.items.length,
+    total,
+    hasNotificationUrl: Boolean(preferenceBody.notification_url),
+  });
 
-    auto_return: "approved",
-  },
-});
+  const preference = new Preference(createMercadoPagoClient());
+  let response;
 
-return {
-  checkoutUrl: response.init_point,
-};
+  try {
+    response = await preference.create({ body: preferenceBody });
+  } catch (error) {
+    error.mercadoPagoPayload = getSafePreferencePayloadForLog(preferenceBody);
+    throw error;
+  }
+
+  console.info("[MercadoPago] Preference created", {
+    orderId: order._id.toString(),
+    preferenceId: response.id,
+    hasInitPoint: Boolean(response.init_point),
+    hasSandboxInitPoint: Boolean(response.sandbox_init_point),
+  });
+
+  return {
+    preferenceId: response.id,
+    checkoutUrl: response.sandbox_init_point || response.init_point,
+  };
 };
 
 export { createMercadoPagoPreference };

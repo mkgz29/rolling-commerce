@@ -1,12 +1,7 @@
-import pkg from "mercadopago";
-const { MercadoPagoConfig, Payment } = pkg;
-
+import { Payment } from "mercadopago";
 import Order from "../models/order.js";
 import Product from "../models/products.js";
-
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
-});
+import { createMercadoPagoClient } from "../config/mercadoPago.js";
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
@@ -16,7 +11,7 @@ export const mercadoPagoWebhook = async (req, res) => {
       return res.status(200).send("ok");
     }
 
-    const payment = new Payment(client);
+    const payment = new Payment(createMercadoPagoClient());
 
     const paymentData = await payment.get({
       id: paymentId,

@@ -12,12 +12,17 @@ import paymentRoutes from "./src/routes/paymentRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
 import { configureCloudinary, getMissingCloudinaryEnvVars } from "./src/config/cloudinary.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
+import { hasMercadoPagoAccessToken } from "./src/config/mercadoPago.js";
 
 const requiredEnvVars = ["MONGO_URI", "JWT_SECRET"];
 const missingEnvVars = [
   ...requiredEnvVars.filter((envVar) => !process.env[envVar]?.trim()),
   ...getMissingCloudinaryEnvVars(),
 ];
+
+if (!hasMercadoPagoAccessToken()) {
+  missingEnvVars.push("MERCADOPAGO_ACCESS_TOKEN");
+}
 
 if (missingEnvVars.length > 0) {
   console.error(
