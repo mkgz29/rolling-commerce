@@ -1,14 +1,33 @@
-const rawApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const DEFAULT_API_BASE_URL = import.meta.env.DEV ? 'http://localhost:3000/api' : 'https://rolling-commerce.onrender.com/api';
 
-const normalizedRawApiBaseUrl = rawApiBaseUrl.trim();
+const normalizeApiBaseUrl = (value) => {
+  const rawValue = String(value || DEFAULT_API_BASE_URL)
+    .trim()
+    .replace(/^VITE_API_URL\s*=\s*/, '')
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/\/+$/, '');
 
-const apiBaseUrlWithProtocol = normalizedRawApiBaseUrl.startsWith('http://') || normalizedRawApiBaseUrl.startsWith('https://')
-  ? normalizedRawApiBaseUrl
-  : `https://${normalizedRawApiBaseUrl}`;
+  const urlWithProtocol = rawValue.startsWith('http://') || rawValue.startsWith('https://')
+    ? rawValue
+    : `https://${rawValue}`;
 
-const API_BASE_URL = apiBaseUrlWithProtocol
-  .replace(/\/+$/, '')
-  .replace(/\/api$/, '') + '/api';
+  const withoutApiSuffix = urlWithProtocol.replace(/\/api$/, '');
+  const normalizedUrl = `${withoutApiSuffix}/api`;
+
+  try {
+    return new URL(normalizedUrl).toString().replace(/\/+$/, '');
+  } catch (error) {
+    console.error('[API] Invalid VITE_API_URL. Falling back to default API URL.', {
+      rawValue,
+      normalizedUrl,
+      message: error.message,
+    });
+
+    return DEFAULT_API_BASE_URL;
+  }
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
 
 const TOKEN_STORAGE_KEY = 'rolling-commerce-token';
 
@@ -33,9 +52,9 @@ export const clearStoredToken = () => {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
 };
 
-const buildUrl = (endpoint, params) => {
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = new URL(`${API_BASE_URL}${cleanEndpoint}`);
+const buildUrl = (endpoint = '', params) => {
+  const cleanEndpoint = String(endpoint || '').replace(/^\/+/, '');
+  const url = new URL(cleanEndpoint, `${API_BASE_URL}/`);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -45,7 +64,15 @@ const buildUrl = (endpoint, params) => {
     });
   }
 
-  return url.toString();
+  const finalUrl = url.toString();
+
+  if (import.meta.env.DEV || import.meta.env.VITE_DEBUG_API === 'true') {
+    console.log('API_BASE_URL:', API_BASE_URL);
+    console.log('endpoint:', endpoint);
+    console.log('final URL:', finalUrl);
+  }
+
+  return finalUrl;
 };
 
 export const apiRequest = async (endpoint, options = {}) => {
