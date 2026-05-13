@@ -28,6 +28,11 @@
   padding: 0;
 }
 
+.main-content:has(.auth-page) {
+  max-width: none;
+  padding: 0;
+}
+
 .page {
   animation: fadeIn 0.3s ease-in;
 }

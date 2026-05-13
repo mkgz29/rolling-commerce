@@ -11,6 +11,7 @@ import NotFound from '../pages/not-found-404';
 import ProtectedRoute from '../components/protectedRoute';
 import BuildYourPc from '../pages/build-your-pc';
 import Checkout from '../pages/checkout';
+import PaymentStatus from '../pages/paymentStatus';
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,18 @@ const router = createBrowserRouter([
             <Checkout />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: 'success',
+        element: <PaymentStatus />,
+      },
+      {
+        path: 'failure',
+        element: <PaymentStatus />,
+      },
+      {
+        path: 'pending',
+        element: <PaymentStatus />,
       },
       {
         path: '*',

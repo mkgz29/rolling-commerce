@@ -66,7 +66,7 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.page}>
+    <div className="auth-page" style={styles.page}>
       <div style={styles.bgGlow1} />
       <div style={styles.bgGlow2} />
 
@@ -172,6 +172,7 @@ export default function Login() {
 const styles = {
   page: {
     minHeight: "calc(100vh - 92px)",
+    width: "100%",
     backgroundImage: `linear-gradient(135deg, rgba(4, 8, 18, 0.54), rgba(4, 8, 18, 0.68)), url(${loginRegisterBg})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
@@ -179,9 +180,11 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: "40px 20px",
+    padding: "clamp(24px, 5vh, 48px) 20px",
     position: "relative",
-    overflow: "auto",
+    overflowX: "hidden",
+    overflowY: "visible",
+    boxSizing: "border-box",
   },
   bgGlow1: {
     position: "absolute",
@@ -210,6 +213,7 @@ const styles = {
     padding: "48px 40px",
     width: "100%",
     maxWidth: "440px",
+    maxHeight: "none",
     border: "1px solid rgba(131,216,255,0.18)",
     boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(13,110,253,0.08)",
     position: "relative",
