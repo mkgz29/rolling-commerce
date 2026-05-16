@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { useCart } from '../hooks/useCart';
 
 const statusConfig = {
   '/success': {
@@ -22,10 +24,26 @@ const statusConfig = {
   },
 };
 
+let successCartClearInFlight = false;
+
 export default function PaymentStatus() {
   const { pathname } = useLocation();
+  const { clearCart } = useCart();
   const config = statusConfig[pathname] || statusConfig['/pending'];
   const Icon = config.icon;
+  const isSuccess = pathname === '/success';
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    if (successCartClearInFlight) return;
+
+    successCartClearInFlight = true;
+    clearCart().catch((error) => {
+      console.error('No se pudo limpiar el carrito despues del pago aprobado:', error);
+    }).finally(() => {
+      successCartClearInFlight = false;
+    });
+  }, [clearCart, isSuccess]);
 
   return (
     <section style={styles.page}>
