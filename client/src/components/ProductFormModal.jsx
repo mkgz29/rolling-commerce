@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import FormCharacterCounter from './FormCharacterCounter';
 import { NUMBER_LIMITS, VALIDATION_LIMITS } from '../constants/validationLimits';
 import { apiRequest } from '../routes/api';
 import { getProductImage } from '../utils/productImage';
@@ -54,6 +55,12 @@ const initialFormData = {
   stock: '',
   description: '',
   isActive: true,
+};
+
+const safeTextInputStyle = {
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 };
 
 const normalizeCategoryValue = (category = '') => {
@@ -270,9 +277,11 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                       maxLength={VALIDATION_LIMITS.productName}
                       value={formData.name}
                       onChange={handleChange}
+                      style={safeTextInputStyle}
                       placeholder="Ej: AMD Ryzen 7 7800X3D"
                       disabled={loading}
                     />
+                    <FormCharacterCounter value={formData.name} max={VALIDATION_LIMITS.productName} />
                     {fieldErrors.name && <div className="invalid-feedback">{fieldErrors.name}</div>}
                   </div>
 
@@ -286,9 +295,11 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                       value={formData.description}
                       onChange={handleChange}
                       rows="3"
+                      style={{ ...safeTextInputStyle, resize: 'vertical' }}
                       placeholder="Resumen corto con compatibilidad, uso recomendado o características principales."
                       disabled={loading}
                     />
+                    <FormCharacterCounter value={formData.description} max={VALIDATION_LIMITS.productDescription} />
                     {fieldErrors.description && <div className="invalid-feedback">{fieldErrors.description}</div>}
                   </div>
                 </section>

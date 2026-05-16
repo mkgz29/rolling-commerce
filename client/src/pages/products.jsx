@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import FormCharacterCounter from '../components/FormCharacterCounter';
 import { VALIDATION_LIMITS } from '../constants/validationLimits';
 import { getProductsRequest } from '../routes/productService';
 import { formatPrice } from '../utils/formatPrice';
@@ -142,11 +143,13 @@ export default function Products() {
                   id="catalog-search"
                   value={draftFilters.search}
                   maxLength={VALIDATION_LIMITS.search}
+                  style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
                   onChange={(event) => setDraftFilters((current) => ({ ...current, search: event.target.value }))}
                   placeholder="RTX, Ryzen, SSD, gabinete..."
                 />
                 <button type="submit">Buscar</button>
               </div>
+              <FormCharacterCounter value={draftFilters.search} max={VALIDATION_LIMITS.search} />
               <div className="catalog-filter-row">
                 <select value={draftFilters.category} onChange={handleCategoryChange} aria-label="Filtrar por categoría">
                   <option value="">Todas las categorías</option>

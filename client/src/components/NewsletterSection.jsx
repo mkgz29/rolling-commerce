@@ -1,6 +1,10 @@
+import { useState } from 'react';
+import FormCharacterCounter from './FormCharacterCounter';
 import { VALIDATION_LIMITS } from '../constants/validationLimits';
 
 function NewsletterSection() {
+  const [email, setEmail] = useState('');
+
   return (
     <section className="newsletter py-5">
       <div className="container">
@@ -20,8 +24,12 @@ function NewsletterSection() {
                   type="email"
                   className="form-control form-control-lg"
                   maxLength={VALIDATION_LIMITS.email}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
                   placeholder="Ingresa tu email"
                 />
+                <FormCharacterCounter value={email} max={VALIDATION_LIMITS.email} />
               </div>
               <div className="col-12 col-md-auto">
                 <button type="submit" className="btn btn-primary btn-lg w-100">

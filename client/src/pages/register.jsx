@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import FormCharacterCounter from "../components/FormCharacterCounter";
 import { VALIDATION_LIMITS } from "../constants/validationLimits";
 import loginRegisterBg from "../assets/loginregister.jpg";
 
@@ -89,6 +90,9 @@ export default function Register() {
     outline: "none",
     transition: "all 0.3s ease",
     boxSizing: "border-box",
+    minWidth: 0,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   });
 
   const handleFocus = (event) => {
@@ -138,6 +142,7 @@ export default function Register() {
                 onFocus={handleFocus}
                 onBlur={(event) => handleBlur(event, errors.firstName)}
               />
+              <FormCharacterCounter value={formData.firstName} max={VALIDATION_LIMITS.firstName} />
               {errors.firstName && <p style={styles.error}>{errors.firstName}</p>}
             </div>
             <div>
@@ -153,6 +158,7 @@ export default function Register() {
                 onFocus={handleFocus}
                 onBlur={(event) => handleBlur(event, errors.lastName)}
               />
+              <FormCharacterCounter value={formData.lastName} max={VALIDATION_LIMITS.lastName} />
               {errors.lastName && <p style={styles.error}>{errors.lastName}</p>}
             </div>
           </div>
@@ -170,6 +176,7 @@ export default function Register() {
               onFocus={handleFocus}
               onBlur={(event) => handleBlur(event, errors.email)}
             />
+            <FormCharacterCounter value={formData.email} max={VALIDATION_LIMITS.email} />
             {errors.email && <p style={styles.error}>{errors.email}</p>}
           </div>
 
@@ -183,7 +190,7 @@ export default function Register() {
                 placeholder="Mínimo 6 caracteres"
                 value={formData.password}
                 onChange={handleChange}
-                style={{ ...inputStyle(errors.password), paddingRight: "48px" }}
+                style={{ ...inputStyle(errors.password), paddingRight: "88px" }}
                 onFocus={handleFocus}
                 onBlur={(event) => handleBlur(event, errors.password)}
               />
@@ -191,6 +198,7 @@ export default function Register() {
                 {showPassword ? "ocultar" : "mostrar"}
               </button>
             </div>
+            <FormCharacterCounter value={formData.password} max={VALIDATION_LIMITS.password} />
             {errors.password && <p style={styles.error}>{errors.password}</p>}
           </div>
 
@@ -204,7 +212,7 @@ export default function Register() {
                 placeholder="Repetí tu contraseña"
                 value={formData.repeatPassword}
                 onChange={handleChange}
-                style={{ ...inputStyle(errors.repeatPassword), paddingRight: "48px" }}
+                style={{ ...inputStyle(errors.repeatPassword), paddingRight: "88px" }}
                 onFocus={handleFocus}
                 onBlur={(event) => handleBlur(event, errors.repeatPassword)}
               />
@@ -212,6 +220,7 @@ export default function Register() {
                 {showRepeat ? "ocultar" : "mostrar"}
               </button>
             </div>
+            <FormCharacterCounter value={formData.repeatPassword} max={VALIDATION_LIMITS.password} />
             {errors.repeatPassword && <p style={styles.error}>{errors.repeatPassword}</p>}
           </div>
 

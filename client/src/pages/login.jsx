@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import FormCharacterCounter from "../components/FormCharacterCounter";
 import { VALIDATION_LIMITS } from "../constants/validationLimits";
 import loginRegisterBg from "../assets/loginregister.jpg";
 
@@ -110,6 +111,7 @@ export default function Login() {
                 event.target.style.boxShadow = "none";
               }}
             />
+            <FormCharacterCounter value={email} max={VALIDATION_LIMITS.email} />
             {errors.email && <p style={styles.error}>{errors.email}</p>}
           </div>
 
@@ -124,7 +126,7 @@ export default function Login() {
                 onChange={(event) => setPassword(event.target.value)}
                 style={{
                   ...styles.input,
-                  paddingRight: "48px",
+                  paddingRight: "88px",
                   borderColor: errors.password ? "#d946ef" : "rgba(13,110,253,0.34)",
                 }}
                 onFocus={(event) => {
@@ -144,6 +146,7 @@ export default function Login() {
                 {showPassword ? "Ocultar" : "Mostrar"}
               </button>
             </div>
+            <FormCharacterCounter value={password} max={VALIDATION_LIMITS.password} />
             {errors.password && <p style={styles.error}>{errors.password}</p>}
           </div>
 
@@ -268,6 +271,9 @@ const styles = {
     outline: "none",
     transition: "all 0.3s ease",
     boxSizing: "border-box",
+    minWidth: 0,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   eyeBtn: {
     position: "absolute",
