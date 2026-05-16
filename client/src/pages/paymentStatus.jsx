@@ -28,7 +28,7 @@ let successCartClearInFlight = false;
 
 export default function PaymentStatus() {
   const { pathname } = useLocation();
-  const { clearCart } = useCart();
+  const { clearCartAfterApprovedPayment } = useCart();
   const config = statusConfig[pathname] || statusConfig['/pending'];
   const Icon = config.icon;
   const isSuccess = pathname === '/success';
@@ -38,12 +38,12 @@ export default function PaymentStatus() {
     if (successCartClearInFlight) return;
 
     successCartClearInFlight = true;
-    clearCart().catch((error) => {
+    clearCartAfterApprovedPayment().catch((error) => {
       console.error('No se pudo limpiar el carrito despues del pago aprobado:', error);
     }).finally(() => {
       successCartClearInFlight = false;
     });
-  }, [clearCart, isSuccess]);
+  }, [clearCartAfterApprovedPayment, isSuccess]);
 
   return (
     <section style={styles.page}>

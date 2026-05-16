@@ -8,6 +8,12 @@ import {
   removeCartItemRequest,
   updateCartItemRequest,
 } from '../routes/cartService';
+import {
+  clearPaymentSuccessCartClearPending,
+  clearPersistedCartStorage,
+  hasPaymentSuccessCartClearPending,
+  markPaymentSuccessCartClearPending,
+} from '../utils/cartPersistence';
 
 const emptyCart = {
   items: [],
@@ -22,6 +28,7 @@ export function CartProvider({ children }) {
 
   const syncCart = useCallback(async () => {
     if (!isAuthenticated) {
+      clearPersistedCartStorage();
       setCart(emptyCart);
       return emptyCart;
     }
@@ -43,10 +50,23 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (!authLoading) {
       queueMicrotask(() => {
+        if (isAuthenticated && hasPaymentSuccessCartClearPending()) {
+          clearPersistedCartStorage();
+          clearCartRequest()
+            .then((nextCart) => {
+              setCart(nextCart);
+              clearPaymentSuccessCartClearPending();
+            })
+            .catch(() => {
+              setCart(emptyCart);
+            });
+          return;
+        }
+
         syncCart().catch(() => {});
       });
     }
-  }, [authLoading, syncCart]);
+  }, [authLoading, isAuthenticated, syncCart]);
 
   const addItem = useCallback(async (productId, quantity = 1) => {
     const nextCart = await addCartItemRequest(productId, quantity);
@@ -67,10 +87,26 @@ export function CartProvider({ children }) {
   }, []);
 
   const clearCart = useCallback(async () => {
+    clearPersistedCartStorage();
     const nextCart = await clearCartRequest();
     setCart(nextCart);
     return nextCart;
   }, []);
+
+  const clearCartAfterApprovedPayment = useCallback(async () => {
+    markPaymentSuccessCartClearPending();
+    clearPersistedCartStorage();
+    setCart(emptyCart);
+
+    if (!isAuthenticated) {
+      return emptyCart;
+    }
+
+    const nextCart = await clearCartRequest();
+    setCart(nextCart);
+    clearPaymentSuccessCartClearPending();
+    return nextCart;
+  }, [isAuthenticated]);
 
   const value = useMemo(
     () => ({
@@ -85,8 +121,9 @@ export function CartProvider({ children }) {
       updateItem,
       removeItem,
       clearCart,
+      clearCartAfterApprovedPayment,
     }),
-    [cart, loading, error, syncCart, addItem, updateItem, removeItem, clearCart],
+    [cart, loading, error, syncCart, addItem, updateItem, removeItem, clearCart, clearCartAfterApprovedPayment],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
