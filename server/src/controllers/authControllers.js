@@ -41,7 +41,7 @@ export const register = async (req, res) => {
   } catch (error) {
     console.error("[register] Error registering user:", error.message);
 
-    if (isRegisterValidationError(error.message)) {
+    if (error.statusCode === 400 || isRegisterValidationError(error.message)) {
       return res.status(400).json({ message: error.message });
     }
 
@@ -66,7 +66,7 @@ export const login = async (req, res) => {
   } catch (error) {
     console.error("[login] Error logging in:", error.message);
 
-    if (isLoginValidationError(error.message)) {
+    if (error.statusCode === 400 || isLoginValidationError(error.message)) {
       return res.status(400).json({ message: error.message });
     }
 

@@ -3,27 +3,20 @@ import mongoose from "mongoose";
 import Product from "../models/products.js";
 import Order from "../models/order.js";
 import { getMercadoPagoAccessToken, getMercadoPagoAccessTokenInfo } from "../config/mercadoPago.js";
-
-const sanitizeText = (value = "", maxLength = 120) =>
-  String(value)
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
-    .replace(/[<>$`{}]/g, "")
-    .trim()
-    .slice(0, maxLength);
-
-const sanitizeEmail = (value = "") => sanitizeText(value, 160).toLowerCase();
+import { VALIDATION_LIMITS } from "../constants/validationLimits.js";
+import { parseQuantity, sanitizeEmail, sanitizeLimitedString } from "../utils/validators.js";
 
 const validateCheckoutData = (checkoutData = {}) => {
   const sanitized = {
-    fullName: sanitizeText(checkoutData.fullName, 100),
-    email: sanitizeEmail(checkoutData.email),
-    phone: sanitizeText(checkoutData.phone, 40),
-    country: sanitizeText(checkoutData.country, 80),
-    state: sanitizeText(checkoutData.state, 80),
-    city: sanitizeText(checkoutData.city, 80),
-    zip: sanitizeText(checkoutData.zip, 20),
-    address: sanitizeText(checkoutData.address, 160),
-    delivery: sanitizeText(checkoutData.delivery, 20),
+    fullName: sanitizeLimitedString(checkoutData.fullName, "fullName", VALIDATION_LIMITS.fullName, { required: true }),
+    email: sanitizeEmail(checkoutData.email, { required: true }),
+    phone: sanitizeLimitedString(checkoutData.phone, "phone", VALIDATION_LIMITS.phone, { required: true }),
+    country: sanitizeLimitedString(checkoutData.country, "country", VALIDATION_LIMITS.country, { required: true }),
+    state: sanitizeLimitedString(checkoutData.state, "state", VALIDATION_LIMITS.province, { required: true }),
+    city: sanitizeLimitedString(checkoutData.city, "city", VALIDATION_LIMITS.city, { required: true }),
+    zip: sanitizeLimitedString(checkoutData.zip, "zip", VALIDATION_LIMITS.zip, { required: true }),
+    address: sanitizeLimitedString(checkoutData.address, "address", VALIDATION_LIMITS.address, { required: true }),
+    delivery: sanitizeLimitedString(checkoutData.delivery, "delivery", 20, { required: true }),
   };
 
   const requiredFields = ["fullName", "email", "phone", "country", "state", "city", "zip", "address", "delivery"];
@@ -37,7 +30,7 @@ const validateCheckoutData = (checkoutData = {}) => {
     throw new Error("Invalid email format");
   }
 
-  if (!/^[\d\s()+-]{7,25}$/.test(sanitized.phone)) {
+  if (!/^[\d\s()+-]{7,20}$/.test(sanitized.phone)) {
     throw new Error("Invalid phone format");
   }
 
@@ -59,14 +52,10 @@ const normalizeRequestedItems = (items = []) => {
 
   return items.map((item) => {
     const productId = String(item.productId || item.id || "").trim();
-    const quantity = Number(item.quantity);
+    const quantity = parseQuantity(item.quantity);
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       throw new Error("Invalid product ID format");
-    }
-
-    if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 99) {
-      throw new Error("Invalid item quantity");
     }
 
     return { productId, quantity };

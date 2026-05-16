@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { VALIDATION_LIMITS } from '../constants/validationLimits';
 import { getProductsRequest } from '../routes/productService';
 import { formatPrice } from '../utils/formatPrice';
 import { getProductImage, getProductImageFallback } from '../utils/productImage';
@@ -140,6 +141,7 @@ export default function Products() {
                 <input
                   id="catalog-search"
                   value={draftFilters.search}
+                  maxLength={VALIDATION_LIMITS.search}
                   onChange={(event) => setDraftFilters((current) => ({ ...current, search: event.target.value }))}
                   placeholder="RTX, Ryzen, SSD, gabinete..."
                 />

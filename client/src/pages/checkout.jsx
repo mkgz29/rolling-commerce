@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CreditCard, ShieldCheck, Truck } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import { createMercadoPagoPreferenceRequest } from "../routes/paymentService";
+import { VALIDATION_LIMITS } from "../constants/validationLimits";
 import Loader from "../components/loader";
 import { formatPrice } from "../utils/formatPrice";
 import { getProductImage, getProductImageFallback } from "../utils/productImage";
@@ -30,14 +31,14 @@ const sanitizeText = (value = "", maxLength = 120) =>
 
 const sanitizeCheckoutForm = (form) => ({
   delivery: sanitizeText(form.delivery, 20),
-  fullName: sanitizeText(form.fullName, 100),
-  email: sanitizeText(form.email, 160).toLowerCase(),
-  phone: sanitizeText(form.phone, 40),
-  country: sanitizeText(form.country, 80),
-  state: sanitizeText(form.state, 80),
-  city: sanitizeText(form.city, 80),
+  fullName: sanitizeText(form.fullName, VALIDATION_LIMITS.fullName),
+  email: sanitizeText(form.email, VALIDATION_LIMITS.email).toLowerCase(),
+  phone: sanitizeText(form.phone, VALIDATION_LIMITS.phone),
+  country: sanitizeText(form.country, VALIDATION_LIMITS.country),
+  state: sanitizeText(form.state, VALIDATION_LIMITS.province),
+  city: sanitizeText(form.city, VALIDATION_LIMITS.city),
   zip: sanitizeText(form.zip, 20),
-  address: sanitizeText(form.address, 160),
+  address: sanitizeText(form.address, VALIDATION_LIMITS.address),
   agreeTerms: Boolean(form.agreeTerms),
 });
 
@@ -60,7 +61,7 @@ const validateCheckoutForm = (form) => {
     errors.email = "Ingresá un email válido.";
   }
 
-  if (form.phone && !/^[\d\s()+-]{7,25}$/.test(form.phone)) {
+  if (form.phone && !/^[\d\s()+-]{7,20}$/.test(form.phone)) {
     errors.phone = "Ingresá un teléfono válido.";
   }
 
@@ -272,17 +273,17 @@ function Checkout() {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label">Nombre completo *</label>
-                  <input type="text" name="fullName" value={form.fullName} onChange={handleInput} className={`form-control ${fieldErrors.fullName ? "is-invalid" : ""}`} placeholder="Brandon Johnson" />
+                  <input type="text" name="fullName" value={form.fullName} onChange={handleInput} maxLength={VALIDATION_LIMITS.fullName} className={`form-control ${fieldErrors.fullName ? "is-invalid" : ""}`} placeholder="Brandon Johnson" />
                   {fieldErrors.fullName && <p className="field-error">{fieldErrors.fullName}</p>}
                 </div>
                 <div className="col-md-6">
                   <label className="form-label">Correo electrónico *</label>
-                  <input type="email" name="email" value={form.email} onChange={handleInput} className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`} placeholder="brandon@example.com" />
+                  <input type="email" name="email" value={form.email} onChange={handleInput} maxLength={VALIDATION_LIMITS.email} className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`} placeholder="brandon@example.com" />
                   {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
                 </div>
                 <div className="col-md-6">
                   <label className="form-label">Teléfono *</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleInput} className={`form-control ${fieldErrors.phone ? "is-invalid" : ""}`} placeholder="+54 9 11 1234 5678" />
+                  <input type="tel" name="phone" value={form.phone} onChange={handleInput} maxLength={VALIDATION_LIMITS.phone} className={`form-control ${fieldErrors.phone ? "is-invalid" : ""}`} placeholder="+54 9 11 1234 5678" />
                   {fieldErrors.phone && <p className="field-error">{fieldErrors.phone}</p>}
                 </div>
                 <div className="col-md-6">
@@ -297,22 +298,22 @@ function Checkout() {
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Provincia *</label>
-                  <input type="text" name="state" value={form.state} onChange={handleInput} className={`form-control ${fieldErrors.state ? "is-invalid" : ""}`} placeholder="Buenos Aires" />
+                  <input type="text" name="state" value={form.state} onChange={handleInput} maxLength={VALIDATION_LIMITS.province} className={`form-control ${fieldErrors.state ? "is-invalid" : ""}`} placeholder="Buenos Aires" />
                   {fieldErrors.state && <p className="field-error">{fieldErrors.state}</p>}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Ciudad *</label>
-                  <input type="text" name="city" value={form.city} onChange={handleInput} className={`form-control ${fieldErrors.city ? "is-invalid" : ""}`} placeholder="Buenos Aires" />
+                  <input type="text" name="city" value={form.city} onChange={handleInput} maxLength={VALIDATION_LIMITS.city} className={`form-control ${fieldErrors.city ? "is-invalid" : ""}`} placeholder="Buenos Aires" />
                   {fieldErrors.city && <p className="field-error">{fieldErrors.city}</p>}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">Código postal *</label>
-                  <input type="text" name="zip" value={form.zip} onChange={handleInput} className={`form-control ${fieldErrors.zip ? "is-invalid" : ""}`} placeholder="C1000" />
+                  <input type="text" name="zip" value={form.zip} onChange={handleInput} maxLength={VALIDATION_LIMITS.zip} className={`form-control ${fieldErrors.zip ? "is-invalid" : ""}`} placeholder="C1000" />
                   {fieldErrors.zip && <p className="field-error">{fieldErrors.zip}</p>}
                 </div>
                 <div className="col-12">
                   <label className="form-label">Dirección *</label>
-                  <input type="text" name="address" value={form.address} onChange={handleInput} className={`form-control ${fieldErrors.address ? "is-invalid" : ""}`} placeholder="Av. Corrientes 1234, piso/depto" />
+                  <input type="text" name="address" value={form.address} onChange={handleInput} maxLength={VALIDATION_LIMITS.address} className={`form-control ${fieldErrors.address ? "is-invalid" : ""}`} placeholder="Av. Corrientes 1234, piso/depto" />
                   {fieldErrors.address && <p className="field-error">{fieldErrors.address}</p>}
                 </div>
               </div>

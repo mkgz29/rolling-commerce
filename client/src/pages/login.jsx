@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import { VALIDATION_LIMITS } from "../constants/validationLimits";
 import loginRegisterBg from "../assets/loginregister.jpg";
 
 export default function Login() {
@@ -43,7 +44,7 @@ export default function Login() {
     setErrors({});
 
     try {
-      await login({ email: email.trim(), password });
+      await login({ email: email.trim().toLowerCase(), password });
 
       Swal.fire({
         icon: "success",
@@ -92,6 +93,7 @@ export default function Login() {
             <label style={styles.label}>Correo electrónico</label>
             <input
               type="email"
+              maxLength={VALIDATION_LIMITS.email}
               placeholder="tu@email.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -116,6 +118,7 @@ export default function Login() {
             <div style={{ position: "relative" }}>
               <input
                 type={showPassword ? "text" : "password"}
+                maxLength={VALIDATION_LIMITS.password}
                 placeholder="Ingresá tu contraseña"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

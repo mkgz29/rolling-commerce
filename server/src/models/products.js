@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { NUMBER_LIMITS, VALIDATION_LIMITS } from "../constants/validationLimits.js";
 
 const productImageSchema = new mongoose.Schema(
   {
@@ -11,9 +12,9 @@ const productImageSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    price: { type: Number, required: true, min: 0 },
-    description: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true, maxlength: VALIDATION_LIMITS.productName },
+    price: { type: Number, required: true, min: NUMBER_LIMITS.price.min, max: NUMBER_LIMITS.price.max },
+    description: { type: String, required: true, trim: true, maxlength: VALIDATION_LIMITS.productDescription },
     image: { type: String, trim: true },
     imageUrl: { type: String, trim: true },
     publicId: { type: String, trim: true },
@@ -21,13 +22,13 @@ const productSchema = new mongoose.Schema(
       type: [productImageSchema],
       default: [],
     },
-    category: { type: String, required: true, trim: true },
-    brand: { type: String, trim: true },
+    category: { type: String, required: true, trim: true, maxlength: VALIDATION_LIMITS.productName },
+    brand: { type: String, trim: true, maxlength: VALIDATION_LIMITS.name },
     specs: {
       type: [String],
       default: [],
     },
-    stock: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, min: NUMBER_LIMITS.stock.min, max: NUMBER_LIMITS.stock.max },
     isActive: { type: Boolean, default: true },
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },

@@ -2,41 +2,28 @@
 import generateToken from "../utils/generateToken.js";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { VALIDATION_LIMITS } from "../constants/validationLimits.js";
+import { sanitizeEmail, sanitizeLimitedString, validatePasswordLength } from "../utils/validators.js";
 
 const validateAuthData = (data, type = "register") => {
   const { name, email, password } = data;
+  let sanitizedName;
 
   if (type === "register") {
-    if (!name || !name.trim()) {
-      throw new Error("Name is required");
-    }
+    sanitizedName = sanitizeLimitedString(name, "name", VALIDATION_LIMITS.name, { required: true });
 
-    if (name.trim().length < 2) {
+    if (sanitizedName.length < 2) {
       throw new Error("Name must be at least 2 characters long");
     }
   }
 
-  if (!email || !email.trim()) {
-    throw new Error("Email is required");
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email.trim())) {
-    throw new Error("Invalid email format");
-  }
-
-  if (!password || !password.trim()) {
-    throw new Error("Password is required");
-  }
-
-  if (password.length < 6) {
-    throw new Error("Password must be at least 6 characters long");
-  }
+  const sanitizedEmail = sanitizeEmail(email, { required: true });
+  const validPassword = validatePasswordLength(password);
 
   return {
-    name: name ? name.trim() : undefined,
-    email: email.trim().toLowerCase(),
-    password: password.trim(),
+    name: sanitizedName,
+    email: sanitizedEmail,
+    password: validPassword,
   };
 };
 
@@ -120,11 +107,15 @@ const updateUserProfile = async (userId, updateData) => {
 
   for (const field of allowedFields) {
     if (updateData[field] !== undefined) {
-      if (field === "name" && updateData[field].trim().length < 2) {
+      const sanitizedValue = sanitizeLimitedString(updateData[field], field, VALIDATION_LIMITS.name, {
+        required: true,
+      });
+
+      if (field === "name" && sanitizedValue.length < 2) {
         throw new Error("Name must be at least 2 characters long");
       }
 
-      fieldsToUpdate[field] = updateData[field].trim();
+      fieldsToUpdate[field] = sanitizedValue;
     }
   }
 
@@ -153,9 +144,7 @@ const changeUserPassword = async (userId, oldPassword, newPassword) => {
     throw new Error("Both old and new passwords are required");
   }
 
-  if (newPassword.length < 6) {
-    throw new Error("New password must be at least 6 characters long");
-  }
+  validatePasswordLength(newPassword, "newPassword");
 
   const user = await User.findById(userId).select("+password");
 
@@ -169,7 +158,6 @@ const changeUserPassword = async (userId, oldPassword, newPassword) => {
     throw new Error("Current password is incorrect");
   }
 
-  // Verificar que las contraseñas sean diferentes
   const samePassword = await user.comparePassword(newPassword);
   if (samePassword) {
     throw new Error("New password must be different from current password");
@@ -231,8 +219,6 @@ const verifyToken = (token) => {
       throw new Error("Token is required");
     }
 
-    // El middleware protect se encarga de verificar el token
-    // Esta función es un helper para validar tokens manualmente si es necesario
     return { valid: true };
   } catch (error) {
     throw new Error(`Token verification failed: ${error.message}`);

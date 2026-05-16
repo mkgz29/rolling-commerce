@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { VALIDATION_LIMITS } from "../constants/validationLimits.js";
 
 const categorySchema = new mongoose.Schema(
   {
@@ -7,10 +8,12 @@ const categorySchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      maxlength: VALIDATION_LIMITS.productName,
     },
     description: {
       type: String,
       trim: true,
+      maxlength: VALIDATION_LIMITS.productDescription,
     },
     isActive: {
       type: Boolean,

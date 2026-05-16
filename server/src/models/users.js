@@ -1,5 +1,6 @@
 ﻿import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { VALIDATION_LIMITS } from "../constants/validationLimits.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,6 +8,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: VALIDATION_LIMITS.name,
     },
     email: {
       type: String,
@@ -14,6 +16,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
+      maxlength: VALIDATION_LIMITS.email,
     },
     password: {
       type: String,

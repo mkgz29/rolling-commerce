@@ -52,7 +52,8 @@ export const createMercadoPagoPreferenceController = async (req, res) => {
       "Insufficient stock",
       "Missing MERCADOPAGO_ACCESS_TOKEN",
     ];
-    const isValidationError = validationMessages.some((message) => error.message.includes(message));
+    const isValidationError =
+      error.statusCode === 400 || validationMessages.some((message) => error.message.includes(message));
     const statusCode = error.message.includes("Missing MERCADOPAGO_ACCESS_TOKEN") ? 500 : isValidationError ? 400 : 500;
 
     console.error(error);

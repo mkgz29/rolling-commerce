@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { NUMBER_LIMITS, VALIDATION_LIMITS } from '../constants/validationLimits';
 import { apiRequest } from '../routes/api';
 import { getProductImage } from '../utils/productImage';
 
@@ -67,16 +68,32 @@ const normalizeCategoryValue = (category = '') => {
 
 const validateForm = ({ formData, imageFile, isEditing }) => {
   const errors = {};
+  const productNameTooLong = formData.name.trim().length > VALIDATION_LIMITS.productName;
+  const productDescriptionTooLong =
+    formData.description.trim().length > VALIDATION_LIMITS.productDescription;
 
   if (!formData.name.trim()) errors.name = 'Ingresá el nombre del producto.';
   if (!formData.description.trim()) errors.description = 'Ingresá una descripción breve.';
   if (!formData.category) errors.category = 'Seleccioná una categoría.';
 
-  if (formData.price === '' || Number.isNaN(Number(formData.price)) || Number(formData.price) < 0) {
+  if (productNameTooLong) errors.name = 'El nombre es demasiado largo.';
+  if (productDescriptionTooLong) errors.description = 'La descripcion es demasiado larga.';
+
+  if (
+    formData.price === '' ||
+    !/^\d+(\.\d{1,2})?$/.test(String(formData.price)) ||
+    Number(formData.price) < NUMBER_LIMITS.price.min ||
+    Number(formData.price) > NUMBER_LIMITS.price.max
+  ) {
     errors.price = 'Ingresá un precio válido.';
   }
 
-  if (formData.stock === '' || !Number.isInteger(Number(formData.stock)) || Number(formData.stock) < 0) {
+  if (
+    formData.stock === '' ||
+    !/^\d+$/.test(String(formData.stock)) ||
+    Number(formData.stock) < NUMBER_LIMITS.stock.min ||
+    Number(formData.stock) > NUMBER_LIMITS.stock.max
+  ) {
     errors.stock = 'Ingresá un stock entero válido.';
   }
 
@@ -154,6 +171,8 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'price' && value && !/^\d*\.?\d{0,2}$/.test(value)) return;
+    if (name === 'stock' && value && !/^\d*$/.test(value)) return;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: '' }));
   };
@@ -248,6 +267,7 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                       type="text"
                       className={inputClass('name')}
                       name="name"
+                      maxLength={VALIDATION_LIMITS.productName}
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Ej: AMD Ryzen 7 7800X3D"
@@ -262,6 +282,7 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                       id="product-description"
                       className={inputClass('description')}
                       name="description"
+                      maxLength={VALIDATION_LIMITS.productDescription}
                       value={formData.description}
                       onChange={handleChange}
                       rows="3"
@@ -292,7 +313,9 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                         value={formData.price}
                         onChange={handleChange}
                         min="0"
+                        max={NUMBER_LIMITS.price.max}
                         step="0.01"
+                        inputMode="decimal"
                         placeholder="159999.99"
                         disabled={loading}
                       />
@@ -309,7 +332,9 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                         value={formData.stock}
                         onChange={handleChange}
                         min="0"
+                        max={NUMBER_LIMITS.stock.max}
                         step="1"
+                        inputMode="numeric"
                         placeholder="12"
                         disabled={loading}
                       />

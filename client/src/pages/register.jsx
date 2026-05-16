@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../hooks/useAuth";
+import { VALIDATION_LIMITS } from "../constants/validationLimits";
 import loginRegisterBg from "../assets/loginregister.jpg";
 
 export default function Register() {
@@ -53,7 +54,7 @@ export default function Register() {
     try {
       await register({
         name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
-        email: formData.email.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
 
@@ -129,6 +130,7 @@ export default function Register() {
               <input
                 type="text"
                 name="firstName"
+                maxLength={VALIDATION_LIMITS.firstName}
                 placeholder="Juan"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -143,6 +145,7 @@ export default function Register() {
               <input
                 type="text"
                 name="lastName"
+                maxLength={VALIDATION_LIMITS.lastName}
                 placeholder="Pérez"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -159,6 +162,7 @@ export default function Register() {
             <input
               type="email"
               name="email"
+              maxLength={VALIDATION_LIMITS.email}
               placeholder="tu@email.com"
               value={formData.email}
               onChange={handleChange}
@@ -175,6 +179,7 @@ export default function Register() {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                maxLength={VALIDATION_LIMITS.password}
                 placeholder="Mínimo 6 caracteres"
                 value={formData.password}
                 onChange={handleChange}
@@ -195,6 +200,7 @@ export default function Register() {
               <input
                 type={showRepeat ? "text" : "password"}
                 name="repeatPassword"
+                maxLength={VALIDATION_LIMITS.password}
                 placeholder="Repetí tu contraseña"
                 value={formData.repeatPassword}
                 onChange={handleChange}

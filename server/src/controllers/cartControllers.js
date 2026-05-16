@@ -1,30 +1,8 @@
-// MÓDULO: Cart
-// Rutas del carrito que requieren token JWT:
-// GET    /api/cart                    → obtener el carrito del usuario logueado
-// POST   /api/cart/add                → agregar un producto o sumar cantidad si ya existe
-// PUT    /api/cart/item/:productId    → actualizar la cantidad de un producto en el carrito
-// DELETE /api/cart/item/:productId    → eliminar un producto del carrito
-// DELETE /api/cart/clear              → vaciar el carrito completo
-//
-// El carrito se asocia automáticamente al usuario de `req.user._id`.
-// El backend devuelve el carrito con `items` y `total` calculados.
-// Cada item incluye ahora:
-// - productId
-// - name
-// - price
-// - quantity
-// - product: { _id, name, description, image, images, category, stock }
 import mongoose from "mongoose";
 import Cart from "../models/cart.js";
 import Product from "../models/products.js";
+import { parseQuantity } from "../utils/validators.js";
 
-// buildCartResponse convierte el carrito de Mongo en la forma que usa el frontend.
-// Cada item contiene:
-// - productId
-// - name
-// - price
-// - quantity
-// - product: { _id, name, description, image, images, category, stock }
 const buildCartResponse = (cart) => {
   const items = cart.items.map((item) => {
     const populatedProduct = item.productId && item.productId.name ? item.productId : null;
@@ -58,8 +36,6 @@ const buildCartResponse = (cart) => {
     updatedAt: cart.updatedAt,
   };
 };
-// Devuelve el carrito del usuario logueado.
-// Si no tiene carrito creado, devuelve un objeto vacío con items: [] y total: 0.
 export const getCart = async (req, res) => {
   try {
     if (!req.user) {
@@ -83,10 +59,6 @@ export const getCart = async (req, res) => {
   }
 };
 
-// Agrega un producto al carrito.
-// Si el producto ya existe en el carrito, suma la quantity en lugar de duplicar el item.
-// Si el usuario no tiene carrito, lo crea automáticamente.
-// Body requerido: { productId, name, price, quantity (opcional, default 1) }
 export const addItem = async (req, res) => {
   try {
     if (!req.user) {
@@ -108,11 +80,7 @@ export const addItem = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const itemQuantity = quantity && quantity > 0 ? quantity : 1;
-
-    if (!Number.isInteger(itemQuantity) || itemQuantity <= 0) {
-      return res.status(400).json({ message: "Quantity must be a positive integer" });
-    }
+    const itemQuantity = quantity === undefined ? 1 : parseQuantity(quantity);
 
     if (itemQuantity > product.stock) {
       return res.status(400).json({ message: `Requested quantity exceeds stock. Available: ${product.stock}` });
@@ -152,13 +120,10 @@ export const addItem = async (req, res) => {
     res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[addItem]", error);
-    res.status(500).json({ message: "Error adding item to cart" });
+    res.status(error.statusCode || 500).json({ message: error.statusCode ? error.message : "Error adding item to cart" });
   }
 };
 
-// Actualiza la cantidad de un producto en el carrito.
-// Si quantity llega a 0, el item se elimina automáticamente.
-// Params: productId. Body requerido: { quantity }
 export const updateItem = async (req, res) => {
   try {
     if (!req.user) {
@@ -172,9 +137,7 @@ export const updateItem = async (req, res) => {
       return res.status(400).json({ message: "Invalid product ID format" });
     }
 
-    if (quantity === undefined || quantity < 0 || !Number.isInteger(quantity)) {
-      return res.status(400).json({ message: "Valid quantity (non-negative integer) is required" });
-    }
+    const itemQuantity = parseQuantity(quantity, { allowZero: true });
 
     const cart = await Cart.findOne({ userId: req.user._id });
 
@@ -190,10 +153,10 @@ export const updateItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found in cart" });
     }
 
-    if (quantity === 0) {
+    if (itemQuantity === 0) {
       cart.items.splice(itemIndex, 1);
     } else {
-      cart.items[itemIndex].quantity = quantity;
+      cart.items[itemIndex].quantity = itemQuantity;
     }
 
     await cart.save();
@@ -202,11 +165,9 @@ export const updateItem = async (req, res) => {
     res.status(200).json(buildCartResponse(cart));
   } catch (error) {
     console.error("[updateItem]", error);
-    res.status(500).json({ message: "Error updating item" });
+    res.status(error.statusCode || 500).json({ message: error.statusCode ? error.message : "Error updating item" });
   }
 };
-// Elimina un producto específico del carrito.
-// Params: productId.
 export const removeItem = async (req, res) => {
   try {
     if (!req.user) {
@@ -244,8 +205,6 @@ export const removeItem = async (req, res) => {
     res.status(500).json({ message: "Error removing item from cart" });
   }
 };
-// Vacía el carrito completo — deja items: [] pero mantiene el documento en la DB.
-// El documento se mantiene para no perder la referencia del usuario.
 export const clearCart = async (req, res) => {
   try {
     if (!req.user) {

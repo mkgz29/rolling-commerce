@@ -1,5 +1,7 @@
 import Product from "../models/products.js";
 import mongoose from "mongoose";
+import { NUMBER_LIMITS, VALIDATION_LIMITS } from "../constants/validationLimits.js";
+import { parseLimitedNumber, sanitizeLimitedString } from "../utils/validators.js";
 
 const BUILD_PC_CATEGORIES = new Set([
   "processors",
@@ -53,13 +55,16 @@ const CATEGORY_ALIASES = new Map([
 ]);
 
 const normalizeCategory = (category) => {
-  const normalized = normalizeText(category);
+  const sanitizedCategory = sanitizeLimitedString(category, "category", VALIDATION_LIMITS.productName, {
+    required: true,
+  });
+  const normalized = normalizeText(sanitizedCategory);
 
   if (BUILD_PC_CATEGORIES.has(normalized)) {
     return normalized;
   }
 
-  return CATEGORY_ALIASES.get(normalized) || category.trim();
+  return CATEGORY_ALIASES.get(normalized) || sanitizedCategory;
 };
 
 const parseBoolean = (value, defaultValue = true) => {
@@ -70,18 +75,24 @@ const parseBoolean = (value, defaultValue = true) => {
 
 const parseSpecs = (specs) => {
   if (!specs) return [];
-  if (Array.isArray(specs)) return specs.map((item) => String(item).trim()).filter(Boolean);
+  if (Array.isArray(specs)) {
+    return specs
+      .map((item) => sanitizeLimitedString(String(item), "spec", VALIDATION_LIMITS.comments))
+      .filter(Boolean);
+  }
 
   if (typeof specs === "string") {
     try {
       const parsedSpecs = JSON.parse(specs);
       if (Array.isArray(parsedSpecs)) {
-        return parsedSpecs.map((item) => String(item).trim()).filter(Boolean);
+        return parsedSpecs
+          .map((item) => sanitizeLimitedString(String(item), "spec", VALIDATION_LIMITS.comments))
+          .filter(Boolean);
       }
     } catch {
       return specs
         .split(",")
-        .map((item) => item.trim())
+        .map((item) => sanitizeLimitedString(item, "spec", VALIDATION_LIMITS.comments))
         .filter(Boolean);
     }
   }
@@ -104,21 +115,25 @@ const validateProductData = (data) => {
     stock,
     isActive,
   } = data;
-  const parsedStock = Number(stock);
+  const sanitizedName = sanitizeLimitedString(name, "Product name", VALIDATION_LIMITS.productName, {
+    required: true,
+  });
+  const sanitizedDescription = sanitizeLimitedString(
+    description,
+    "Product description",
+    VALIDATION_LIMITS.productDescription,
+    { required: true },
+  );
+  const parsedPrice = parseLimitedNumber(price, "Product price", NUMBER_LIMITS.price);
+  const parsedStock = parseLimitedNumber(stock, "Product stock", {
+    ...NUMBER_LIMITS.stock,
+    integer: true,
+  });
 
-  if (!name || !name.trim()) {
-    throw new Error("Product name is required");
-  }
+  const hasImageValue = typeof image === "string" && image.trim();
+  const hasImageUrlValue = typeof imageUrl === "string" && imageUrl.trim();
 
-  if (price === undefined || price === null || isNaN(price) || price < 0) {
-    throw new Error("Product price must be a valid positive number");
-  }
-
-  if (!description || !description.trim()) {
-    throw new Error("Product description is required");
-  }
-
-  if (!image?.trim() && !imageUrl?.trim() && (!Array.isArray(images) || images.length === 0)) {
+  if (!hasImageValue && !hasImageUrlValue && (!Array.isArray(images) || images.length === 0)) {
     throw new Error("At least one product image is required");
   }
 
@@ -134,14 +149,20 @@ const validateProductData = (data) => {
     }
 
     return {
-      url: item.url.trim(),
-      public_id: itemPublicId.trim(),
-      publicId: itemPublicId.trim(),
+      url: sanitizeLimitedString(item.url, "image url", 500, { required: true }),
+      public_id: sanitizeLimitedString(itemPublicId, "image public_id", 200, { required: true }),
+      publicId: sanitizeLimitedString(itemPublicId, "image publicId", 200, { required: true }),
     };
   });
 
-  const primaryImage = imageUrl?.trim() || image?.trim() || normalizedImages[0]?.url;
-  const primaryPublicId = publicId?.trim() || normalizedImages[0]?.public_id || "";
+  const primaryImage = imageUrl
+    ? sanitizeLimitedString(imageUrl, "imageUrl", 500, { required: true })
+    : image
+      ? sanitizeLimitedString(image, "image", 500, { required: true })
+      : normalizedImages[0]?.url;
+  const primaryPublicId = publicId
+    ? sanitizeLimitedString(publicId, "publicId", 200, { required: true })
+    : normalizedImages[0]?.public_id || "";
   const finalImages =
     normalizedImages.length > 0
       ? normalizedImages
@@ -153,30 +174,18 @@ const validateProductData = (data) => {
     throw new Error("Product image URL is required");
   }
 
-  if (!category || !category.trim()) {
-    throw new Error("Product category is required");
-  }
-
-  if (
-    stock === undefined ||
-    stock === null ||
-    stock === "" ||
-    !Number.isInteger(parsedStock) ||
-    parsedStock < 0
-  ) {
-    throw new Error("Product stock must be a non-negative integer");
-  }
+  const normalizedCategory = normalizeCategory(category);
 
   return {
-    name: name.trim(),
-    price: parseFloat(price),
-    description: description.trim(),
+    name: sanitizedName,
+    price: parsedPrice,
+    description: sanitizedDescription,
     image: primaryImage,
     imageUrl: primaryImage,
     publicId: primaryPublicId,
     images: finalImages,
-    category: normalizeCategory(category),
-    brand: brand?.trim() || "",
+    category: normalizedCategory,
+    brand: brand ? sanitizeLimitedString(brand, "brand", VALIDATION_LIMITS.name) : "",
     specs: parseSpecs(specs),
     stock: parsedStock,
     isActive: parseBoolean(isActive, true),
@@ -200,9 +209,10 @@ const getProducts = async ({ category = null, search = null, includeInactive = f
   }
 
   if (search && search.trim()) {
+    const sanitizedSearch = sanitizeLimitedString(search, "search", VALIDATION_LIMITS.search);
     filter.$or = [
-      { name: { $regex: search.trim(), $options: "i" } },
-      { description: { $regex: search.trim(), $options: "i" } },
+      { name: { $regex: sanitizedSearch, $options: "i" } },
+      { description: { $regex: sanitizedSearch, $options: "i" } },
     ];
   }
 
@@ -245,8 +255,8 @@ const updateProduct = async (productId, updateData) => {
   }
 
   const hasReplacementImage =
-    Boolean(updateData.image?.trim()) ||
-    Boolean(updateData.imageUrl?.trim()) ||
+    (typeof updateData.image === "string" && Boolean(updateData.image.trim())) ||
+    (typeof updateData.imageUrl === "string" && Boolean(updateData.imageUrl.trim())) ||
     (Array.isArray(updateData.images) && updateData.images.length > 0);
 
   const imageData = hasReplacementImage
