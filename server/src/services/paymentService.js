@@ -190,6 +190,14 @@ const createMercadoPagoPreference = async ({
 
   await attachPaymentPreference(order._id, response.id);
 
+  console.info("PENDING_ORDER_CREATED", {
+    orderId: order._id.toString(),
+    status: order.status,
+    userId: String(userId),
+    total,
+    preferenceId: response.id,
+  });
+
   return {
     preferenceId: response.id,
     checkoutUrl: getCheckoutUrl(response),

@@ -64,6 +64,13 @@ export const getAdminOrdersController = async (req, res, next) => {
       populateUser: true,
     });
 
+    console.info("ADMIN_ORDERS_COUNT", {
+      total: orders.total,
+      page: orders.page,
+      limit: orders.limit,
+      status: req.query.status || null,
+    });
+
     res.status(200).json(orders);
   } catch (error) {
     next(error);

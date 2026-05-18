@@ -1,6 +1,6 @@
 import { Payment } from "mercadopago";
 import { createMercadoPagoClient } from "../config/mercadoPago.js";
-import { markOrderPaidFromPayment } from "../services/orderService.js";
+import { syncOrderFromPayment } from "../services/orderService.js";
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
@@ -22,17 +22,13 @@ export const mercadoPagoWebhook = async (req, res) => {
       id: paymentId,
     });
 
-    if (paymentData.status !== "approved") {
-      return res.status(200).send("payment not approved");
-    }
-
     const orderId = paymentData.external_reference;
 
     if (!orderId) {
       return res.status(200).send("missing order reference");
     }
 
-    await markOrderPaidFromPayment({
+    await syncOrderFromPayment({
       orderId,
       paymentId,
       paymentStatus: paymentData.status,

@@ -33,6 +33,20 @@ const getStatusTimestampPatch = (status) => {
   return {};
 };
 
+const mapPaymentStatusToOrderStatus = (paymentStatus = "") => {
+  const normalizedStatus = String(paymentStatus || "").toLowerCase();
+
+  if (normalizedStatus === "approved") return "paid";
+  if (["rejected", "cancelled", "canceled", "refunded", "charged_back"].includes(normalizedStatus)) {
+    return "cancelled";
+  }
+  if (["pending", "in_process", "in_mediation"].includes(normalizedStatus)) {
+    return "pending";
+  }
+
+  return "pending";
+};
+
 const validateOrderItems = async (items) => {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error("Order items cannot be empty");
@@ -250,6 +264,13 @@ const createPendingPaymentOrder = async ({
       provider: paymentProvider,
       status: "pending",
     },
+  });
+
+  console.info("PENDING_ORDER_CREATED_BEFORE_PREFERENCE", {
+    orderId: order._id.toString(),
+    status: order.status,
+    userId: String(userId),
+    total,
   });
 
   return { order, preferenceItems, total };
@@ -495,6 +516,55 @@ const markOrderPaidFromPayment = async ({
   }
 };
 
+const syncOrderFromPayment = async ({
+  orderId,
+  paymentId,
+  paymentStatus = "pending",
+  statusDetail = "",
+} = {}) => {
+  const nextOrderStatus = mapPaymentStatusToOrderStatus(paymentStatus);
+
+  if (nextOrderStatus === "paid") {
+    return markOrderPaidFromPayment({
+      orderId,
+      paymentId,
+      paymentStatus,
+      statusDetail,
+    });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new Error("Invalid order ID format");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    const error = new Error("Order not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (order.status !== "paid" || nextOrderStatus === "cancelled") {
+    order.status = nextOrderStatus;
+    if (nextOrderStatus === "cancelled") {
+      order.cancelledAt = order.cancelledAt || new Date();
+    }
+  }
+
+  order.payment = {
+    ...(order.payment?.toObject?.() || order.payment || {}),
+    provider: order.payment?.provider || "mercadopago",
+    paymentId: paymentId ? String(paymentId) : order.payment?.paymentId,
+    status: paymentStatus,
+    statusDetail,
+  };
+
+  await order.save();
+
+  return order;
+};
+
 const cancelOrder = async (orderId, userId = null) => {
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     throw new Error("Invalid order ID format");
@@ -534,6 +604,7 @@ export {
   cancelOrder,
   attachPaymentPreference,
   markOrderPaidFromPayment,
+  syncOrderFromPayment,
   calculateOrderTotal,
   validateOrderItems,
 };
