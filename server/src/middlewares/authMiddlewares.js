@@ -1,13 +1,6 @@
-// MÓDULO: Auth (compartido con Users y Cart)
-// protect: verifica el token JWT y carga el usuario en req.user.
-// admin: verifica que req.user.role sea "admin". Siempre usar después de protect.
-// Uso en rutas: router.get("/ruta", protect, admin, controller)
-// El token debe enviarse en el header: Authorization: Bearer <token>
 import jwt from "jsonwebtoken";
 import User from "../models/users.js";
-// Middleware principal de autenticación.
-// Si el token es válido y el usuario está activo, carga req.user y llama a next().
-// Si el token es inválido o el usuario está inactivo, corta la cadena con 401.
+
 export const protect = async (req, res, next) => {
   try {
     let token;
@@ -34,9 +27,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Middleware de autorización de rol.
-// Solo deja pasar si req.user.role === "admin".
-// Siempre usar después de protect — depende de que req.user ya esté cargado.
+
 export const admin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();

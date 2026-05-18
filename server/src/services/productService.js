@@ -1,5 +1,6 @@
 import Product from "../models/products.js";
 import mongoose from "mongoose";
+import { v2 as cloudinary } from "cloudinary";
 
 const BUILD_PC_CATEGORIES = new Set([
   "processors",
@@ -292,10 +293,42 @@ const deleteProduct = async (productId) => {
     throw new Error("Product not found");
   }
 
-  product.isActive = false;
-  await product.save();
 
-  return { message: "Product deactivated successfully" };
+  if (Array.isArray(product.images)) {
+    for (const image of product.images) {
+      const publicId = image?.public_id || image?.publicId;
+
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (error) {
+          console.error("Error deleting image from Cloudinary:", error);
+        }
+      }
+    }
+  }
+
+  
+  await Product.findByIdAndDelete(productId);
+
+  return {
+    message: "Product deleted successfully",
+  };
+};
+const permanentlyDeleteProduct = async (productId) => {
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new Error("Invalid product ID format");
+  }
+
+  const deletedProduct = await Product.findByIdAndDelete(productId);
+
+  if (!deletedProduct) {
+    throw new Error("Product not found");
+  }
+
+  return {
+    message: "Product permanently deleted successfully",
+  };
 };
 
 const decreaseStock = async (productId, quantity) => {
@@ -330,6 +363,7 @@ export {
   getFeaturedProducts,
   updateProduct,
   deleteProduct,
+  permanentlyDeleteProduct,
   decreaseStock,
   validateProductData,
 };

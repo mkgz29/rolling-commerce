@@ -4,6 +4,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  permanentlyDeleteProduct,
 } from "../services/productService.js";
 import { uploadImageFile } from "../services/image.service.js";
 
@@ -88,12 +89,18 @@ const updateProductController = async (req, res, next) => {
   }
 };
 
-// @desc    Delete a product
-// @route   DELETE /api/products/:id
-// @access  Private/Admin
 const deleteProductController = async (req, res, next) => {
   try {
     const result = await deleteProduct(req.params.id);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const permanentlyDeleteProductController = async (req, res, next) => {
+  try {
+    const result = await permanentlyDeleteProduct(req.params.id);
     res.json(result);
   } catch (error) {
     next(error);
@@ -106,4 +113,5 @@ export {
   getProductByIdController as getProductById,
   updateProductController as updateProduct,
   deleteProductController as deleteProduct,
+  permanentlyDeleteProductController as permanentlyDeleteProduct,
 };
