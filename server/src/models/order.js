@@ -4,6 +4,7 @@
 // Para integrar pagos en el futuro: el campo status se actualiza desde el webhook de pago.
 
 import mongoose from "mongoose";
+import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -46,14 +47,46 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "paid", "cancelled", "delivered"],
+      enum: ORDER_STATUSES,
       default: "pending",
     },
+    customer: {
+      fullName: { type: String, trim: true },
+      email: { type: String, trim: true, lowercase: true },
+      phone: { type: String, trim: true },
+    },
+    shipping: {
+      country: { type: String, trim: true },
+      state: { type: String, trim: true },
+      city: { type: String, trim: true },
+      zip: { type: String, trim: true },
+      address: { type: String, trim: true },
+      delivery: {
+        type: String,
+        enum: ["delivery", "pickup", ""],
+        default: "",
+      },
+    },
+    payment: {
+      provider: { type: String, trim: true },
+      preferenceId: { type: String, trim: true },
+      paymentId: { type: String, trim: true },
+      status: { type: String, trim: true },
+      statusDetail: { type: String, trim: true },
+    },
+    paidAt: { type: Date },
+    deliveredAt: { type: Date },
+    cancelledAt: { type: Date },
+    stockReducedAt: { type: Date },
   },
   {
     timestamps: true,
   }
 );
+
+orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ "customer.email": 1, createdAt: -1 });
+orderSchema.index({ userId: 1, createdAt: -1 });
 
 const Order = mongoose.model("Order", orderSchema);
 

@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminProductsTable from '../components/AdminProductsTable';
 import ProductFormModal from '../components/ProductFormModal';
 import { apiRequest } from '../routes/api';
-import { getOrdersRequest } from '../routes/orderService';
+import { getAdminOrdersRequest } from '../routes/orderService';
 import '../styles/admin.css';
+
+const AdminSalesPage = lazy(() => import('./admin/AdminSalesPage'));
 
 const unwrapOrders = (data) => {
   if (Array.isArray(data)) return data;
@@ -26,7 +28,7 @@ const formatCurrency = (value) =>
 const isPaidOrder = (order) => ['paid', 'delivered', 'approved'].includes(String(order?.status || '').toLowerCase());
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,12 +56,12 @@ const AdminDashboard = () => {
     try {
       setMetricsLoading(true);
       setMetricsError('');
-      const data = await getOrdersRequest();
+      const data = await getAdminOrdersRequest({ limit: 100, sortBy: '-createdAt' });
       setOrders(unwrapOrders(data));
     } catch (err) {
       console.error('Error fetching orders for admin metrics:', err);
       setOrders([]);
-      setMetricsError('Órdenes no disponibles');
+      setMetricsError('Ordenes no disponibles');
     } finally {
       setMetricsLoading(false);
     }
@@ -77,6 +79,12 @@ const AdminDashboard = () => {
   const totalSales = orders
     .filter(isPaidOrder)
     .reduce((total, order) => total + Number(order.total || order.totalAmount || 0), 0);
+  const isProductsView = activeTab === 'products';
+  const pageTitle = {
+    dashboard: 'Tablero admin',
+    products: 'Gestion de productos',
+    sales: 'Gestion de ventas',
+  }[activeTab] || 'Panel admin';
 
   const handleEdit = (product) => {
     setProductToEdit(product);
@@ -85,13 +93,13 @@ const AdminDashboard = () => {
 
   const handleDelete = async (product) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: `El producto "${product.name}" pasará a estar inactivo.`,
+      title: 'Confirmar desactivacion',
+      text: `El producto "${product.name}" pasara a estar inactivo.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#42c4ff',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, desactivar',
+      confirmButtonText: 'Si, desactivar',
       cancelButtonText: 'Cancelar',
       background: '#1a1d21',
       color: '#fff',
@@ -104,7 +112,7 @@ const AdminDashboard = () => {
       await fetchProducts();
       Swal.fire({
         title: 'Producto desactivado',
-        text: 'Ya no aparecerá en el catálogo público.',
+        text: 'Ya no aparecera en el catalogo publico.',
         icon: 'success',
         background: '#1a1d21',
         color: '#fff',
@@ -115,7 +123,7 @@ const AdminDashboard = () => {
       console.error('Error deleting product:', err);
       Swal.fire({
         title: 'No se pudo desactivar',
-        text: err.message || 'El servidor rechazó la operación.',
+        text: err.message || 'El servidor rechazo la operacion.',
         icon: 'error',
         background: '#1a1d21',
         color: '#fff',
@@ -136,7 +144,7 @@ const AdminDashboard = () => {
     Swal.fire({
       title: action === 'updated' ? 'Producto actualizado' : 'Producto creado',
       text: action === 'updated'
-        ? 'Los cambios ya se reflejan en el catálogo.'
+        ? 'Los cambios ya se reflejan en el catalogo.'
         : 'El producto fue guardado y ya puede aparecer en Productos.',
       icon: 'success',
       background: '#1a1d21',
@@ -152,11 +160,13 @@ const AdminDashboard = () => {
 
       <main className="admin-content p-4 flex-grow-1">
         <header className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h3 mb-0">Gestión de inventario</h1>
-          <button className="btn btn-primary-gradient" onClick={handleOpenCreateModal}>
-            <i className="bi bi-plus-lg me-2" />
-            Nuevo producto
-          </button>
+          <h1 className="h3 mb-0">{pageTitle}</h1>
+          {isProductsView && (
+            <button className="btn btn-primary-gradient" onClick={handleOpenCreateModal}>
+              <i className="bi bi-plus-lg me-2" />
+              Nuevo producto
+            </button>
+          )}
         </header>
 
         <div className="row g-4 mb-4">
@@ -167,7 +177,7 @@ const AdminDashboard = () => {
               icon: 'bi-currency-dollar',
               color: '#42c4ff',
               loading: metricsLoading,
-              hint: metricsError || 'Órdenes pagadas',
+              hint: metricsError || 'Ordenes pagadas',
             },
             {
               label: 'Productos',
@@ -175,10 +185,10 @@ const AdminDashboard = () => {
               icon: 'bi-box',
               color: '#8d5cff',
               loading,
-              hint: 'Activos en catálogo',
+              hint: 'Activos en catalogo',
             },
             {
-              label: 'Órdenes pendientes',
+              label: 'Ordenes pendientes',
               value: pendingOrders,
               icon: 'bi-clock-history',
               color: '#ffc107',
@@ -190,7 +200,18 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {error ? (
+        {activeTab === 'dashboard' ? (
+          <section className="table-container admin-dashboard-summary p-4">
+            <h2 className="h4 mb-2">Resumen general</h2>
+            <p className="admin-page-subtitle mb-0">
+              Usa Productos para administrar inventario y Ventas para gestionar ordenes.
+            </p>
+          </section>
+        ) : activeTab === 'sales' ? (
+          <Suspense fallback={<div className="table-container admin-table-state">Cargando ventas...</div>}>
+            <AdminSalesPage onOrdersChanged={fetchOrders} />
+          </Suspense>
+        ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
           <AdminProductsTable
@@ -202,15 +223,17 @@ const AdminDashboard = () => {
         )}
       </main>
 
-      <ProductFormModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setProductToEdit(null);
-        }}
-        productToEdit={productToEdit}
-        onProductCreated={handleProductSaved}
-      />
+      {isProductsView && (
+        <ProductFormModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setProductToEdit(null);
+          }}
+          productToEdit={productToEdit}
+          onProductCreated={handleProductSaved}
+        />
+      )}
     </div>
   );
 };

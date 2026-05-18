@@ -10,6 +10,8 @@
 import express from "express";
 import {
   createOrder,
+  getAdminOrders,
+  getAdminOrderById,
   getOrders,
   getOrderById,
   updateOrderStatus,
@@ -17,6 +19,12 @@ import {
 import { protect, admin } from "../middlewares/authMiddlewares.js";
 
 const router = express.Router();
+
+router.get("/admin", protect, admin, getAdminOrders);
+
+router.get("/admin/:id", protect, admin, getAdminOrderById);
+
+router.patch("/admin/:id/status", protect, admin, updateOrderStatus);
 
 router.post("/", protect, createOrder);
 

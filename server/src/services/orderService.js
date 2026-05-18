@@ -1,7 +1,37 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import Product from "../models/products.js";
+import User from "../models/users.js";
 import mongoose from "mongoose";
+import { ORDER_STATUSES } from "../constants/orderStatuses.js";
+import { sanitizeLimitedString } from "../utils/validators.js";
+
+const ORDER_SORT_FIELDS = new Set(["createdAt", "total"]);
+
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildCheckoutSnapshot = (checkoutData = {}) => ({
+  customer: {
+    fullName: checkoutData.fullName || "",
+    email: checkoutData.email || "",
+    phone: checkoutData.phone || "",
+  },
+  shipping: {
+    country: checkoutData.country || "",
+    state: checkoutData.state || "",
+    city: checkoutData.city || "",
+    zip: checkoutData.zip || "",
+    address: checkoutData.address || "",
+    delivery: checkoutData.delivery || "",
+  },
+});
+
+const getStatusTimestampPatch = (status) => {
+  if (status === "paid") return { paidAt: new Date() };
+  if (status === "delivered") return { deliveredAt: new Date() };
+  if (status === "cancelled") return { cancelledAt: new Date() };
+  return {};
+};
 
 const validateOrderItems = async (items) => {
   if (!Array.isArray(items) || items.length === 0) {
@@ -124,6 +154,9 @@ const createOrder = async (userId, cartData = null) => {
       }
     }
 
+    order.stockReducedAt = new Date();
+    await order.save({ session });
+
     if (cartData) {
       cartData.items = [];
       await cartData.save({ session });
@@ -143,12 +176,97 @@ const createOrder = async (userId, cartData = null) => {
   }
 };
 
-const getOrderById = async (orderId, userId = null) => {
+const createPendingPaymentOrder = async ({
+  userId,
+  requestedItems = [],
+  checkoutData = {},
+  paymentProvider = "mercadopago",
+} = {}) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID format");
+  }
+
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0) {
+    throw new Error("Order items cannot be empty");
+  }
+
+  const productIds = requestedItems.map((item) => item.productId);
+  const products = await Product.find({
+    _id: { $in: productIds },
+    isActive: { $ne: false },
+  }).select("name price stock isActive");
+
+  const productsById = new Map(products.map((product) => [String(product._id), product]));
+
+  const preferenceItems = requestedItems.map((item) => {
+    if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+      throw new Error("Invalid product ID format in order items");
+    }
+
+    if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+      throw new Error("Item quantity must be a positive integer");
+    }
+
+    const product = productsById.get(String(item.productId));
+
+    if (!product) {
+      throw new Error("Product not found or inactive");
+    }
+
+    if (product.stock < item.quantity) {
+      throw new Error(`Insufficient stock for product "${product.name}"`);
+    }
+
+    return {
+      productId: String(product._id),
+      title: product.name,
+      quantity: item.quantity,
+      unitPrice: product.price,
+      subtotal: Number((product.price * item.quantity).toFixed(2)),
+    };
+  });
+
+  const total = calculateOrderTotal(
+    preferenceItems.map((item) => ({
+      price: item.unitPrice,
+      quantity: item.quantity,
+    }))
+  );
+
+  const { customer, shipping } = buildCheckoutSnapshot(checkoutData);
+  const order = await Order.create({
+    userId,
+    items: preferenceItems.map((item) => ({
+      productId: item.productId,
+      name: item.title,
+      price: item.unitPrice,
+      quantity: item.quantity,
+    })),
+    total,
+    status: "pending",
+    customer,
+    shipping,
+    payment: {
+      provider: paymentProvider,
+      status: "pending",
+    },
+  });
+
+  return { order, preferenceItems, total };
+};
+
+const getOrderById = async (orderId, userId = null, { populateUser = false } = {}) => {
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     throw new Error("Invalid order ID format");
   }
 
-  const order = await Order.findById(orderId);
+  let query = Order.findById(orderId);
+
+  if (populateUser) {
+    query = query.populate("userId", "name email role");
+  }
+
+  const order = await query;
 
   if (!order) {
     throw new Error("Order not found");
@@ -180,31 +298,88 @@ const getOrdersByUserId = async (userId) => {
   };
 };
 
-const getAllOrders = async ({ status = null, sortBy = "createdAt" } = {}) => {
+const getAllOrders = async ({
+  status = null,
+  sortBy = "-createdAt",
+  from = null,
+  to = null,
+  customer = null,
+  page = 1,
+  limit = 50,
+  populateUser = false,
+} = {}) => {
   const filter = {};
 
   if (status) {
-    const validStatuses = ["pending", "paid", "cancelled", "delivered"];
-    if (!validStatuses.includes(status)) {
+    if (!ORDER_STATUSES.includes(status)) {
       throw new Error(
-        `Invalid status. Must be one of: ${validStatuses.join(", ")}`
+        `Invalid status. Must be one of: ${ORDER_STATUSES.join(", ")}`
       );
     }
     filter.status = status;
   }
 
-  const sortOptions = {};
-  if (sortBy === "createdAt" || sortBy === "-createdAt") {
-    sortOptions.createdAt = sortBy === "-createdAt" ? -1 : 1;
-  } else if (sortBy === "total" || sortBy === "-total") {
-    sortOptions.total = sortBy === "-total" ? -1 : 1;
+  if (from || to) {
+    filter.createdAt = {};
+
+    if (from) {
+      const fromDate = new Date(from);
+      if (Number.isNaN(fromDate.getTime())) {
+        throw new Error("Invalid from date");
+      }
+      filter.createdAt.$gte = fromDate;
+    }
+
+    if (to) {
+      const toDate = new Date(to);
+      if (Number.isNaN(toDate.getTime())) {
+        throw new Error("Invalid to date");
+      }
+      filter.createdAt.$lte = toDate;
+    }
   }
 
-  const orders = await Order.find(filter)
-    .sort(sortOptions);
+  if (customer && customer.trim()) {
+    const sanitizedCustomer = sanitizeLimitedString(customer, "customer", 120);
+    const customerRegex = new RegExp(escapeRegex(sanitizedCustomer), "i");
+    const matchingUsers = await User.find({
+      $or: [{ name: customerRegex }, { email: customerRegex }],
+    }).select("_id");
+
+    filter.$or = [
+      { "customer.fullName": customerRegex },
+      { "customer.email": customerRegex },
+      { "customer.phone": customerRegex },
+      { userId: { $in: matchingUsers.map((user) => user._id) } },
+    ];
+  }
+
+  const normalizedSort = String(sortBy || "-createdAt");
+  const sortDirection = normalizedSort.startsWith("-") ? -1 : 1;
+  const sortField = normalizedSort.replace(/^-/, "");
+  const sortOptions = ORDER_SORT_FIELDS.has(sortField)
+    ? { [sortField]: sortDirection }
+    : { createdAt: -1 };
+
+  const parsedPage = Math.max(Number.parseInt(page, 10) || 1, 1);
+  const parsedLimit = Math.min(Math.max(Number.parseInt(limit, 10) || 50, 1), 100);
+  const skip = (parsedPage - 1) * parsedLimit;
+
+  let query = Order.find(filter).sort(sortOptions).skip(skip).limit(parsedLimit);
+
+  if (populateUser) {
+    query = query.populate("userId", "name email role");
+  }
+
+  const [orders, total] = await Promise.all([
+    query,
+    Order.countDocuments(filter),
+  ]);
 
   return {
-    total: orders.length,
+    total,
+    page: parsedPage,
+    limit: parsedLimit,
     orders,
   };
 };
@@ -214,11 +389,9 @@ const updateOrderStatus = async (orderId, newStatus) => {
     throw new Error("Invalid order ID format");
   }
 
-  const validStatuses = ["pending", "paid", "cancelled", "delivered"];
-
-  if (!newStatus || !validStatuses.includes(newStatus)) {
+  if (!newStatus || !ORDER_STATUSES.includes(newStatus)) {
     throw new Error(
-      `Invalid status. Must be one of: ${validStatuses.join(", ")}`
+      `Invalid status. Must be one of: ${ORDER_STATUSES.join(", ")}`
     );
   }
 
@@ -229,9 +402,97 @@ const updateOrderStatus = async (orderId, newStatus) => {
   }
 
   order.status = newStatus;
+  Object.assign(order, getStatusTimestampPatch(newStatus));
   await order.save();
 
   return order;
+};
+
+const attachPaymentPreference = async (orderId, preferenceId) => {
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new Error("Invalid order ID format");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  order.payment = {
+    ...(order.payment?.toObject?.() || order.payment || {}),
+    provider: order.payment?.provider || "mercadopago",
+    preferenceId,
+    status: order.payment?.status || "pending",
+  };
+
+  await order.save();
+
+  return order;
+};
+
+const markOrderPaidFromPayment = async ({
+  orderId,
+  paymentId,
+  paymentStatus = "approved",
+  statusDetail = "",
+} = {}) => {
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new Error("Invalid order ID format");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const order = await Order.findById(orderId).session(session);
+
+    if (!order) {
+      const error = new Error("Order not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const shouldReduceStock = order.status !== "paid" && !order.stockReducedAt;
+
+    if (shouldReduceStock) {
+      for (const item of order.items) {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { _id: item.productId, stock: { $gte: item.quantity } },
+          { $inc: { stock: -item.quantity } },
+          { new: true, session }
+        );
+
+        if (!updatedProduct) {
+          throw new Error(`Insufficient stock for product "${item.productId}" during payment confirmation`);
+        }
+      }
+
+      order.stockReducedAt = new Date();
+    } else if (order.status === "paid" && !order.stockReducedAt) {
+      order.stockReducedAt = new Date();
+    }
+
+    order.status = "paid";
+    order.paidAt = order.paidAt || new Date();
+    order.payment = {
+      ...(order.payment?.toObject?.() || order.payment || {}),
+      provider: order.payment?.provider || "mercadopago",
+      paymentId: paymentId ? String(paymentId) : order.payment?.paymentId,
+      status: paymentStatus,
+      statusDetail,
+    };
+
+    await order.save({ session });
+    await session.commitTransaction();
+    session.endSession();
+
+    return order;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 const cancelOrder = async (orderId, userId = null) => {
@@ -265,11 +526,14 @@ const cancelOrder = async (orderId, userId = null) => {
 
 export {
   createOrder,
+  createPendingPaymentOrder,
   getOrderById,
   getOrdersByUserId,
   getAllOrders,
   updateOrderStatus,
   cancelOrder,
+  attachPaymentPreference,
+  markOrderPaidFromPayment,
   calculateOrderTotal,
   validateOrderItems,
 };

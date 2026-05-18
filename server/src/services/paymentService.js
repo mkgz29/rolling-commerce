@@ -1,10 +1,9 @@
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import mongoose from "mongoose";
-import Product from "../models/products.js";
-import Order from "../models/order.js";
 import { getMercadoPagoAccessToken, getMercadoPagoAccessTokenInfo } from "../config/mercadoPago.js";
 import { VALIDATION_LIMITS } from "../constants/validationLimits.js";
 import { parseQuantity, sanitizeEmail, sanitizeLimitedString } from "../utils/validators.js";
+import { attachPaymentPreference, createPendingPaymentOrder } from "./orderService.js";
 
 const validateCheckoutData = (checkoutData = {}) => {
   const sanitized = {
@@ -145,49 +144,11 @@ const createMercadoPagoPreference = async ({
 }) => {
   const sanitizedCheckoutData = validateCheckoutData(checkoutData);
   const requestedItems = normalizeRequestedItems(items);
-  const productIds = requestedItems.map((item) => item.productId);
-  const products = await Product.find({
-    _id: { $in: productIds },
-    isActive: { $ne: false },
-  }).select("name price stock isActive");
-
-  const productsById = new Map(products.map((product) => [String(product._id), product]));
-
-  const preferenceItems = requestedItems.map((item) => {
-    const product = productsById.get(String(item.productId));
-
-    if (!product) {
-      throw new Error("Product not found or inactive");
-    }
-
-    if (product.stock < item.quantity) {
-      throw new Error(`Insufficient stock for product "${product.name}"`);
-    }
-
-    return {
-      productId: String(product._id),
-      title: product.name,
-      quantity: item.quantity,
-      unitPrice: product.price,
-      subtotal: Number((product.price * item.quantity).toFixed(2)),
-    };
-  });
-
-  const total = Number(preferenceItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
-
-  const order = await Order.create({
+  const { order, preferenceItems, total } = await createPendingPaymentOrder({
     userId,
-
-    items: preferenceItems.map((item) => ({
-      productId: item.productId,
-      name: item.title,
-      price: item.unitPrice,
-      quantity: item.quantity,
-    })),
-
-    total,
-
-    status: "pending",
+    requestedItems,
+    checkoutData: sanitizedCheckoutData,
+    paymentProvider: "mercadopago",
   });
 
   const preferenceBody = buildPreferenceBody({ preferenceItems, sanitizedCheckoutData, order });
@@ -226,6 +187,8 @@ const createMercadoPagoPreference = async ({
         ? "sandbox_init_point"
         : "init_point",
   });
+
+  await attachPaymentPreference(order._id, response.id);
 
   return {
     preferenceId: response.id,
