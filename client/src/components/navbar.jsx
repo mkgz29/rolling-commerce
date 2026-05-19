@@ -8,6 +8,7 @@ import './navbar.css';
 const publicNavLinks = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/products', label: 'Productos' },
+  { to: '/about', label: 'Nosotros' },
   { to: '/build-your-pc', label: 'Armá tu PC' },
 ];
 
