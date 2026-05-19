@@ -9,7 +9,9 @@
 
 import express from "express";
 import {
+  cancelOrder,
   createOrder,
+  deleteOrder,
   getAdminOrders,
   getAdminOrderById,
   getOrders,
@@ -24,7 +26,11 @@ router.get("/admin", protect, admin, getAdminOrders);
 
 router.get("/admin/:id", protect, admin, getAdminOrderById);
 
+router.patch("/admin/:id/cancel", protect, admin, cancelOrder);
+
 router.patch("/admin/:id/status", protect, admin, updateOrderStatus);
+
+router.delete("/admin/:id", protect, admin, deleteOrder);
 
 router.post("/", protect, createOrder);
 

@@ -10,7 +10,9 @@
 import mongoose from "mongoose";
 import Cart from "../models/cart.js";
 import {
+  cancelOrder,
   createOrder,
+  deleteOrder,
   getAllOrders,
   getOrderById,
   getOrdersByUserId,
@@ -142,6 +144,39 @@ export const updateOrderStatusController = async (req, res, next) => {
   }
 };
 
+export const cancelOrderController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid order ID format" });
+    }
+
+    const order = await cancelOrder(id);
+    res.status(200).json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteOrderController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid order ID format" });
+    }
+
+    const deletedOrder = await deleteOrder(id);
+    res.status(200).json({
+      message: "Order deleted successfully",
+      orderId: deletedOrder._id,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   createOrderController as createOrder,
   getOrdersController as getOrders,
@@ -149,4 +184,6 @@ export {
   getAdminOrderByIdController as getAdminOrderById,
   getOrderByIdController as getOrderById,
   updateOrderStatusController as updateOrderStatus,
+  cancelOrderController as cancelOrder,
+  deleteOrderController as deleteOrder,
 };

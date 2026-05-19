@@ -5,12 +5,25 @@
 }
 
 .admin-sidebar {
+  box-sizing: border-box;
+  flex: 0 0 280px;
+  max-width: 280px;
+  min-width: 280px;
   width: 280px;
   background-color: #081123;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   position: sticky;
   top: 0;
   height: 100vh;
+}
+
+.admin-content {
+  min-width: 0;
+}
+
+.admin-sidebar-title {
+  flex: 0 0 auto;
+  line-height: 1.2;
 }
 
 .text-gradient {
@@ -21,11 +34,34 @@
 }
 
 .admin-sidebar .nav-link {
+  align-items: center;
+  border: 1px solid transparent;
+  box-sizing: border-box;
   color: rgba(244, 247, 255, 0.6);
+  display: flex;
+  font-weight: 500;
+  gap: 0.65rem;
+  justify-content: flex-start;
+  line-height: 1.2;
+  min-height: 46px;
   padding: 0.8rem 1.2rem;
   border-radius: 0.75rem;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   background: transparent;
+  width: 100%;
+}
+
+.admin-sidebar .nav-link i {
+  color: inherit;
+  flex: 0 0 1.1rem;
+  font-size: 1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.admin-sidebar .nav-link span {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .admin-sidebar .nav-link:hover {
@@ -35,8 +71,16 @@
 
 .admin-sidebar .nav-link.active {
   background: rgba(141, 92, 255, 0.15);
+  border-color: rgba(141, 92, 255, 0.35);
   color: #8d5cff;
-  font-weight: 600;
+}
+
+.admin-sidebar-logout {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 42px;
+  width: 100%;
 }
 
 .stat-card, .table-container {
@@ -286,6 +330,31 @@
   font-weight: 600;
 }
 
+.admin-sales-table-scroll {
+  overflow-x: auto;
+  scrollbar-color: rgba(141, 92, 255, 0.85) #0b1220;
+  scrollbar-width: thin;
+}
+
+.admin-sales-table-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.admin-sales-table-scroll::-webkit-scrollbar-track {
+  background: #0b1220;
+  border-radius: 999px;
+}
+
+.admin-sales-table-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #42c4ff 0%, #8d5cff 100%);
+  border: 2px solid #0b1220;
+  border-radius: 999px;
+}
+
+.admin-sales-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #62d0ff 0%, #a77cff 100%);
+}
+
 .admin-sales-table th,
 .admin-sales-table td {
   white-space: nowrap;
@@ -489,6 +558,9 @@
   }
 
   .admin-sidebar {
+    flex: 0 0 auto;
+    max-width: none;
+    min-width: 0;
     width: 100%;
     height: auto;
     position: relative;
@@ -503,8 +575,11 @@
   }
 
   .admin-sidebar .nav-link {
+    flex: 0 0 auto;
+    min-height: 42px;
     white-space: nowrap;
     padding: 0.5rem 1rem;
+    width: auto;
   }
 
   .admin-sidebar h2 {

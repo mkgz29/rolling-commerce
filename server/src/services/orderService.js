@@ -7,6 +7,7 @@ import { ORDER_STATUSES } from "../constants/orderStatuses.js";
 import { sanitizeLimitedString } from "../utils/validators.js";
 
 const ORDER_SORT_FIELDS = new Set(["createdAt", "total"]);
+const DELETABLE_ORDER_STATUSES = new Set(["pending", "cancelled", "rejected"]);
 
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -573,23 +574,51 @@ const cancelOrder = async (orderId, userId = null) => {
   const order = await Order.findById(orderId);
 
   if (!order) {
-    throw new Error("Order not found");
+    const error = new Error("Order not found");
+    error.statusCode = 404;
+    throw error;
   }
 
   // Si se proporciona userId, verificar que sea el propietario
   if (userId && String(order.userId) !== String(userId)) {
-    throw new Error("Access denied. Cannot cancel this order");
+    const error = new Error("Access denied. Cannot cancel this order");
+    error.statusCode = 403;
+    throw error;
   }
 
-  // No permitir cancelar órdenes ya pagadas o entregadas
-  if (order.status === "paid" || order.status === "delivered") {
-    throw new Error(
-      `Cannot cancel order with status "${order.status}"`
-    );
+  if (order.status !== "pending") {
+    const error = new Error(`Cannot cancel order with status "${order.status}"`);
+    error.statusCode = 409;
+    throw error;
   }
 
   order.status = "cancelled";
+  order.cancelledAt = order.cancelledAt || new Date();
   await order.save();
+
+  return order;
+};
+
+const deleteOrder = async (orderId) => {
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new Error("Invalid order ID format");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    const error = new Error("Order not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (!DELETABLE_ORDER_STATUSES.has(order.status)) {
+    const error = new Error(`Cannot delete order with status "${order.status}"`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  await order.deleteOne();
 
   return order;
 };
@@ -602,6 +631,7 @@ export {
   getAllOrders,
   updateOrderStatus,
   cancelOrder,
+  deleteOrder,
   attachPaymentPreference,
   markOrderPaidFromPayment,
   syncOrderFromPayment,

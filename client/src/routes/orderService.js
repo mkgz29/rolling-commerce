@@ -34,6 +34,20 @@ export const updateAdminOrderStatusRequest = (id, status) => {
   });
 };
 
+export const cancelAdminOrderRequest = (id) => {
+  assertValidOrderId(id);
+  return apiRequest(`/orders/admin/${id}/cancel`, {
+    method: 'PATCH',
+  });
+};
+
+export const deleteAdminOrderRequest = (id) => {
+  assertValidOrderId(id);
+  return apiRequest(`/orders/admin/${id}`, {
+    method: 'DELETE',
+  });
+};
+
 export const createOrderRequest = () => {
   return apiRequest('/orders', {
     method: 'POST',

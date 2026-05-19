@@ -16,7 +16,17 @@ const STATUS_CLASSES = {
   delivered: 'admin-status-badge admin-status-delivered',
 };
 
-const AdminSalesTable = ({ orders, loading = false, onViewDetail, onStatusChange, updatingOrderId = '' }) => {
+const CLEANABLE_STATUSES = new Set(['pending', 'cancelled', 'rejected']);
+
+const AdminSalesTable = ({
+  orders,
+  loading = false,
+  onViewDetail,
+  onStatusChange,
+  onCancelOrder,
+  onDeleteOrder,
+  updatingOrderId = '',
+}) => {
   if (loading) {
     return (
       <div className="table-container admin-table-state">
@@ -40,7 +50,7 @@ const AdminSalesTable = ({ orders, loading = false, onViewDetail, onStatusChange
 
   return (
     <div className="table-container p-4">
-      <div className="table-responsive">
+      <div className="table-responsive admin-sales-table-scroll">
         <table className="table table-dark table-hover align-middle mb-0 admin-sales-table">
           <thead>
             <tr>
@@ -59,6 +69,8 @@ const AdminSalesTable = ({ orders, loading = false, onViewDetail, onStatusChange
               const orderId = getOrderId(order);
               const status = String(order?.status || 'pending').toLowerCase();
               const isUpdating = updatingOrderId === orderId;
+              const canCancel = status === 'pending';
+              const canDelete = CLEANABLE_STATUSES.has(status);
 
               return (
                 <tr key={orderId}>
@@ -98,6 +110,30 @@ const AdminSalesTable = ({ orders, loading = false, onViewDetail, onStatusChange
                         <i className="bi bi-eye" />
                         <span className="admin-action-text">Ver</span>
                       </button>
+                      {canCancel && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-warning"
+                          onClick={() => onCancelOrder(order)}
+                          disabled={isUpdating}
+                          aria-label={`Cancelar venta ${getShortId(order)}`}
+                          title="Cancelar"
+                        >
+                          Cancelar
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => onDeleteOrder(order)}
+                          disabled={isUpdating}
+                          aria-label={`Eliminar venta ${getShortId(order)}`}
+                          title="Eliminar"
+                        >
+                          Eliminar
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

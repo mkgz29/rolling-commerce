@@ -6,6 +6,8 @@ import AdminSalesFilters from '../../components/AdminSalesFilters';
 import AdminSalesTable from '../../components/AdminSalesTable';
 import { STATUS_LABELS, getOrderId, isValidOrderId } from '../../components/adminSalesUtils';
 import {
+  cancelAdminOrderRequest,
+  deleteAdminOrderRequest,
   getAdminOrderByIdRequest,
   getAdminOrdersRequest,
   updateAdminOrderStatusRequest,
@@ -191,6 +193,119 @@ const AdminSalesPage = ({ onOrdersChanged }) => {
     }
   };
 
+  const handleCancelOrder = async (order) => {
+    const orderId = getOrderId(order);
+    if (!isValidOrderId(orderId) || String(order?.status || '').toLowerCase() !== 'pending') return;
+
+    const confirmation = await Swal.fire({
+      title: 'Cancelar orden',
+      text: 'Esta accion cancelara la orden pendiente.',
+      icon: 'warning',
+      background: '#1a1d21',
+      color: '#fff',
+      showCancelButton: true,
+      confirmButtonText: 'Cancelar orden',
+      cancelButtonText: 'Volver',
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#6c757d',
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      setUpdatingOrderId(orderId);
+      const updatedOrder = await cancelAdminOrderRequest(orderId);
+
+      setOrders((currentOrders) =>
+        currentOrders.map((currentOrder) =>
+          getOrderId(currentOrder) === orderId ? mergeOrderUpdate(currentOrder, updatedOrder) : currentOrder,
+        ),
+      );
+
+      setSelectedOrder((currentOrder) =>
+        currentOrder && getOrderId(currentOrder) === orderId
+          ? mergeOrderUpdate(currentOrder, updatedOrder)
+          : currentOrder,
+      );
+
+      onOrdersChanged?.();
+
+      Swal.fire({
+        title: 'Orden cancelada',
+        text: 'La orden pendiente fue cancelada correctamente.',
+        icon: 'success',
+        background: '#1a1d21',
+        color: '#fff',
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (requestError) {
+      console.error('Error cancelling sale:', requestError);
+      Swal.fire({
+        title: 'No se pudo cancelar',
+        text: requestError.message || 'El servidor rechazo la cancelacion.',
+        icon: 'error',
+        background: '#1a1d21',
+        color: '#fff',
+      });
+    } finally {
+      setUpdatingOrderId('');
+    }
+  };
+
+  const handleDeleteOrder = async (order) => {
+    const orderId = getOrderId(order);
+    const status = String(order?.status || '').toLowerCase();
+    if (!isValidOrderId(orderId) || !['pending', 'cancelled', 'rejected'].includes(status)) return;
+
+    const confirmation = await Swal.fire({
+      title: 'Eliminar orden',
+      text: 'Esta accion quitara la orden del listado administrativo.',
+      icon: 'warning',
+      background: '#1a1d21',
+      color: '#fff',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Volver',
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      setUpdatingOrderId(orderId);
+      await deleteAdminOrderRequest(orderId);
+
+      setOrders((currentOrders) => currentOrders.filter((currentOrder) => getOrderId(currentOrder) !== orderId));
+      setTotal((currentTotal) => Math.max(Number(currentTotal || 0) - 1, 0));
+      setSelectedOrder((currentOrder) => (currentOrder && getOrderId(currentOrder) === orderId ? null : currentOrder));
+
+      onOrdersChanged?.();
+
+      Swal.fire({
+        title: 'Orden eliminada',
+        text: 'La orden fue removida correctamente.',
+        icon: 'success',
+        background: '#1a1d21',
+        color: '#fff',
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (requestError) {
+      console.error('Error deleting sale:', requestError);
+      Swal.fire({
+        title: 'No se pudo eliminar',
+        text: requestError.message || 'El servidor rechazo la eliminacion.',
+        icon: 'error',
+        background: '#1a1d21',
+        color: '#fff',
+      });
+    } finally {
+      setUpdatingOrderId('');
+    }
+  };
+
   return (
     <section className="admin-sales-page">
       <div className="d-flex justify-content-between align-items-start gap-3 mb-4 flex-wrap">
@@ -287,6 +402,8 @@ const AdminSalesPage = ({ onOrdersChanged }) => {
           loading={loading}
           onViewDetail={handleViewDetail}
           onStatusChange={handleStatusChange}
+          onCancelOrder={handleCancelOrder}
+          onDeleteOrder={handleDeleteOrder}
           updatingOrderId={updatingOrderId}
         />
       )}
