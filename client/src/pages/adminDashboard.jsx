@@ -123,76 +123,6 @@ const AdminDashboard = () => {
     }
   };
 
-const handleToggleActive = async (product) => {
-  const nextState = !product.isActive;
-
-  const result = await Swal.fire({
-    title: nextState
-      ? '¿Activar producto?'
-      : '¿Desactivar producto?',
-
-    text: nextState
-      ? `${product.name} volverá a aparecer en el catálogo.`
-      : `${product.name} dejará de aparecer en el catálogo.`,
-
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#42c4ff',
-    cancelButtonColor: '#d33',
-
-    confirmButtonText: nextState
-      ? 'Sí, activar'
-      : 'Sí, desactivar',
-
-    cancelButtonText: 'Cancelar',
-    background: '#1a1d21',
-    color: '#fff',
-  });
-
-  if (!result.isConfirmed) return;
-
-  try {
-    await apiRequest(`/products/${product._id || product.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({
-        isActive: nextState,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    await fetchProducts();
-
-    Swal.fire({
-      icon: 'success',
-
-      title: nextState
-        ? 'Producto activado'
-        : 'Producto desactivado',
-
-      text: nextState
-        ? `${product.name} ya está visible nuevamente.`
-        : `${product.name} fue ocultado del catálogo.`,
-
-      timer: 1800,
-      showConfirmButton: false,
-      background: '#1a1d21',
-      color: '#fff',
-    });
-  } catch (error) {
-    console.error(error);
-
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'No se pudo actualizar el estado del producto.',
-      background: '#1a1d21',
-      color: '#fff',
-    });
-  }
-};
-
   const handleOpenCreateModal = () => {
     setProductToEdit(null);
     setIsModalOpen(true);
@@ -268,7 +198,6 @@ const handleToggleActive = async (product) => {
             loading={loading}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onToggleActive={handleToggleActive}
           />
         )}
       </main>

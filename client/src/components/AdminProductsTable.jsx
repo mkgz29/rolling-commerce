@@ -7,13 +7,7 @@ const CATEGORY_LABELS = {
   cases: 'Gabinetes',
 };
 
-const AdminProductsTable = ({
-  products,
-  loading = false,
-  onEdit,
-  onDelete,
-  onToggleActive,
-}) => {
+const AdminProductsTable = ({ products, loading = false, onEdit, onDelete }) => {
   if (loading) {
     return (
       <div className="table-container admin-table-state">
@@ -86,64 +80,23 @@ const AdminProductsTable = ({
                     </div>
                   </td>
                   <td className="text-end">
-                    <div className="dropdown">
-  <button
-    className="btn btn-sm btn-action text-light"
-    type="button"
-    data-bs-toggle="dropdown"
-    aria-expanded="false"
-  >
-    <i className="bi bi-three-dots-vertical" />
-  </button>
-
-  <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-    <li>
-      <button
-        type="button"
-        className="dropdown-item"
-        onClick={() => onEdit(product)}
-      >
-        <i className="bi bi-pencil-square me-2" />
-        Editar
-      </button>
-    </li>
-
-    <li>
-      <button
-        type="button"
-        className="dropdown-item"
-        onClick={() => onToggleActive(product)}
-      >
-        <i
-          className={`bi me-2 ${
-            product.isActive === false
-              ? 'bi-eye'
-              : 'bi-eye-slash'
-          }`}
-        />
-
-        {product.isActive === false
-          ? 'Activar producto'
-          : 'Desactivar producto'}
-      </button>
-    </li>
-
-    <li>
-      <hr className="dropdown-divider" />
-    </li>
-
-    <li>
-      <button
-        type="button"
-        className="dropdown-item text-danger"
-        onClick={() => onDelete(product)}
-      >
-        <i className="bi bi-trash me-2" />
-        Eliminar permanentemente
-      </button>
-    </li>
-  </ul>
-</div>
+                    <button
+                      className="btn btn-sm btn-action text-success"
+                      title={`Editar ${product.name}`}
+                      aria-label={`Editar ${product.name}`}
+                      onClick={() => onEdit(product)}
+                    >
+                      <i className="bi bi-pencil-square" />
+                    </button>
+                    <button
+                      className="btn btn-sm btn-action text-danger"
+                      title={product.isActive === false ? 'Producto inactivo' : `Desactivar ${product.name}`}
+                      aria-label={product.isActive === false ? 'Producto inactivo' : `Desactivar ${product.name}`}
+                      onClick={() => onDelete(product)}
+                      disabled={product.isActive === false}
+                    >
+                      <i className="bi bi-trash" />
+                    </button>
                   </td>
                 </tr>
               );

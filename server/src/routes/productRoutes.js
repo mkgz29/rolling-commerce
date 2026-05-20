@@ -5,7 +5,6 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
-  permanentlyDeleteProduct,
 } from "../controllers/productsController.js";
 import { protect, admin } from "../middlewares/authMiddlewares.js";
 import {
@@ -45,6 +44,5 @@ router.patch(
   updateProduct
 );
 router.delete("/:id", protect, admin, deleteProduct);
-router.delete("/:id/permanently", protect, admin, permanentlyDeleteProduct);
 
 export default router;
