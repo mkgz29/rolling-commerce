@@ -1,3 +1,4 @@
+import Dropdown from "react-bootstrap/Dropdown";
 const CATEGORY_LABELS = {
   processors: 'Procesadores',
   'graphics-cards': 'Placas de video',
@@ -7,7 +8,14 @@ const CATEGORY_LABELS = {
   cases: 'Gabinetes',
 };
 
-const AdminProductsTable = ({ products, loading = false, onEdit, onDelete }) => {
+const AdminProductsTable = ({
+  products,
+  loading = false,
+  onEdit,
+  onDelete,
+  onActivate,
+  onPermanentDelete,
+}) => {
   if (loading) {
     return (
       <div className="table-container admin-table-state">
@@ -80,24 +88,49 @@ const AdminProductsTable = ({ products, loading = false, onEdit, onDelete }) => 
                     </div>
                   </td>
                   <td className="text-end">
-                    <button
-                      className="btn btn-sm btn-action text-success"
-                      title={`Editar ${product.name}`}
-                      aria-label={`Editar ${product.name}`}
-                      onClick={() => onEdit(product)}
-                    >
-                      <i className="bi bi-pencil-square" />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-action text-danger"
-                      title={product.isActive === false ? 'Producto inactivo' : `Desactivar ${product.name}`}
-                      aria-label={product.isActive === false ? 'Producto inactivo' : `Desactivar ${product.name}`}
-                      onClick={() => onDelete(product)}
-                      disabled={product.isActive === false}
-                    >
-                      <i className="bi bi-trash" />
-                    </button>
-                  </td>
+  <Dropdown align="end">
+    <Dropdown.Toggle
+      variant="dark"
+      size="sm"
+      className="border-0 shadow-none"
+    >
+      <i className="bi bi-three-dots-vertical" />
+    </Dropdown.Toggle>
+
+    <Dropdown.Menu className="dropdown-menu-dark">
+      <Dropdown.Item onClick={() => onEdit(product)}>
+        <i className="bi bi-pencil-square me-2 text-success" />
+        Editar
+      </Dropdown.Item>
+
+     <Dropdown.Item
+  onClick={() =>
+    product.isActive === false
+      ? onActivate(product)
+      : onDelete(product)
+  }
+>
+  <i
+    className={`bi me-2 ${
+      product.isActive === false
+        ? 'bi-eye text-success'
+        : 'bi-eye-slash text-warning'
+    }`}
+  />
+  {product.isActive === false ? 'Activar' : 'Desactivar'}
+</Dropdown.Item>
+      <Dropdown.Divider />
+
+      <Dropdown.Item
+  className="text-danger"
+  onClick={() => onPermanentDelete(product)}
+>
+  <i className="bi bi-trash me-2" />
+  Borrar
+</Dropdown.Item>
+    </Dropdown.Menu>
+  </Dropdown>
+</td>
                 </tr>
               );
             })}

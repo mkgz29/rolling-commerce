@@ -85,8 +85,6 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/webhooks", webhookRoutes);
 
-// Compatibilidad temporal por si alguna parte vieja del frontend llama sin /api
-app.use("/products", productRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

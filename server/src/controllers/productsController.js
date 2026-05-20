@@ -4,6 +4,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  permanentDeleteProductService,
 } from "../services/productService.js";
 import { uploadImageFile } from "../services/image.service.js";
 
@@ -100,10 +101,24 @@ const deleteProductController = async (req, res, next) => {
   }
 };
 
+// @desc    Permanently delete a product
+// @route   DELETE /api/products/:id/permanent
+// @access  Private/Admin
+const permanentDeleteProductController = async (req, res, next) => {
+  try {
+    const result = await permanentDeleteProductService(req.params.id);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   createProductController as createProduct,
   getProductsController as getProducts,
   getProductByIdController as getProductById,
   updateProductController as updateProduct,
   deleteProductController as deleteProduct,
+  permanentDeleteProductController as permanentDeleteProduct,
 };
+  

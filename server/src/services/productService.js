@@ -297,6 +297,23 @@ const deleteProduct = async (productId) => {
 
   return { message: "Product deactivated successfully" };
 };
+const permanentDeleteProductService = async (productId) => {
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new Error("Invalid product ID format");
+  }
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  await Product.findByIdAndDelete(productId);
+
+  return {
+    message: "Product permanently deleted successfully",
+  };
+};
 
 const decreaseStock = async (productId, quantity) => {
   if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -330,6 +347,7 @@ export {
   getFeaturedProducts,
   updateProduct,
   deleteProduct,
+  permanentDeleteProductService,
   decreaseStock,
   validateProductData,
 };
