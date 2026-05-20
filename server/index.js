@@ -10,6 +10,8 @@ import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
+import contactRoutes from "./src/routes/contactRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
 import { configureCloudinary, getMissingCloudinaryEnvVars } from "./src/config/cloudinary.js";
 import { hasMercadoPagoAccessToken } from "./src/config/mercadoPago.js";
@@ -84,6 +86,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/webhooks", webhookRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Compatibilidad temporal por si alguna parte vieja del frontend llama sin /api
 app.use("/products", productRoutes);

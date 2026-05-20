@@ -3,6 +3,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     { id: 'dashboard', label: 'Tablero', icon: 'bi-speedometer2' },
     { id: 'products', label: 'Productos', icon: 'bi-box' },
     { id: 'sales', label: 'Ventas', icon: 'bi-receipt' },
+    { id: 'contacts', label: 'Consultas', icon: 'bi-chat-left-text' },
   ];
 
   return (

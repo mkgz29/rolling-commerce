@@ -89,6 +89,41 @@
   border-radius: 1.25rem;
 }
 
+.admin-stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.admin-stat-card::after {
+  background: linear-gradient(90deg, rgba(66, 196, 255, 0.65), rgba(141, 92, 255, 0.5));
+  bottom: 0;
+  content: '';
+  height: 2px;
+  left: 1rem;
+  opacity: 0.5;
+  position: absolute;
+  right: 1rem;
+}
+
+.admin-stat-card:hover {
+  border-color: rgba(66, 196, 255, 0.22);
+  box-shadow: 0 18px 50px rgba(0, 8, 26, 0.28);
+  transform: translateY(-2px);
+}
+
+.admin-stat-healthy {
+  border-color: rgba(34, 197, 94, 0.14);
+}
+
+.admin-stat-warning {
+  border-color: rgba(250, 204, 21, 0.18);
+}
+
+.admin-stat-danger {
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
 .stat-icon {
   width: 48px;
   height: 48px;
@@ -139,6 +174,42 @@
   display: block;
   font-size: 0.78rem;
   margin-top: 0.35rem;
+}
+
+.stat-health-badge {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-top: 0.65rem;
+  padding: 0.36rem 0.55rem;
+  text-transform: uppercase;
+}
+
+.stat-health-healthy {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.24);
+  color: #86efac;
+}
+
+.stat-health-warning {
+  background: rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.24);
+  color: #fde68a;
+}
+
+.stat-health-danger {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.26);
+  color: #fca5a5;
+}
+
+.stat-health-neutral {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
 }
 
 .admin-modal-backdrop {
@@ -394,6 +465,12 @@
   color: #93e7ff;
 }
 
+.admin-status-archived {
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #cbd5e1;
+}
+
 .admin-status-select {
   background-color: #111827;
   border-color: rgba(255, 255, 255, 0.14);
@@ -469,6 +546,232 @@
   min-height: 160px;
 }
 
+.admin-dashboard-overview {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-dashboard-alert {
+  background: rgba(250, 204, 21, 0.1);
+  border-color: rgba(250, 204, 21, 0.25);
+  color: #fde68a;
+}
+
+.admin-dashboard-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+}
+
+.admin-dashboard-grid-secondary {
+  grid-template-columns: minmax(360px, 0.92fr) minmax(0, 1.08fr);
+}
+
+.admin-dashboard-panel {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.022)),
+    #081123;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 50px rgba(0, 8, 26, 0.22);
+  min-width: 0;
+  overflow: hidden;
+  padding: 1.2rem;
+}
+
+.admin-mini-chart-panel {
+  position: relative;
+}
+
+.admin-mini-chart-panel::before {
+  background: radial-gradient(circle, rgba(66, 196, 255, 0.14), transparent 62%);
+  content: '';
+  height: 220px;
+  pointer-events: none;
+  position: absolute;
+  right: -82px;
+  top: -92px;
+  width: 220px;
+}
+
+.admin-panel-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-panel-eyebrow {
+  color: #83d8ff;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.admin-panel-header h2 {
+  color: #f4f7ff;
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.admin-panel-chip {
+  background: rgba(66, 196, 255, 0.1);
+  border: 1px solid rgba(66, 196, 255, 0.2);
+  border-radius: 999px;
+  color: #9fe8ff;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.4rem 0.65rem;
+}
+
+.admin-mini-chart,
+.admin-chart-skeleton {
+  min-height: 190px;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-chart-skeleton {
+  align-items: end;
+  display: grid;
+  gap: 0.7rem;
+  padding-top: 3rem;
+}
+
+.admin-chart-skeleton .placeholder {
+  border-radius: 999px;
+  height: 18px;
+}
+
+.admin-activity-list,
+.admin-message-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-activity-item,
+.admin-message-item {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.95rem;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-activity-item:hover,
+.admin-message-item:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(66, 196, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+.admin-activity-item {
+  align-items: center;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  min-height: 70px;
+  padding: 0.75rem;
+}
+
+.admin-activity-icon {
+  align-items: center;
+  background: rgba(66, 196, 255, 0.1);
+  border: 1px solid rgba(66, 196, 255, 0.2);
+  border-radius: 14px;
+  color: #9fe8ff;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.admin-activity-order_approved {
+  background: rgba(34, 197, 94, 0.11);
+  border-color: rgba(34, 197, 94, 0.22);
+  color: #86efac;
+}
+
+.admin-activity-message_received {
+  background: rgba(141, 92, 255, 0.12);
+  border-color: rgba(141, 92, 255, 0.24);
+  color: #c4b5fd;
+}
+
+.admin-activity-product_updated {
+  background: rgba(250, 204, 21, 0.11);
+  border-color: rgba(250, 204, 21, 0.2);
+  color: #fde68a;
+}
+
+.admin-activity-copy {
+  min-width: 0;
+}
+
+.admin-activity-copy strong,
+.admin-message-item strong {
+  color: #f4f7ff;
+  display: block;
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.admin-activity-copy small,
+.admin-message-item span:not(.admin-status-badge) {
+  color: rgba(244, 247, 255, 0.58);
+  display: block;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  margin-top: 0.18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-activity-item time,
+.admin-message-item time {
+  color: rgba(244, 247, 255, 0.48);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.admin-message-item {
+  align-items: center;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  min-height: 64px;
+  padding: 0.85rem;
+}
+
+.admin-empty-compact {
+  align-items: center;
+  color: rgba(244, 247, 255, 0.62);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 160px;
+  text-align: center;
+}
+
+.admin-empty-compact i {
+  color: #42c4ff;
+  font-size: 1.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.admin-empty-compact p {
+  margin: 0;
+}
+
 .admin-sales-metric {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -501,6 +804,41 @@
 
 .admin-sales-metric-cancelled {
   border-color: rgba(248, 113, 113, 0.2);
+}
+
+.admin-contact-filters .form-label {
+  color: rgba(244, 247, 255, 0.76);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.admin-contact-metric-pending {
+  border-color: rgba(250, 204, 21, 0.2);
+}
+
+.admin-contact-metric-answered {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.admin-contact-metric-archived {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.admin-contact-table th,
+.admin-contact-table td {
+  vertical-align: top;
+}
+
+.admin-contact-muted {
+  color: rgba(244, 247, 255, 0.58);
+  font-size: 0.84rem;
+}
+
+.admin-contact-message-cell {
+  color: rgba(244, 247, 255, 0.76);
+  max-width: 320px;
+  min-width: 260px;
+  white-space: normal;
 }
 
 .admin-sales-chart {
@@ -603,6 +941,11 @@
     grid-template-columns: 1fr;
   }
 
+  .admin-dashboard-grid,
+  .admin-dashboard-grid-secondary {
+    grid-template-columns: 1fr;
+  }
+
   .admin-chart-legend {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -627,5 +970,23 @@
 
   .admin-chart-legend {
     grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-panel {
+    padding: 1rem;
+  }
+
+  .admin-activity-item,
+  .admin-message-item {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-activity-icon {
+    display: none;
+  }
+
+  .admin-activity-item time,
+  .admin-message-item time {
+    white-space: normal;
   }
 }
