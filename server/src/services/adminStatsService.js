@@ -43,7 +43,16 @@ const buildSalesLast7Days = async () => {
     {
       $match: {
         status: { $in: PAID_STATUSES },
-        createdAt: { $gte: from },
+      },
+    },
+    {
+      $addFields: {
+        saleDate: { $ifNull: ["$paidAt", "$createdAt"] },
+      },
+    },
+    {
+      $match: {
+        saleDate: { $gte: from },
       },
     },
     {
@@ -51,7 +60,8 @@ const buildSalesLast7Days = async () => {
         _id: {
           $dateToString: {
             format: "%Y-%m-%d",
-            date: "$createdAt",
+            date: "$saleDate",
+            timezone: "America/Argentina/Buenos_Aires",
           },
         },
         total: { $sum: "$total" },

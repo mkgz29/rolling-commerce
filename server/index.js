@@ -81,13 +81,13 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/webhooks", webhookRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/admin", adminRoutes);
 
 // Compatibilidad temporal por si alguna parte vieja del frontend llama sin /api
 app.use("/products", productRoutes);

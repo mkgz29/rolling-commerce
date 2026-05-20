@@ -280,7 +280,11 @@ const AdminDashboard = () => {
                   </section>
                 }
               >
-                <AdminDashboardMiniChart data={dashboardStats.salesLast7Days} loading={dashboardLoading} />
+                <AdminDashboardMiniChart
+                  data={dashboardStats.salesLast7Days}
+                  loading={dashboardLoading}
+                  totalSales={dashboardStats.totalSales}
+                />
               </Suspense>
               <AdminRecentActivity items={dashboardStats.recentActivity} loading={dashboardLoading} />
             </div>
