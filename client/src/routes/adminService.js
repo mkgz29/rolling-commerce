@@ -1,5 +1,5 @@
 import { apiRequest } from './api';
 
 export const getAdminStatsRequest = () => {
-  return apiRequest('/admin/stats');
+  return apiRequest('/orders/admin/stats');
 };
