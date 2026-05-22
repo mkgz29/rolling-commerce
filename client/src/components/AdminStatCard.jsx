@@ -4,10 +4,10 @@ const AdminStatCard = ({ stat }) => {
   return (
     <div className="col-xl-3 col-md-6">
       <div className={`stat-card admin-stat-card admin-stat-${tone} p-4 h-100`}>
-        <div className="d-flex justify-content-between align-items-start">
-          <div>
+        <div className="d-flex justify-content-between align-items-start gap-3">
+          <div className="admin-stat-copy">
             <p className="text-secondary small mb-1">{stat.label}</p>
-            <h3 className="mb-0 fw-bold">
+            <h3 className="mb-0 fw-bold admin-stat-value">
               {stat.loading ? (
                 <span className="placeholder-glow">
                   <span className="placeholder col-6 rounded" />
