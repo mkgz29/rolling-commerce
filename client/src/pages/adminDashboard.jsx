@@ -177,8 +177,9 @@ const AdminDashboard = () => {
       color: '#fff',
     });
 
+    
     if (!result.isConfirmed) return;
-
+    
     try {
       await apiRequest(`/products/${product._id || product.id}`, { method: 'DELETE' });
       await fetchProducts();
@@ -197,6 +198,93 @@ const AdminDashboard = () => {
       Swal.fire({
         title: 'No se pudo desactivar',
         text: err.message || 'El servidor rechazo la operacion.',
+        icon: 'error',
+        background: '#1a1d21',
+        color: '#fff',
+      });
+    }
+  };
+  const handleActivate = async (product) => {
+try {
+ await apiRequest(`/products/${product._id || product.id}`, {
+  method: 'PATCH',
+  body: {
+    name: product.name,
+    price: product.price,
+    description: product.description,
+    image: product.image,
+    imageUrl: product.imageUrl,
+    publicId: product.publicId,
+    images: product.images,
+    category: product.category,
+    brand: product.brand,
+    specs: product.specs,
+    stock: product.stock,
+    isActive: true,
+  },
+});
+
+  await fetchProducts();
+
+  Swal.fire({
+    title: 'Producto activado',
+    text: 'El producto volvió a estar visible en el catálogo.',
+    icon: 'success',
+    background: '#1a1d21',
+    color: '#fff',
+    timer: 2200,
+    showConfirmButton: false,
+  });
+} catch (err) {
+  console.error('Error activating product:', err);
+
+  Swal.fire({
+    title: 'No se pudo activar',
+    text: err.message || 'El servidor rechazó la operación.',
+    icon: 'error',
+    background: '#1a1d21',
+    color: '#fff',
+  });
+}
+};
+  const handlePermanentDelete = async (product) => {
+    const result = await Swal.fire({
+      title: '¿Borrar producto definitivamente?',
+      text: `El producto "${product.name}" será eliminado permanentemente de MongoDB.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, borrar',
+      cancelButtonText: 'Cancelar',
+      background: '#1a1d21',
+      color: '#fff',
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await apiRequest(`/products/${product._id || product.id}/permanent`, {
+        method: 'DELETE',
+      });
+
+      await fetchProducts();
+
+      Swal.fire({
+        title: 'Producto eliminado',
+        text: 'El producto fue eliminado definitivamente.',
+        icon: 'success',
+        background: '#1a1d21',
+        color: '#fff',
+        timer: 2200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error('Error permanently deleting product:', err);
+
+      Swal.fire({
+        title: 'No se pudo borrar',
+        text: err.message || 'El servidor rechazó la operación.',
         icon: 'error',
         background: '#1a1d21',
         color: '#fff',
@@ -320,6 +408,8 @@ const AdminDashboard = () => {
             loading={loading}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onActivate={handleActivate}
+            onPermanentDelete={handlePermanentDelete}
           />
         )}
       </main>
