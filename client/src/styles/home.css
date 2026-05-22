@@ -1,6 +1,9 @@
 .home-page {
   background: #060b16;
   color: #f4f7ff;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .hero-section {
@@ -359,8 +362,9 @@
 .catalog-hero-grid {
   display: grid;
   align-items: end;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+  grid-template-columns: minmax(0, 1fr) minmax(min(100%, 320px), 440px);
   gap: 2rem;
+  min-width: 0;
 }
 
 .catalog-kicker {
@@ -390,6 +394,7 @@
 }
 
 .catalog-filter-panel {
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.14);
   border-radius: 22px;
   background: rgba(10, 17, 31, 0.84);
@@ -487,11 +492,13 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .catalog-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 100%;
   overflow: hidden;
   border: 1px solid rgba(131, 216, 255, 0.14);
@@ -536,6 +543,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .catalog-card-meta span:first-child {
@@ -775,9 +783,10 @@
 
 .newsletter-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
+  grid-template-columns: minmax(0, 1fr) minmax(min(100%, 320px), 0.78fr);
   align-items: center;
   gap: 2rem;
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.12);
   border-radius: 24px;
   background: rgba(10, 17, 31, 0.78);
@@ -796,6 +805,7 @@
 .newsletter-form {
   display: flex;
   gap: 0.75rem;
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.18);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.055);

@@ -1,20 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminProductsTable from '../components/AdminProductsTable';
 import ProductFormModal from '../components/ProductFormModal';
+import AdminCategoriesPanel from '../components/AdminCategoriesPanel';
+import AdminRecentActivity from '../components/AdminRecentActivity';
+import AdminRecentMessages from '../components/AdminRecentMessages';
 import { apiRequest } from '../routes/api';
-import { getOrdersRequest } from '../routes/orderService';
+import { getAdminStatsRequest } from '../routes/adminService';
+import { getCategoriesRequest } from '../routes/categoryService';
 import '../styles/admin.css';
 
-const unwrapOrders = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.orders)) return data.orders;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.items)) return data.items;
-  return [];
-};
+const AdminSalesPage = lazy(() => import('./admin/AdminSalesPage'));
+const AdminContactPage = lazy(() => import('./admin/AdminContactPage'));
+const AdminDashboardMiniChart = lazy(() => import('../components/AdminDashboardMiniChart'));
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('es-AR', {
@@ -23,15 +24,42 @@ const formatCurrency = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const isPaidOrder = (order) => ['paid', 'delivered', 'approved'].includes(String(order?.status || '').toLowerCase());
+const emptyStats = {
+  totalSales: 0,
+  totalProducts: 0,
+  pendingOrders: 0,
+  pendingMessages: 0,
+  recentOrders: [],
+  recentMessages: [],
+  salesLast7Days: [],
+  recentActivity: [],
+};
+
+const getAttentionTone = (value) => {
+  const count = Number(value || 0);
+  if (count === 0) return 'healthy';
+  if (count <= 3) return 'warning';
+  return 'danger';
+};
+
+const getAttentionBadge = (value) => {
+  const count = Number(value || 0);
+  if (count === 0) return 'Saludable';
+  if (count <= 3) return 'Revisar';
+  return 'Atencion';
+};
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [dashboardStats, setDashboardStats] = useState(emptyStats);
   const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [metricsLoading, setMetricsLoading] = useState(true);
-  const [metricsError, setMetricsError] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState('');
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
@@ -47,36 +75,123 @@ const AdminDashboard = () => {
       setError(err.message || 'Error al cargar los productos.');
     } finally {
       setLoading(false);
+      setProductsLoaded(true);
     }
   }, []);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      setMetricsLoading(true);
-      setMetricsError('');
-      const data = await getOrdersRequest();
-      setOrders(unwrapOrders(data));
+      setCategoriesLoading(true);
+      const data = await getCategoriesRequest();
+      setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Error fetching orders for admin metrics:', err);
-      setOrders([]);
-      setMetricsError('Órdenes no disponibles');
+      console.error('Error fetching categories:', err);
+      setError(err.message || 'Error al cargar las categorias.');
     } finally {
-      setMetricsLoading(false);
+      setCategoriesLoading(false);
+      setCategoriesLoaded(true);
+    }
+  }, []);
+
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      setDashboardLoading(true);
+      setDashboardError('');
+      const data = await getAdminStatsRequest();
+      setDashboardStats({ ...emptyStats, ...data });
+    } catch (err) {
+      console.error('Error fetching admin dashboard stats:', err);
+      setDashboardStats(emptyStats);
+      setDashboardError(err.message || 'No se pudo cargar el resumen admin.');
+    } finally {
+      setDashboardLoading(false);
     }
   }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
-      fetchProducts();
-      fetchOrders();
+      fetchDashboardStats();
     });
-  }, [fetchProducts, fetchOrders]);
+  }, [fetchDashboardStats]);
 
-  const totalProducts = products.filter((product) => product.isActive !== false).length;
-  const pendingOrders = orders.filter((order) => String(order?.status || '').toLowerCase() === 'pending').length;
-  const totalSales = orders
-    .filter(isPaidOrder)
-    .reduce((total, order) => total + Number(order.total || order.totalAmount || 0), 0);
+  useEffect(() => {
+    if (activeTab !== 'products' || productsLoaded || loading) return;
+    queueMicrotask(() => {
+      fetchProducts();
+    });
+  }, [activeTab, fetchProducts, loading, productsLoaded]);
+
+  useEffect(() => {
+    if (activeTab !== 'products' || categoriesLoaded || categoriesLoading) return;
+    queueMicrotask(() => {
+      fetchCategories();
+    });
+  }, [activeTab, categoriesLoaded, categoriesLoading, fetchCategories]);
+
+  const statCards = useMemo(() => {
+    const pendingOrderTone = getAttentionTone(dashboardStats.pendingOrders);
+    const pendingMessageTone = getAttentionTone(dashboardStats.pendingMessages);
+
+    return [
+      {
+        label: 'Ventas totales',
+        value: formatCurrency(dashboardStats.totalSales),
+        icon: 'bi-currency-dollar',
+        color: '#42c4ff',
+        loading: dashboardLoading,
+        hint: dashboardError || 'Ordenes pagadas',
+        tone: 'healthy',
+        badge: 'Activo',
+      },
+      {
+        label: 'Productos',
+        value: dashboardStats.totalProducts,
+        icon: 'bi-box',
+        color: '#8d5cff',
+        loading: dashboardLoading,
+        hint: 'Activos en catalogo',
+        tone: 'neutral',
+        badge: 'Catalogo',
+      },
+      {
+        label: 'Ordenes pendientes',
+        value: dashboardStats.pendingOrders,
+        icon: 'bi-clock-history',
+        color: '#ffc107',
+        loading: dashboardLoading,
+        hint: dashboardError || 'Estado pendiente',
+        tone: pendingOrderTone,
+        badge: getAttentionBadge(dashboardStats.pendingOrders),
+      },
+      {
+        label: 'Consultas pendientes',
+        value: dashboardStats.pendingMessages,
+        icon: 'bi-chat-left-text',
+        color: '#53e8a8',
+        loading: dashboardLoading,
+        hint: 'Mensajes por responder',
+        tone: pendingMessageTone,
+        badge: getAttentionBadge(dashboardStats.pendingMessages),
+      },
+    ];
+  }, [dashboardError, dashboardLoading, dashboardStats]);
+
+  const isProductsView = activeTab === 'products';
+  const categoryLabels = useMemo(() => {
+    const labels = {};
+    categories.forEach((category) => {
+      const value = category.slug || category.value || category.name || category.title || category._id;
+      const label = category.label || category.name || category.title || value;
+      if (value) labels[value] = label;
+    });
+    return labels;
+  }, [categories]);
+  const pageTitle = {
+    dashboard: 'Tablero admin',
+    products: 'Gestion de productos',
+    sales: 'Gestion de ventas',
+    contacts: 'Gestion de consultas',
+  }[activeTab] || 'Panel admin';
 
   const handleEdit = (product) => {
     setProductToEdit(product);
@@ -85,13 +200,13 @@ const AdminDashboard = () => {
 
   const handleDelete = async (product) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: `El producto "${product.name}" pasará a estar inactivo.`,
+      title: 'Confirmar desactivacion',
+      text: `El producto "${product.name}" pasara a estar inactivo.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#42c4ff',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, desactivar',
+      confirmButtonText: 'Si, desactivar',
       cancelButtonText: 'Cancelar',
       background: '#1a1d21',
       color: '#fff',
@@ -103,9 +218,10 @@ const AdminDashboard = () => {
     try {
       await apiRequest(`/products/${product._id || product.id}`, { method: 'DELETE' });
       await fetchProducts();
+      await fetchDashboardStats();
       Swal.fire({
         title: 'Producto desactivado',
-        text: 'Ya no aparecerá en el catálogo público.',
+        text: 'Ya no aparecera en el catalogo publico.',
         icon: 'success',
         background: '#1a1d21',
         color: '#fff',
@@ -116,7 +232,7 @@ const AdminDashboard = () => {
       console.error('Error deleting product:', err);
       Swal.fire({
         title: 'No se pudo desactivar',
-        text: err.message || 'El servidor rechazó la operación.',
+        text: err.message || 'El servidor rechazo la operacion.',
         icon: 'error',
         background: '#1a1d21',
         color: '#fff',
@@ -220,11 +336,12 @@ try {
     setIsModalOpen(false);
     setProductToEdit(null);
     await fetchProducts();
+    await fetchDashboardStats();
 
     Swal.fire({
       title: action === 'updated' ? 'Producto actualizado' : 'Producto creado',
       text: action === 'updated'
-        ? 'Los cambios ya se reflejan en el catálogo.'
+        ? 'Los cambios ya se reflejan en el catalogo.'
         : 'El producto fue guardado y ya puede aparecer en Productos.',
       icon: 'success',
       background: '#1a1d21',
@@ -240,67 +357,118 @@ try {
 
       <main className="admin-content p-4 flex-grow-1">
         <header className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h3 mb-0">Gestión de inventario</h1>
-          <button className="btn btn-primary-gradient" onClick={handleOpenCreateModal}>
-            <i className="bi bi-plus-lg me-2" />
-            Nuevo producto
-          </button>
+          <h1 className="h3 mb-0">{pageTitle}</h1>
+          {isProductsView && (
+            <button className="btn btn-primary-gradient" onClick={handleOpenCreateModal}>
+              <i className="bi bi-plus-lg me-2" />
+              Nuevo producto
+            </button>
+          )}
         </header>
 
         <div className="row g-4 mb-4">
-          {[
-            {
-              label: 'Ventas totales',
-              value: formatCurrency(totalSales),
-              icon: 'bi-currency-dollar',
-              color: '#42c4ff',
-              loading: metricsLoading,
-              hint: metricsError || 'Órdenes pagadas',
-            },
-            {
-              label: 'Productos',
-              value: totalProducts,
-              icon: 'bi-box',
-              color: '#8d5cff',
-              loading,
-              hint: 'Activos en catálogo',
-            },
-            {
-              label: 'Órdenes pendientes',
-              value: pendingOrders,
-              icon: 'bi-clock-history',
-              color: '#ffc107',
-              loading: metricsLoading,
-              hint: metricsError || 'Estado pendiente',
-            },
-          ].map((stat) => (
+          {statCards.map((stat) => (
             <AdminStatCard key={stat.label} stat={stat} />
           ))}
         </div>
 
-        {error ? (
+        {activeTab === 'dashboard' ? (
+          <motion.section
+            className="admin-dashboard-overview"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.32 }}
+          >
+            {dashboardError && (
+              <div className="alert alert-warning admin-dashboard-alert">
+                {dashboardError}
+              </div>
+            )}
+
+            <div className="admin-dashboard-grid">
+              <Suspense
+                fallback={
+                  <section className="admin-dashboard-panel admin-mini-chart-panel">
+                    <div className="admin-panel-header">
+                      <div>
+                        <span className="admin-panel-eyebrow">Ventas</span>
+                        <h2>Ultimos 7 dias</h2>
+                      </div>
+                    </div>
+                    <div className="admin-chart-skeleton placeholder-glow">
+                      <span className="placeholder col-12" />
+                      <span className="placeholder col-10" />
+                      <span className="placeholder col-8" />
+                    </div>
+                  </section>
+                }
+              >
+                <AdminDashboardMiniChart
+                  data={dashboardStats.salesLast7Days}
+                  loading={dashboardLoading}
+                  totalSales={dashboardStats.totalSales}
+                />
+              </Suspense>
+              <AdminRecentActivity items={dashboardStats.recentActivity} loading={dashboardLoading} />
+            </div>
+
+            <div className="admin-dashboard-grid admin-dashboard-grid-secondary">
+              <AdminRecentMessages messages={dashboardStats.recentMessages} loading={dashboardLoading} />
+              <section className="admin-dashboard-panel admin-dashboard-summary p-4">
+                <div className="admin-panel-header">
+                  <div>
+                    <span className="admin-panel-eyebrow">Centro rapido</span>
+                    <h2>Resumen ejecutivo</h2>
+                  </div>
+                </div>
+                <p className="admin-page-subtitle mb-0">
+                  Usa este tablero para detectar pendientes y actividad reciente. La analitica detallada queda en Ventas.
+                </p>
+              </section>
+            </div>
+          </motion.section>
+        ) : activeTab === 'sales' ? (
+          <Suspense fallback={<div className="table-container admin-table-state">Cargando ventas...</div>}>
+            <AdminSalesPage onOrdersChanged={fetchDashboardStats} />
+          </Suspense>
+        ) : activeTab === 'contacts' ? (
+          <Suspense fallback={<div className="table-container admin-table-state">Cargando consultas...</div>}>
+            <AdminContactPage onMessagesChanged={fetchDashboardStats} />
+          </Suspense>
+        ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
-          <AdminProductsTable
-            products={products}
-            loading={loading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onActivate={handleActivate}
-            onPermanentDelete={handlePermanentDelete}
-          />
+          <>
+            <AdminCategoriesPanel
+              categories={categories}
+              loading={categoriesLoading}
+              onCategoryCreated={fetchCategories}
+            />
+            <AdminProductsTable
+              products={products}
+              loading={loading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onActivate={handleActivate}
+              onPermanentDelete={handlePermanentDelete}
+              categoryLabels={categoryLabels}
+            />
+          </>
         )}
       </main>
 
-      <ProductFormModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setProductToEdit(null);
-        }}
-        productToEdit={productToEdit}
-        onProductCreated={handleProductSaved}
-      />
+      {isProductsView && (
+        <ProductFormModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setProductToEdit(null);
+          }}
+          productToEdit={productToEdit}
+          onProductCreated={handleProductSaved}
+          categories={categories}
+        />
+      )}
     </div>
   );
 };

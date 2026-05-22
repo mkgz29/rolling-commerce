@@ -17,6 +17,7 @@ router.get("/:id", getCategoryById);
 // Rutas privadas - requieren autenticación y rol admin
 router.post("/", protect, admin, createCategory);
 router.put("/:id", protect, admin, updateCategory);
+router.patch("/:id", protect, admin, updateCategory);
 router.delete("/:id", protect, admin, deleteCategory);
 
 export default router;

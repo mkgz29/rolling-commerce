@@ -1,6 +1,7 @@
 .product-gallery-card {
   display: grid;
   gap: 1rem;
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.14);
   border-radius: 20px;
   background: rgba(13, 20, 35, 0.92);
@@ -51,6 +52,7 @@
 .product-thumbnails {
   display: flex;
   gap: 0.75rem;
+  max-width: 100%;
   overflow-x: auto;
   padding: 0.1rem 0.1rem 0.25rem;
   scrollbar-width: thin;

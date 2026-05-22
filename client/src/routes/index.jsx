@@ -13,6 +13,8 @@ import BuildYourPc from '../pages/build-your-pc';
 import Checkout from '../pages/checkout';
 import PaymentStatus from '../pages/paymentStatus';
 import StaticInfo from '../pages/staticInfo';
+import AboutUs from '../pages/AboutUs';
+import ContactPage from '../pages/ContactPage';
 
 const router = createBrowserRouter([
   {
@@ -81,11 +83,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'about',
-        element: <StaticInfo />,
+        element: <AboutUs />,
       },
       {
         path: 'contact',
-        element: <StaticInfo />,
+        element: <ContactPage />,
       },
       {
         path: 'support',

@@ -2,7 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
+  max-width: 100%;
   min-height: 92px;
+  overflow-x: clip;
   background: rgba(10, 14, 22, 0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(80, 180, 255, 0.18);
@@ -11,9 +14,12 @@
 
 .main-navbar .container {
   max-width: 1180px;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .navbar-brand {
+  min-width: 0;
   text-decoration: none;
 }
 
@@ -27,6 +33,7 @@
 .brand-copy {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   line-height: 1.05;
 }
 
@@ -35,6 +42,9 @@
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand-tagline {
@@ -48,6 +58,7 @@
 
 .navbar-menu {
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .custom-link {
@@ -92,19 +103,51 @@
 }
 
 .custom-toggler {
+  align-items: center;
+  justify-content: center;
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  margin-left: auto;
   border: 1px solid rgba(131, 216, 255, 0.35);
   border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f7ff;
   padding: 0.55rem 0.7rem;
   box-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2;
 }
 
 .custom-toggler:focus {
   box-shadow: 0 0 0 0.18rem rgba(0, 212, 255, 0.18) !important;
 }
 
+.navbar-expand-lg .custom-toggler {
+  display: inline-flex !important;
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-lg .custom-toggler {
+    display: none !important;
+  }
+}
+
 @media (max-width: 991px) {
   .main-navbar {
     min-height: 78px;
+  }
+
+  .main-navbar .container {
+    position: relative;
+    padding-right: 4.5rem;
+  }
+
+  .custom-toggler {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .brand-logo {
@@ -113,7 +156,11 @@
   }
 
   .navbar-collapse {
+    flex-basis: 100%;
+    width: 100%;
+    max-width: 100%;
     margin-top: 1rem;
+    margin-right: -3.75rem;
     padding: 1rem;
     background: rgba(13, 18, 28, 0.96);
     border: 1px solid rgba(80, 180, 255, 0.16);
@@ -127,6 +174,8 @@
   .custom-link {
     padding: 0.85rem 1rem !important;
     border-radius: 14px;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .custom-link::after {
@@ -135,12 +184,30 @@
 }
 
 @media (max-width: 480px) {
+  .main-navbar .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .custom-toggler {
+    right: 0.75rem;
+  }
+
+  .navbar-brand {
+    gap: 0.55rem !important;
+    max-width: calc(100% - 58px);
+  }
+
+  .navbar-collapse {
+    margin-right: 0;
+  }
+
   .brand-logo {
-    width: 54px;
-    height: 54px;
+    width: 48px;
+    height: 48px;
   }
 
   .brand-name {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 }

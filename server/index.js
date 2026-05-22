@@ -10,6 +10,8 @@ import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
+import contactRoutes from "./src/routes/contactRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
 import { errorHandler, notFound } from "./src/middlewares/errorMiddlewares.js";
 import { configureCloudinary, getMissingCloudinaryEnvVars } from "./src/config/cloudinary.js";
 import { hasMercadoPagoAccessToken } from "./src/config/mercadoPago.js";
@@ -79,6 +81,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);

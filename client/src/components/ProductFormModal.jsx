@@ -111,7 +111,29 @@ const validateForm = ({ formData, imageFile, isEditing }) => {
   return errors;
 };
 
-const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = null }) => {
+const getCategoryValue = (category) => {
+  if (typeof category === 'object' && category !== null) {
+    return category.slug || category.value || category.name || category.title || category._id || '';
+  }
+
+  return String(category || '');
+};
+
+const getCategoryLabel = (category) => {
+  if (typeof category === 'object' && category !== null) {
+    return category.label || category.name || category.title || category.slug || category._id || '';
+  }
+
+  return CATEGORY_ALIASES.get(normalizeCategoryValue(category)) || category;
+};
+
+const ProductFormModal = ({
+  isOpen,
+  onClose,
+  onProductCreated,
+  productToEdit = null,
+  categories = ADMIN_PRODUCT_CATEGORIES,
+}) => {
   const isEditing = Boolean(productToEdit);
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
@@ -126,6 +148,21 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
   );
 
   const visibleImageUrl = imagePreviewUrl || currentImageUrl;
+  const categoryOptions = useMemo(() => {
+    const options = [...ADMIN_PRODUCT_CATEGORIES];
+    const seenValues = new Set(options.map((item) => item.value));
+
+    categories.forEach((category) => {
+      const value = normalizeCategoryValue(getCategoryValue(category));
+      const label = getCategoryLabel(category);
+
+      if (!value || seenValues.has(value)) return;
+      options.push({ value, label: label || value });
+      seenValues.add(value);
+    });
+
+    return options;
+  }, [categories]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -373,7 +410,7 @@ const ProductFormModal = ({ isOpen, onClose, onProductCreated, productToEdit = n
                     disabled={loading}
                   >
                     <option value="" disabled>Seleccioná una categoría</option>
-                    {ADMIN_PRODUCT_CATEGORIES.map((cat) => (
+                    {categoryOptions.map((cat) => (
                       <option key={cat.value} value={cat.value}>
                         {cat.label}
                       </option>

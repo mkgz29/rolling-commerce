@@ -1,7 +1,6 @@
 import { Payment } from "mercadopago";
-import Order from "../models/order.js";
-import Product from "../models/products.js";
 import { createMercadoPagoClient } from "../config/mercadoPago.js";
+import { syncOrderFromPayment } from "../services/orderService.js";
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
@@ -23,38 +22,23 @@ export const mercadoPagoWebhook = async (req, res) => {
       id: paymentId,
     });
 
-    if (paymentData.status !== "approved") {
-      return res.status(200).send("payment not approved");
-    }
-
     const orderId = paymentData.external_reference;
 
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).send("order not found");
+    if (!orderId) {
+      return res.status(200).send("missing order reference");
     }
 
-    if (order.status === "paid") {
-      return res.status(200).send("already processed");
-    }
-
-    order.status = "paid";
-
-    await order.save();
-
-    for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.productId, {
-        $inc: {
-          stock: -item.quantity,
-        },
-      });
-    }
+    await syncOrderFromPayment({
+      orderId,
+      paymentId,
+      paymentStatus: paymentData.status,
+      statusDetail: paymentData.status_detail || "",
+    });
 
     return res.status(200).send("success");
   } catch (error) {
     console.error(error);
 
-    return res.status(500).send("webhook error");
+    return res.status(error.statusCode || 500).send(error.statusCode === 404 ? "order not found" : "webhook error");
   }
 };
