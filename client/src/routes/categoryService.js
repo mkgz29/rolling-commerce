@@ -31,7 +31,7 @@ export const updateCategoryRequest = (id, category) => {
   assertValidCategoryId(id);
 
   return apiRequest(`/categories/${id}`, {
-    method: 'PATCH',
+    method: 'PUT',
     body: category,
   });
 };

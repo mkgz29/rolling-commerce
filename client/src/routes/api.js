@@ -1,7 +1,9 @@
 const DEFAULT_API_BASE_URL = import.meta.env.DEV ? 'http://localhost:3000/api' : 'https://rolling-commerce.onrender.com/api';
 
 const normalizeApiBaseUrl = (value) => {
-  const rawValue = String(value || DEFAULT_API_BASE_URL)
+  const configuredValue = String(value || '').trim();
+  const isRelativeApiUrl = configuredValue.startsWith('/');
+  const rawValue = String(isRelativeApiUrl ? DEFAULT_API_BASE_URL : configuredValue || DEFAULT_API_BASE_URL)
     .trim()
     .replace(/^VITE_API_URL\s*=\s*/, '')
     .replace(/^['"]|['"]$/g, '')
@@ -28,6 +30,10 @@ const normalizeApiBaseUrl = (value) => {
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+
+if (import.meta.env.PROD || import.meta.env.VITE_DEBUG_API === 'true') {
+  console.log('API BASE URL:', API_BASE_URL);
+}
 
 const TOKEN_STORAGE_KEY = 'rolling-commerce-token';
 
