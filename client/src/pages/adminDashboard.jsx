@@ -5,10 +5,12 @@ import AdminSidebar from '../components/AdminSidebar';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminProductsTable from '../components/AdminProductsTable';
 import ProductFormModal from '../components/ProductFormModal';
+import AdminCategoriesPanel from '../components/AdminCategoriesPanel';
 import AdminRecentActivity from '../components/AdminRecentActivity';
 import AdminRecentMessages from '../components/AdminRecentMessages';
 import { apiRequest } from '../routes/api';
 import { getAdminStatsRequest } from '../routes/adminService';
+import { getCategoriesRequest } from '../routes/categoryService';
 import '../styles/admin.css';
 
 const AdminSalesPage = lazy(() => import('./admin/AdminSalesPage'));
@@ -51,8 +53,11 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dashboardStats, setDashboardStats] = useState(emptyStats);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState('');
   const [error, setError] = useState(null);
@@ -71,6 +76,20 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
       setProductsLoaded(true);
+    }
+  }, []);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setCategoriesLoading(true);
+      const data = await getCategoriesRequest();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError(err.message || 'Error al cargar las categorias.');
+    } finally {
+      setCategoriesLoading(false);
+      setCategoriesLoaded(true);
     }
   }, []);
 
@@ -101,6 +120,13 @@ const AdminDashboard = () => {
       fetchProducts();
     });
   }, [activeTab, fetchProducts, loading, productsLoaded]);
+
+  useEffect(() => {
+    if (activeTab !== 'products' || categoriesLoaded || categoriesLoading) return;
+    queueMicrotask(() => {
+      fetchCategories();
+    });
+  }, [activeTab, categoriesLoaded, categoriesLoading, fetchCategories]);
 
   const statCards = useMemo(() => {
     const pendingOrderTone = getAttentionTone(dashboardStats.pendingOrders);
@@ -151,6 +177,15 @@ const AdminDashboard = () => {
   }, [dashboardError, dashboardLoading, dashboardStats]);
 
   const isProductsView = activeTab === 'products';
+  const categoryLabels = useMemo(() => {
+    const labels = {};
+    categories.forEach((category) => {
+      const value = category.slug || category.value || category.name || category.title || category._id;
+      const label = category.label || category.name || category.title || value;
+      if (value) labels[value] = label;
+    });
+    return labels;
+  }, [categories]);
   const pageTitle = {
     dashboard: 'Tablero admin',
     products: 'Gestion de productos',
@@ -403,14 +438,22 @@ try {
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
-          <AdminProductsTable
-            products={products}
-            loading={loading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onActivate={handleActivate}
-            onPermanentDelete={handlePermanentDelete}
-          />
+          <>
+            <AdminCategoriesPanel
+              categories={categories}
+              loading={categoriesLoading}
+              onCategoryCreated={fetchCategories}
+            />
+            <AdminProductsTable
+              products={products}
+              loading={loading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onActivate={handleActivate}
+              onPermanentDelete={handlePermanentDelete}
+              categoryLabels={categoryLabels}
+            />
+          </>
         )}
       </main>
 
@@ -423,6 +466,7 @@ try {
           }}
           productToEdit={productToEdit}
           onProductCreated={handleProductSaved}
+          categories={categories}
         />
       )}
     </div>

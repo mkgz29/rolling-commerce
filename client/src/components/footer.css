@@ -1,6 +1,8 @@
 .footer {
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
   margin-top: 0;
   padding: 4.5rem 0 1.4rem;
   color: #f5f7fb;
@@ -36,6 +38,7 @@
 .footer-container {
   position: relative;
   z-index: 1;
+  min-width: 0;
 }
 
 .footer-grid {
@@ -43,9 +46,11 @@
   grid-template-columns: minmax(220px, 1.8fr) repeat(4, minmax(130px, 1fr));
   gap: 2rem;
   align-items: start;
+  min-width: 0;
 }
 
 .footer-brand {
+  min-width: 0;
   max-width: 26rem;
 }
 
@@ -53,6 +58,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.9rem;
+  min-width: 0;
   color: #ffffff;
   text-decoration: none;
 }
@@ -140,7 +146,7 @@
 }
 
 .footer-social-column {
-  min-width: 11rem;
+  min-width: 0;
 }
 
 .footer-socials {
@@ -206,6 +212,10 @@
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 1.75rem;
+  }
+
+  .footer-logo {
+    align-items: flex-start;
   }
 
   .footer-logo-image {

@@ -1,11 +1,14 @@
 .contact-page {
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
   background: #060b16;
   color: #f4f7ff;
 }
 
 .contact-page .container {
   max-width: 1180px;
+  min-width: 0;
 }
 
 .contact-hero {
@@ -85,14 +88,16 @@
 
 .contact-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(min(100%, 320px), 0.7fr);
   gap: clamp(1.25rem, 4vw, 2rem);
   align-items: start;
+  min-width: 0;
 }
 
 .contact-form-panel,
 .contact-info-panel {
   position: relative;
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.16);
   border-radius: 28px;
   background:
@@ -205,6 +210,7 @@ textarea.contact-field {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  min-width: 0;
   min-height: 18px;
   color: rgba(219, 233, 255, 0.58);
   font-size: 0.78rem;
@@ -312,6 +318,7 @@ textarea.contact-field {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  min-width: 0;
   border: 1px solid rgba(131, 216, 255, 0.12);
   border-radius: 18px;
   background: rgba(10, 17, 31, 0.72);
@@ -344,6 +351,7 @@ textarea.contact-field {
 .contact-info-item strong,
 .contact-info-item small {
   display: block;
+  min-width: 0;
 }
 
 .contact-info-item strong {

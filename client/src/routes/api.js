@@ -70,22 +70,30 @@ const buildUrl = (endpoint = '', params) => {
 
 export const apiRequest = async (endpoint, options = {}) => {
   const { body, params, token = getStoredToken(), headers = {}, ...requestOptions } = options;
+  const isFormData = body instanceof FormData;
 
   const response = await fetch(buildUrl(endpoint, params), {
     ...requestOptions,
     headers: {
-      'Content-Type': 'application/json',
+      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   });
 
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : null;
 
   if (!response.ok) {
-    throw new ApiError(data?.message || 'Request failed', response.status, data);
+    const backendMessage = data?.message || 'Request failed';
+    const authMessages = new Set(['invalid token', 'unauthorized', 'User unauthorized']);
+    const message =
+      response.status === 401 && authMessages.has(backendMessage)
+        ? 'Tu sesion expiro o no es valida. Volve a iniciar sesion.'
+        : backendMessage;
+
+    throw new ApiError(message, response.status, data);
   }
 
   return data;

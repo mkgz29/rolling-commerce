@@ -15,6 +15,7 @@ const AdminProductsTable = ({
   onDelete,
   onActivate,
   onPermanentDelete,
+  categoryLabels = CATEGORY_LABELS,
 }) => {
   if (loading) {
     return (
@@ -37,10 +38,20 @@ const AdminProductsTable = ({
     );
   }
 
-  return (
-    <div className="table-container p-4">
+  const activeProducts = products.filter((product) => product.isActive !== false);
+  const inactiveProducts = products.filter((product) => product.isActive === false);
+
+  const renderProductsTable = (items, { inactive = false } = {}) => (
+    <div className={`table-container admin-products-section p-4 ${inactive ? 'admin-products-section-inactive' : ''}`}>
+      <div className="admin-products-section-header">
+        <div>
+          <span className="admin-panel-eyebrow">{inactive ? 'Desactivados' : 'Catalogo visible'}</span>
+          <h2>{inactive ? 'Productos inactivos' : 'Productos activos'}</h2>
+        </div>
+        <span className="admin-products-count">{items.length}</span>
+      </div>
       <div className="table-responsive">
-        <table className="table table-dark table-hover align-middle mb-0">
+        <table className="table table-dark table-hover align-middle mb-0 admin-products-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -52,31 +63,31 @@ const AdminProductsTable = ({
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => {
+            {items.map((product) => {
               const productId = product._id || product.id;
               const stock = Number(product.stock || 0);
               const stockPercent = Math.min((stock / 30) * 100, 100);
 
               return (
-                <tr key={productId} style={{ opacity: product.isActive === false ? 0.5 : 1 }}>
+                <tr key={productId} className={product.isActive === false ? 'admin-product-row-inactive' : ''}>
                   <td className="text-secondary">{product._id ? `${product._id.substring(0, 8)}...` : product.id}</td>
                   <td className="fw-semibold">
                     {product.name}
                     {product.isActive === false && (
-                      <span className="badge bg-danger ms-2" style={{ fontSize: '10px' }}>Inactivo</span>
+                      <span className="admin-product-state admin-product-state-inactive ms-2">Inactivo</span>
                     )}
                   </td>
                   <td>
-                    <span className="badge bg-secondary-subtle text-dark">
-                      {CATEGORY_LABELS[product.category] || product.category}
+                    <span className="admin-product-category-badge">
+                      {categoryLabels[product.category] || product.category}
                     </span>
                   </td>
                   <td className="text-info">${Number(product.price).toLocaleString()}</td>
                   <td>
                     <div className="d-flex align-items-center gap-2">
-                      <div className="progress flex-grow-1" style={{ height: '6px', width: '60px' }}>
+                      <div className="progress admin-product-stock-bar flex-grow-1">
                         <div
-                          className="progress-bar bg-primary"
+                          className={`progress-bar ${stock <= 5 ? 'bg-warning' : 'bg-info'}`}
                           role="progressbar"
                           style={{ width: `${stockPercent}%` }}
                           aria-valuenow={stock}
@@ -90,9 +101,9 @@ const AdminProductsTable = ({
                   <td className="text-end">
   <Dropdown align="end">
     <Dropdown.Toggle
-      variant="dark"
+      variant="outline-light"
       size="sm"
-      className="border-0 shadow-none"
+      className="admin-product-action-toggle"
     >
       <i className="bi bi-three-dots-vertical" />
     </Dropdown.Toggle>
@@ -137,6 +148,13 @@ const AdminProductsTable = ({
           </tbody>
         </table>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="admin-products-groups">
+      {renderProductsTable(activeProducts)}
+      {inactiveProducts.length > 0 && renderProductsTable(inactiveProducts, { inactive: true })}
     </div>
   );
 };
