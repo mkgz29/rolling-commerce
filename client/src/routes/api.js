@@ -64,15 +64,8 @@ const buildUrl = (endpoint = '', params) => {
     });
   }
 
-  const finalUrl = url.toString();
 
-  if (import.meta.env.DEV || import.meta.env.VITE_DEBUG_API === 'true') {
-    console.log('API_BASE_URL:', API_BASE_URL);
-    console.log('endpoint:', endpoint);
-    console.log('final URL:', finalUrl);
-  }
-
-  return finalUrl;
+  return url.toString();
 };
 
 export const apiRequest = async (endpoint, options = {}) => {
