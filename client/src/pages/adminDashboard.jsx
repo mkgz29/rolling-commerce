@@ -27,12 +27,39 @@ const formatCurrency = (value) =>
 const emptyStats = {
   totalSales: 0,
   totalProducts: 0,
+  inactiveProducts: 0,
   pendingOrders: 0,
   pendingMessages: 0,
   recentOrders: [],
   recentMessages: [],
+  recentProducts: [],
+  latestOrder: null,
+  latestPaidOrder: null,
+  latestProduct: null,
+  latestPendingOrder: null,
+  updatedAt: null,
   salesLast7Days: [],
   recentActivity: [],
+};
+
+const formatDateTime = (value) => {
+  if (!value) return 'Sin datos';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sin datos';
+
+  return new Intl.DateTimeFormat('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
+const getOrderSummary = (order) => {
+  if (!order) return '';
+  const customer = order.customerName || order.customerEmail || 'Cliente';
+  return `${customer} · ${formatCurrency(order.total)}`;
 };
 
 const getAttentionTone = (value) => {
@@ -175,6 +202,58 @@ const AdminDashboard = () => {
       },
     ];
   }, [dashboardError, dashboardLoading, dashboardStats]);
+
+  const executiveSummaryItems = useMemo(() => {
+    const latestSale = dashboardStats.latestPaidOrder || dashboardStats.latestOrder;
+    const items = [
+      {
+        label: dashboardStats.latestPaidOrder ? 'Ultima venta registrada' : 'Ultima orden registrada',
+        value: latestSale ? getOrderSummary(latestSale) : '',
+        meta: latestSale ? formatDateTime(latestSale.createdAt) : '',
+        icon: 'bi-receipt',
+        tone: latestSale?.status || 'neutral',
+      },
+      {
+        label: 'Ultimo producto creado',
+        value: dashboardStats.latestProduct?.name || '',
+        meta: dashboardStats.latestProduct ? formatDateTime(dashboardStats.latestProduct.createdAt) : '',
+        icon: 'bi-box-seam',
+        tone: dashboardStats.latestProduct?.isActive === false ? 'inactive' : 'active',
+      },
+      {
+        label: 'Productos inactivos',
+        value: Number(dashboardStats.inactiveProducts || 0).toLocaleString('es-AR'),
+        meta: 'Fuera del catalogo publico',
+        icon: 'bi-eye-slash',
+        tone: Number(dashboardStats.inactiveProducts || 0) > 0 ? 'warning' : 'healthy',
+      },
+      {
+        label: 'Consultas pendientes',
+        value: Number(dashboardStats.pendingMessages || 0).toLocaleString('es-AR'),
+        meta: Number(dashboardStats.pendingMessages || 0) === 1 ? 'Mensaje por responder' : 'Mensajes por responder',
+        icon: 'bi-chat-left-text',
+        tone: Number(dashboardStats.pendingMessages || 0) > 0 ? 'warning' : 'healthy',
+      },
+      {
+        label: 'Orden pendiente mas reciente',
+        value: dashboardStats.latestPendingOrder ? getOrderSummary(dashboardStats.latestPendingOrder) : '',
+        meta: dashboardStats.latestPendingOrder ? formatDateTime(dashboardStats.latestPendingOrder.createdAt) : '',
+        icon: 'bi-clock-history',
+        tone: 'pending',
+      },
+      {
+        label: 'Ultima actualizacion',
+        value: dashboardStats.updatedAt ? formatDateTime(dashboardStats.updatedAt) : '',
+        meta: dashboardError || 'Datos sincronizados del backend',
+        icon: 'bi-arrow-repeat',
+        tone: dashboardError ? 'danger' : 'neutral',
+      },
+    ];
+
+    return items;
+  }, [dashboardError, dashboardStats]);
+
+  const hasExecutiveData = executiveSummaryItems.some((item) => item.value && item.value !== '0');
 
   const isProductsView = activeTab === 'products';
   const categoryLabels = useMemo(() => {
@@ -417,13 +496,35 @@ try {
               <section className="admin-dashboard-panel admin-dashboard-summary p-4">
                 <div className="admin-panel-header">
                   <div>
-                    <span className="admin-panel-eyebrow">Centro rapido</span>
+                    <span className="admin-panel-eyebrow">Centro operativo</span>
                     <h2>Resumen ejecutivo</h2>
                   </div>
                 </div>
-                <p className="admin-page-subtitle mb-0">
-                  Usa este tablero para detectar pendientes y actividad reciente. La analitica detallada queda en Ventas.
-                </p>
+                {dashboardLoading ? (
+                  <div className="admin-executive-list placeholder-glow">
+                    <span className="placeholder col-12" />
+                    <span className="placeholder col-10" />
+                    <span className="placeholder col-11" />
+                  </div>
+                ) : hasExecutiveData ? (
+                  <div className="admin-executive-list">
+                    {executiveSummaryItems.map((item) => (
+                      <article className={`admin-executive-item admin-executive-${item.tone}`} key={item.label}>
+                        <i className={`bi ${item.icon}`} aria-hidden="true" />
+                        <div>
+                          <span>{item.label}</span>
+                          <strong>{item.value || 'Sin registros'}</strong>
+                          {item.meta && <small>{item.meta}</small>}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="admin-empty-compact">
+                    <i className="bi bi-clipboard-data" aria-hidden="true" />
+                    <p>No hay actividad suficiente para armar el resumen.</p>
+                  </div>
+                )}
               </section>
             </div>
           </motion.section>

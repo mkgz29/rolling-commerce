@@ -447,6 +447,8 @@
 .about-team-card {
   display: flex;
   flex-direction: column;
+  gap: 0.8rem;
+  padding: 1.35rem;
 }
 
 .about-team-card:hover {
@@ -456,9 +458,18 @@
     0 0 34px rgba(141, 92, 255, 0.12);
 }
 
+.about-team-card-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
 .about-avatar {
   align-items: center;
   display: flex;
+  flex: 0 0 auto;
   justify-content: center;
   width: 68px;
   height: 68px;
@@ -471,20 +482,98 @@
   font-weight: 850;
 }
 
-.about-team-card h3 {
-  margin-bottom: 0.35rem;
+.about-role-badge {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+  justify-content: center;
+  min-height: 34px;
+  min-width: 152px;
+  max-width: 100%;
+  border: 1px solid rgba(131, 216, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #dff6ff;
+  font-size: 0.71rem;
+  font-weight: 850;
+  line-height: 1;
+  padding: 0.5rem 0.72rem;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.about-team-card > span {
-  min-height: 42px;
+.about-role-badge svg {
+  flex: 0 0 auto;
+  color: #9fe8ff;
+}
+
+.about-role-badge--scrum {
+  border-color: rgba(141, 92, 255, 0.26);
+  background: linear-gradient(135deg, rgba(141, 92, 255, 0.14), rgba(66, 196, 255, 0.08));
+  color: #eef1ff;
+}
+
+.about-role-badge--developer {
+  border-color: rgba(131, 216, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.about-team-card h3 {
+  font-size: 1.18rem;
+  margin: 0.15rem 0 0;
+}
+
+.about-team-role {
   color: #83d8ff;
+  display: block;
   font-size: 0.86rem;
   font-weight: 800;
   line-height: 1.35;
+  min-height: 38px;
 }
 
 .about-team-card p {
-  margin-top: 0.85rem;
+  flex: 1;
+  margin-top: 0;
+}
+
+.about-github-link {
+  align-items: center;
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 0.48rem;
+  max-width: 100%;
+  border: 1px solid rgba(131, 216, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
+    rgba(255, 255, 255, 0.065);
+  color: #f7fbff;
+  font-size: 0.86rem;
+  font-weight: 850;
+  justify-content: center;
+  margin-top: 0.2rem;
+  min-height: 40px;
+  padding: 0.62rem 0.9rem;
+  text-decoration: none;
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+  white-space: nowrap;
+}
+
+.about-github-link svg {
+  flex: 0 0 auto;
+}
+
+.about-github-link:hover,
+.about-github-link:focus-visible {
+  border-color: rgba(183, 228, 255, 0.48);
+  background:
+    linear-gradient(135deg, rgba(66, 196, 255, 0.16), rgba(141, 92, 255, 0.14)),
+    rgba(255, 255, 255, 0.105);
+  box-shadow: 0 16px 36px rgba(0, 8, 26, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+  outline: 0;
+  transform: translateY(-2px);
 }
 
 .about-workflow {
@@ -651,6 +740,23 @@
   .about-workflow-step > span {
     width: 72px;
   }
+
+  .about-team-card {
+    padding: 1.15rem;
+  }
+
+  .about-team-card-header {
+    align-items: center;
+  }
+
+  .about-role-badge {
+    min-width: 0;
+    width: auto;
+  }
+
+  .about-team-role {
+    min-height: 0;
+  }
 }
 
 @media (max-width: 380px) {
@@ -679,6 +785,7 @@
   .about-primary-action,
   .about-secondary-action,
   .about-card,
+  .about-github-link,
   .about-badge-list span,
   .about-workflow-step {
     transition-duration: 1ms;
@@ -687,6 +794,7 @@
   .about-primary-action:hover,
   .about-secondary-action:hover,
   .about-card:hover,
+  .about-github-link:hover,
   .about-badge-list span:hover,
   .about-workflow-step:hover {
     transform: none;

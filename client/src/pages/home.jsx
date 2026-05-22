@@ -3,7 +3,6 @@ import HeroSection from '../components/HeroSection';
 import CategoriesSection from '../components/CategoriesSection';
 import FeaturedProductsSection from '../components/FeaturedProductsSection';
 import PromoBanner from '../components/PromoBanner';
-import NewsletterSection from '../components/NewsletterSection';
 import { getProductsRequest } from '../routes/productService';
 import '../styles/home.css';
 
@@ -48,7 +47,6 @@ function Home() {
       <CategoriesSection />
       <FeaturedProductsSection products={products.slice(0, 4)} loading={productsLoading} error={productsError} />
       <PromoBanner />
-      <NewsletterSection />
     </main>
   );
 }

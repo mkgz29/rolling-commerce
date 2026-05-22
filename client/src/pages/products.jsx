@@ -4,12 +4,13 @@ import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import FormCharacterCounter from '../components/FormCharacterCounter';
 import { VALIDATION_LIMITS } from '../constants/validationLimits';
+import { getCategoriesRequest, normalizeCategoryOptions } from '../routes/categoryService';
 import { getProductsRequest } from '../routes/productService';
 import { formatPrice } from '../utils/formatPrice';
 import { getProductImage, getProductImageFallback } from '../utils/productImage';
 import '../styles/home.css';
 
-const categories = [
+const fallbackCategories = [
   { value: 'processors', label: 'Procesadores' },
   { value: 'graphics-cards', label: 'Placas de video' },
   { value: 'ram', label: 'Memoria RAM' },
@@ -25,6 +26,8 @@ const getProductId = (product) => product?._id || product?.id;
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [categoriesError, setCategoriesError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartMessage, setCartMessage] = useState('');
@@ -48,6 +51,31 @@ export default function Products() {
       setDraftFilters(filters);
     });
   }, [filters]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCategories = async () => {
+      try {
+        setCategoriesError('');
+        const data = await getCategoriesRequest();
+        if (active) {
+          setCategories(normalizeCategoryOptions(data));
+        }
+      } catch (requestError) {
+        if (active) {
+          setCategories(normalizeCategoryOptions(fallbackCategories));
+          setCategoriesError(requestError.message || 'No se pudieron cargar las categorias.');
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -98,8 +126,8 @@ export default function Products() {
     updateFilters(draftFilters);
   };
 
-  const handleCategoryChange = (event) => {
-    const nextFilters = { ...draftFilters, category: event.target.value };
+  const handleCategoryChange = (categoryValue) => {
+    const nextFilters = { ...draftFilters, category: categoryValue };
     setDraftFilters(nextFilters);
     updateFilters(nextFilters);
   };
@@ -150,15 +178,27 @@ export default function Products() {
                 <button type="submit">Buscar</button>
               </div>
               <FormCharacterCounter value={draftFilters.search} max={VALIDATION_LIMITS.search} />
+              <div className="catalog-category-filter" aria-label="Filtrar por categoria">
+                <button
+                  type="button"
+                  className={`catalog-category-chip ${!draftFilters.category ? 'is-active' : ''}`}
+                  onClick={() => handleCategoryChange('')}
+                >
+                  Todas las categorias
+                </button>
+                {categories.map((category) => (
+                  <button
+                    type="button"
+                    className={`catalog-category-chip ${draftFilters.category === category.value ? 'is-active' : ''}`}
+                    onClick={() => handleCategoryChange(category.value)}
+                    key={category.value}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+              {categoriesError && <small className="catalog-filter-error">{categoriesError}</small>}
               <div className="catalog-filter-row">
-                <select value={draftFilters.category} onChange={handleCategoryChange} aria-label="Filtrar por categoría">
-                  <option value="">Todas las categorías</option>
-                  {categories.map((category) => (
-                    <option value={category.value} key={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
                 {(filters.search || filters.category) && (
                   <button className="catalog-clear" type="button" onClick={handleClearFilters}>
                     Limpiar filtros

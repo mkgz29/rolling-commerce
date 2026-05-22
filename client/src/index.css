@@ -131,7 +131,6 @@ a.btn,
 .catalog-clear,
 .catalog-card-actions a,
 .catalog-card-actions button,
-.newsletter-form button,
 .category-action,
 .state-action,
 .promo-primary {
@@ -162,7 +161,6 @@ a.btn,
 .product-action-primary,
 .catalog-search-row button,
 .catalog-card-actions button,
-.newsletter-form button,
 .promo-primary {
   border: 1px solid var(--btn-primary-border) !important;
   background: var(--btn-primary-bg) !important;
@@ -215,8 +213,7 @@ a.btn,
 
 .btn-lg,
 .hero-action-group .btn,
-.hero-showcase .btn,
-.newsletter-form button {
+.hero-showcase .btn {
   min-height: 52px;
   padding-inline: 1.25rem !important;
 }
@@ -235,8 +232,6 @@ a.btn,
 .catalog-card-actions a:focus-visible,
 .catalog-card-actions button:hover:not(:disabled),
 .catalog-card-actions button:focus-visible,
-.newsletter-form button:hover:not(:disabled),
-.newsletter-form button:focus-visible,
 .category-action:hover,
 .category-action:focus-visible,
 .state-action:hover,
@@ -263,8 +258,6 @@ a.btn,
 .catalog-search-row button:focus-visible,
 .catalog-card-actions button:hover:not(:disabled),
 .catalog-card-actions button:focus-visible,
-.newsletter-form button:hover:not(:disabled),
-.newsletter-form button:focus-visible,
 .promo-primary:hover,
 .promo-primary:focus-visible {
   border-color: var(--btn-primary-border-hover) !important;
@@ -314,7 +307,6 @@ a.btn,
 .catalog-clear:active,
 .catalog-card-actions a:active,
 .catalog-card-actions button:active,
-.newsletter-form button:active,
 .category-action:active,
 .state-action:active,
 .promo-primary:active {
@@ -329,7 +321,6 @@ a.btn,
 .catalog-clear:focus-visible,
 .catalog-card-actions a:focus-visible,
 .catalog-card-actions button:focus-visible,
-.newsletter-form button:focus-visible,
 .category-action:focus-visible,
 .state-action:focus-visible,
 .promo-primary:focus-visible {

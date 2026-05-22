@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -6,9 +7,11 @@ import {
   HardDrive,
   MemoryStick,
   PlugZap,
+  Tag,
 } from 'lucide-react';
+import { getCategoriesRequest, normalizeCategoryOptions } from '../routes/categoryService';
 
-const categories = [
+const fallbackCategories = [
   {
     id: 'processors',
     label: 'Procesadores',
@@ -57,12 +60,87 @@ const categories = [
     categoryKey: 'cases',
     accent: 'violet',
   },
-].map((category) => ({
-  ...category,
-  to: `/products?category=${encodeURIComponent(category.categoryKey)}`,
-}));
+];
+
+const categoryMetadata = {
+  processors: {
+    description: 'CPUs para gaming, creacion y equipos de alto rendimiento.',
+    icon: Cpu,
+    accent: 'cyan',
+  },
+  'graphics-cards': {
+    description: 'GPUs preparadas para juegos exigentes, render y streaming.',
+    icon: CircuitBoard,
+    accent: 'violet',
+  },
+  ram: {
+    description: 'Modulos veloces para multitarea fluida y builds estables.',
+    icon: MemoryStick,
+    accent: 'blue',
+  },
+  storage: {
+    description: 'SSD, NVMe y discos para cargar juegos y proyectos mas rapido.',
+    icon: HardDrive,
+    accent: 'magenta',
+  },
+  'power-supplies': {
+    description: 'Energia confiable para sostener componentes actuales y futuros.',
+    icon: PlugZap,
+    accent: 'cyan',
+  },
+  cases: {
+    description: 'Chasis con flujo de aire, espacio y estetica para cerrar tu equipo.',
+    icon: Box,
+    accent: 'violet',
+  },
+};
+
+const accents = ['cyan', 'violet', 'blue', 'magenta'];
+
+const buildCategoryCards = (categories) =>
+  normalizeCategoryOptions(categories).map((category, index) => {
+    const metadata = categoryMetadata[category.value] || {};
+
+    return {
+      ...category,
+      description: category.description || metadata.description || 'Explora productos disponibles en esta categoria.',
+      icon: metadata.icon || Tag,
+      accent: metadata.accent || accents[index % accents.length],
+      to: `/products?category=${encodeURIComponent(category.value)}`,
+    };
+  });
 
 function CategoriesSection() {
+  const [categories, setCategories] = useState([]);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCategories = async () => {
+      try {
+        setLoadError('');
+        const data = await getCategoriesRequest();
+        if (active) {
+          setCategories(data);
+        }
+      } catch (requestError) {
+        if (active) {
+          setCategories(fallbackCategories);
+          setLoadError(requestError.message || 'No se pudieron cargar las categorias.');
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const categoryCards = useMemo(() => buildCategoryCards(categories), [categories]);
+
   return (
     <section className="categories-section py-5">
       <div className="container">
@@ -79,8 +157,10 @@ function CategoriesSection() {
           </Link>
         </div>
 
+        {loadError && <p className="category-load-note">{loadError}</p>}
+
         <div className="category-grid">
-          {categories.map((category) => {
+          {categoryCards.map((category) => {
             const Icon = category.icon;
 
             return (

@@ -16,6 +16,50 @@ const assertValidCategoryId = (id) => {
   }
 };
 
+const normalizeCategoryText = (value = '') => String(value || '').trim();
+
+export const normalizeCategoryOption = (category) => {
+  if (typeof category === 'string') {
+    const label = normalizeCategoryText(category);
+    return label ? { id: label, value: label, label } : null;
+  }
+
+  if (!category || typeof category !== 'object') {
+    return null;
+  }
+
+  const label = normalizeCategoryText(category.label || category.name || category.title || category.slug || category.value || category.categoryKey);
+  const value = normalizeCategoryText(category.slug || category.value || category.categoryKey || category.key || category.name || category.title);
+
+  if (!label || !value) {
+    return null;
+  }
+
+  return {
+    id: normalizeCategoryText(category._id || category.id || value),
+    value,
+    label,
+    description: normalizeCategoryText(category.description),
+    raw: category,
+  };
+};
+
+export const normalizeCategoryOptions = (categories = []) => {
+  const seen = new Set();
+
+  return categories.reduce((options, category) => {
+    const option = normalizeCategoryOption(category);
+    if (!option) return options;
+
+    const key = option.value.toLowerCase();
+    if (seen.has(key)) return options;
+
+    seen.add(key);
+    options.push(option);
+    return options;
+  }, []);
+};
+
 export const getCategoriesRequest = () => {
   return apiRequest('/categories', { token: null }).then(unwrapCategories);
 };

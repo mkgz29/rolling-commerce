@@ -580,6 +580,125 @@
   min-height: 160px;
 }
 
+.admin-executive-list {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 380px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-color: rgba(131, 216, 255, 0.34) rgba(255, 255, 255, 0.04);
+  scrollbar-width: thin;
+}
+
+.admin-executive-list::-webkit-scrollbar,
+.admin-activity-list::-webkit-scrollbar,
+.admin-message-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-executive-list::-webkit-scrollbar-track,
+.admin-activity-list::-webkit-scrollbar-track,
+.admin-message-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 999px;
+}
+
+.admin-executive-list::-webkit-scrollbar-thumb,
+.admin-activity-list::-webkit-scrollbar-thumb,
+.admin-message-list::-webkit-scrollbar-thumb {
+  background: rgba(131, 216, 255, 0.28);
+  border: 2px solid rgba(8, 17, 35, 0.95);
+  border-radius: 999px;
+}
+
+.admin-executive-list::-webkit-scrollbar-thumb:hover,
+.admin-activity-list::-webkit-scrollbar-thumb:hover,
+.admin-message-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(131, 216, 255, 0.42);
+}
+
+.admin-executive-list .placeholder {
+  border-radius: 12px;
+  min-height: 58px;
+}
+
+.admin-executive-item {
+  align-items: flex-start;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 38px minmax(0, 1fr);
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0.75rem;
+}
+
+.admin-executive-item > i {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(66, 196, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(66, 196, 255, 0.1);
+  color: #9fe8ff;
+}
+
+.admin-executive-item div {
+  min-width: 0;
+}
+
+.admin-executive-item span {
+  color: rgba(244, 247, 255, 0.58);
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+}
+
+.admin-executive-item strong {
+  color: #f4f7ff;
+  display: block;
+  font-size: 0.94rem;
+  line-height: 1.28;
+}
+
+.admin-executive-item small {
+  color: rgba(244, 247, 255, 0.54);
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.2rem;
+}
+
+.admin-executive-warning > i,
+.admin-executive-pending > i {
+  background: rgba(250, 204, 21, 0.11);
+  border-color: rgba(250, 204, 21, 0.22);
+  color: #fde68a;
+}
+
+.admin-executive-danger > i,
+.admin-executive-cancelled > i,
+.admin-executive-inactive > i {
+  background: rgba(248, 113, 113, 0.11);
+  border-color: rgba(248, 113, 113, 0.22);
+  color: #fca5a5;
+}
+
+.admin-executive-healthy > i,
+.admin-executive-paid > i,
+.admin-executive-active > i,
+.admin-executive-delivered > i {
+  background: rgba(34, 197, 94, 0.11);
+  border-color: rgba(34, 197, 94, 0.22);
+  color: #86efac;
+}
+
 .admin-dashboard-overview {
   display: grid;
   gap: 1rem;
@@ -738,6 +857,12 @@
 .admin-message-list {
   display: grid;
   gap: 0.75rem;
+  max-height: 380px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-color: rgba(131, 216, 255, 0.34) rgba(255, 255, 255, 0.04);
+  scrollbar-width: thin;
 }
 
 .admin-activity-item,
@@ -1295,6 +1420,12 @@
 
   .admin-dashboard-panel {
     padding: 1rem;
+  }
+
+  .admin-executive-list,
+  .admin-activity-list,
+  .admin-message-list {
+    max-height: 320px;
   }
 
   .admin-activity-item,

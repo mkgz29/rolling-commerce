@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Code2, GitBranch, ShieldCheck } from 'lucide-react';
 import logo from '../assets/logo.png';
 import '../styles/about.css';
 
@@ -29,28 +30,44 @@ const techGroups = [
 
 const teamMembers = [
   {
-    name: 'Miguel Gomez',
+    name: 'Ramon Miguel Gomez',
     role: 'Scrum Master & Full Stack Developer',
-    description: 'Lidero la organizacion del proyecto, arquitectura general y desarrollo frontend/backend.',
-    initials: 'MG',
+    description: 'Coordina el proceso de trabajo y desarrolla funcionalidades full stack para sostener la experiencia ecommerce.',
+    initials: 'RM',
+    github: 'https://github.com/mkgz29',
+    icon: ShieldCheck,
+    badge: 'Scrum Master',
+    badgeVariant: 'scrum',
   },
   {
-    name: 'Facundo',
+    name: 'Facundo Solano',
     role: 'Full Stack Developer',
-    description: 'Participo en el desarrollo de funcionalidades y mejoras del sistema.',
-    initials: 'FA',
+    description: 'Desarrolla funcionalidades full stack, integrando interfaces, servicios y comportamiento del sistema.',
+    initials: 'FS',
+    github: 'https://github.com/FSR1991',
+    icon: Code2,
+    badge: 'Developer',
+    badgeVariant: 'developer',
   },
   {
-    name: 'Luciano',
-    role: 'Frontend & Backend Collaborator',
-    description: 'Colaboro en distintas funcionalidades visuales y logicas del ecommerce.',
-    initials: 'LU',
+    name: 'Luciano Caro',
+    role: 'Full Stack Developer',
+    description: 'Desarrolla componentes, logica de negocio y ajustes funcionales para una experiencia consistente.',
+    initials: 'LC',
+    github: 'https://github.com/LECod3',
+    icon: Code2,
+    badge: 'Developer',
+    badgeVariant: 'developer',
   },
   {
-    name: 'Alexis',
-    role: 'Frontend & Backend Collaborator',
-    description: 'Participo en tareas de desarrollo y soporte del proyecto.',
-    initials: 'AX',
+    name: 'Alexis Areyes',
+    role: 'Full Stack Developer',
+    description: 'Desarrolla flujos, componentes visuales y mejoras funcionales dentro del proyecto ecommerce.',
+    initials: 'AA',
+    github: 'https://github.com/alammedina46-coder',
+    icon: Code2,
+    badge: 'Developer',
+    badgeVariant: 'developer',
   },
 ];
 
@@ -170,14 +187,34 @@ export default function AboutUs() {
           </div>
 
           <div className="about-team-grid">
-            {teamMembers.map((member) => (
-              <article className="about-card about-team-card" key={member.name}>
-                <div className="about-avatar" aria-hidden="true">{member.initials}</div>
-                <h3>{member.name}</h3>
-                <span>{member.role}</span>
-                <p>{member.description}</p>
-              </article>
-            ))}
+            {teamMembers.map((member) => {
+              const RoleIcon = member.icon;
+
+              return (
+                <article className="about-card about-team-card" key={member.name}>
+                  <div className="about-team-card-header">
+                    <div className="about-avatar" aria-hidden="true">{member.initials}</div>
+                    <span className={`about-role-badge about-role-badge--${member.badgeVariant || 'developer'}`}>
+                      <RoleIcon size={15} strokeWidth={2.3} aria-hidden="true" />
+                      {member.badge}
+                    </span>
+                  </div>
+                  <h3>{member.name}</h3>
+                  <span className="about-team-role">{member.role}</span>
+                  <p>{member.description}</p>
+                  <a
+                    className="about-github-link"
+                    href={member.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Ver GitHub de ${member.name}`}
+                  >
+                    <GitBranch size={18} strokeWidth={2.1} aria-hidden="true" />
+                    GitHub
+                  </a>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
